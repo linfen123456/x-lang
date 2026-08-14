@@ -1,0 +1,16 @@
+schema_version: "1.0"
+kind: xlang-ai-audit-event
+required: [agent_run_id, timestamp, actor, model, context_manifest, tools, change, verification, approval, data_policy]
+properties:
+  agent_run_id: {type: string, pattern: '^AGENT-[A-Z0-9-]+$'}
+  timestamp: {type: datetime}
+  actor: {type: string}
+  model: {provider: string, name: string, version: string, parameters_hash: string}
+  context_manifest: {files: list, rules: list, source_ids: list, sha256: string}
+  tools: {calls: list, network_access: boolean}
+  change: {files: list, diff_sha256: string, authorization: string}
+  verification: {commands: list, results: list, evidence: list}
+  approval: {required: boolean, approver: string, timestamp: datetime}
+  budget: {tokens: integer, tool_calls: integer, elapsed_seconds: number}
+  data_policy: {classification: string, redaction: string, retention: string, deletion_at: string}
+
