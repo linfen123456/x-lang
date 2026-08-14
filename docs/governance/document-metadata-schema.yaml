@@ -1,0 +1,26 @@
+schema_version: "1.0"
+kind: xlang-document-metadata
+required:
+  - doc_id
+  - authority
+  - owner
+  - version
+  - maturity
+  - status
+  - phase
+  - last_reviewed
+  - traceability_scope
+properties:
+  doc_id: {type: string, pattern: '^DOC-[A-Z0-9-]+$'}
+  authority: {type: enum, values: [master, normative, implementation, evidence, research]}
+  owner: {type: string}
+  backup_owner: {type: string}
+  version: {type: string, pattern: '^\\d+\\.\\d+$'}
+  maturity: {type: enum, values: [CORE, EXTENDED, EXPERIMENTAL, RESEARCH]}
+  status: {type: enum, values: [草案, 待决策, 已决策, 原型验证中, 已验证, 已稳定, 研究, 归档, 否决]}
+  phase: {type: enum, values: [P0, P1, P2, P3, P4, P5, P6]}
+  applies_to: {type: list, item_type: string}
+  last_reviewed: {type: date, format: YYYY-MM-DD}
+  supersedes: {type: list, item_type: string}
+  traceability_scope: {type: list, item_type: string}
+

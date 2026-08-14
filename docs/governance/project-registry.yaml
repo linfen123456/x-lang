@@ -1,0 +1,40 @@
+schema_version: "1.0"
+kind: xlang-project-registry
+authority: docs/X-Lang完整项目目录架构与模块说明.md
+projects:
+  - project_id: PROJ-COMPILER-core
+    path: compiler/
+    owner: role/compiler-team
+    maturity: CORE
+    release_channel: nightly
+    depends_on: [PROJ-SPEC-core, PROJ-RUNTIME-xrt]
+    forbidden_dependencies: [labs/]
+    test_entry: tests/compiler/
+  - project_id: PROJ-RUNTIME-xrt
+    path: runtime/xrt/
+    owner: role/runtime-team
+    maturity: CORE
+    release_channel: nightly
+    depends_on: [PROJ-SPEC-memory]
+    forbidden_dependencies: [labs/]
+    test_entry: tests/runtime/
+  - project_id: PROJ-TOOLS-xdoc
+    path: tools/xdoc/
+    aliases: [xdoc-test]
+    owner: role/tooling-team
+    maturity: EXTENDED
+    release_channel: beta
+    depends_on: [PROJ-COMPILER-core]
+    forbidden_dependencies: [labs/]
+    test_entry: tests/docs/
+  - project_id: PROJ-ARTIFACT-xlib
+    path: artifacts/
+    artifact_only: true
+    aliases: [.xlib]
+    owner: role/release-team
+    maturity: CORE
+    release_channel: stable
+    depends_on: []
+    forbidden_dependencies: []
+    test_entry: tests/release/
+
