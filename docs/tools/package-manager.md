@@ -1,16 +1,33 @@
 ---
 doc_id: DOC-TOOLS-PACKAGE-MANAGER
 authority: implementation
-owner: role/documentation
+owner: role/tooling-team
 backup_owner: role/architecture
-version: "1.0"
-maturity: EXTENDED
+version: "1.1"
+maturity: CORE
 status: 草案
 phase: P2
 last_reviewed: 2026-08-15
-traceability_scope: [XLF, XLC, XLE]
+traceability_scope: [XLF-02-013, XLF-02-014, XLF-03-011, XLF-10-012, XLF-10-014, XLF-11-001, XLF-11-004]
 ---
-# XPM 实施
-> 状态：草案｜Owner：Package Team｜追溯：XLF-*、XLC-FFI-*、XLE-DEV-*
+# XPM、`x.toml`/`x.lock` 与依赖求解
 
-x.toml/x.lock canonical serialization，确定性解析、签名、撤回、离线缓存和路径沙箱。锁冲突、哈希不匹配和注册表错误均有负向测试与回滚。
+> 状态：草案｜Owner：`role/tooling-team`
+
+## 配置结构
+
+`x.toml` 使用 canonical TOML：`package{name:String,version:SemVer,edition:Edition,authors:Vec<String>,entry:PathBuf}`、`targets:Map<TargetSpecId,TargetConfig>`、`dependencies:Map<Name,DependencySpec>`、`dev_dependencies`、`features:Map<String,Vec<FeatureRef>>`、`registries:Vec<RegistryRef>`、`profile:Map<ProfileId,ProfileSpec>`。`entry` 必须是 workspace-relative 源路径，存在、属于 package 且只能有一个 executable entry；library package 必须省略 entry。字段未知/重复、包名不合法、路径越界或 edition 不支持返回 `XPM_E_CONFIG`；不在网络失败时偷偷采用默认依赖。
+
+`DependencySpec` 字段为 `source:Registry|Git|Path`、`version_req:SemVerReq`、`checksum:Hash32?`、`features:BTreeSet<String>`、`optional:bool`、`default_features:bool`。Git revision 必须固定 commit，path 必须在 workspace 或显式 vendor 根内；registry 包需 digest、签名和许可证元数据。
+
+## 锁文件和求解器
+
+`x.lock` 字段为 `schema_version:SemVer`、`root:PackageId`、`packages:Vec<{id,name,version,source,checksum,dependencies,features}>`、`target_sets`、`toolchain_fingerprint`。canonical 排序为 name/source/version，换行和编码固定；锁文件缺 hash、重复 package、循环不可解析或工具链 fingerprint 不兼容都拒绝。
+
+求解器输入 `RootManifest + RegistrySnapshot + TargetSpec + FeatureSet + toolchain_fingerprint`，输出唯一 `Resolution{packages,edges,explanation,lock_digest}`。算法必须确定性：版本优先级、源优先级、feature 合并和冲突解释有固定规则；无解返回 `XPM_E_CONFLICT` 并列出最小冲突集合。`--locked` 禁止更新，`--offline` 只允许本地索引/cache，`x update` 生成预览 diff 后才写锁。Profile 采用共享 `ProfileSpec`，优先级为 `CLI > x.toml profile > TargetSpec defaults > toolchain defaults`，环境变量仅进入 declared inputs。
+
+下载、校验、解包和构建分阶段隔离，分别有 URL/文件大小/CPU/并发上限。哈希或签名不匹配、撤回包、供应链审计失败不得使用缓存；坏缓存被 quarantine，不直接删除证据。默认 registry 10 并发、包 512 MiB、解包 2 GiB、网络 60 s，Profile 可收紧。
+
+## 负向测试、版本与回滚
+
+覆盖重复依赖、路径逃逸、entry 不存在/越界、同名不同源、锁冲突、循环 feature、撤回/哈希不匹配、离线缺缓存、registry 5xx、解包路径穿越、签名过期和磁盘满。规划测试 `TEST-TOOLS-XPM-001`、`TEST-TOOLS-XPM-002`、`TEST-TOOLS-XPM-003` 状态均为 `planned`，分别验证 deterministic lock、坏缓存隔离和 schema migration。schema minor 追加字段，major 通过 `x lock migrate` 迁移；求解回归时恢复旧 lock、旧 registry snapshot 或 vendor 源码构建。
