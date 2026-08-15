@@ -1,36 +1,36 @@
 ---
-doc_id: DOC-TESTING-TEST-STRATEGY
-authority: implementation
-owner: role/documentation
-backup_owner: role/architecture
-version: "1.0"
-maturity: EXTENDED
-status: 草案
-phase: P2
+doc_id: DOC-TESTING-STRATEGY
+authority: evidence
+owner: role/quality-team
+backup_owner: role/compiler-team
+version: "2.0.0"
+maturity: CORE
+status: 已决策
+phase: P1
 last_reviewed: 2026-08-15
-traceability_scope: [XLF, XLC, XLE]
+traceability_scope: [QUALITY, XLF, XLC, XLE]
 ---
 # 测试策略与符合性套件
 
-## 1. 分层策略
+## 分层与最小覆盖
 
-| 层级 | 范围 | 必须证据 |
-|---|---|---|
-| 单元 | Lexer、Parser、类型、借用、IR Pass、运行时原语 | `TEST-*-unit-*`、覆盖分支和错误路径 |
-| 契约 | 规范规则、公共 API、ABI、Schema、CLI 输出 | `TEST-*-contract-*`、版本化黄金样例 |
-| 编译器端到端 | compile-pass/fail、run、诊断和跨后端差分 | 源码、期望结果、编译器版本、快照 |
-| 集成 | std、包管理、LSP、调试器、网络和数据库适配 | 平台、依赖版本、清理和重试记录 |
-| 故障与安全 | OOM、磁盘满、恶意输入、供应链和权限 | 威胁模型、注入命令、恢复结果 |
-| 性能 | 编译、运行、内存、P95/P99、冷/热缓存 | 基准环境、样本、统计和阈值 |
+本文件描述未来测试工程，并不声称测试目录或运行结果已经存在。所有 `TEST-*` 在测试卡和可执行案例落地前均为 planned；只有实际运行记录可作为“已验证”证据。
 
-## 2. 编译器符合性
+1. 解析器：Unicode、恢复、空输入、超长输入、注入样本和 fuzz；任何输入不得崩溃。
+2. 语义：每条规则的 compile-pass/compile-fail、诊断稳定性、所有权/Effect/错误路径和属性测试。
+3. IR/后端：每个 Pass 前后 verifier、差分执行、ABI/调试信息、目标矩阵和 determinism。
+4. Runtime/库：并发模型、取消、超时、资源耗尽、故障注入、sanitizer、泄漏和升级兼容。
+5. 工具/生态：CLI JSON、LSP/DAP、xpm 锁文件、文档示例、WASM/WPT、FFI 和签名制品 E2E。
+6. 系统：Windows/Linux/macOS Tier 1；WASM、移动、裸机和 GPU 按能力探测与 Tier 门禁运行。
 
-每条稳定 `RULE-*` 至少有一个正例、负例、边界例和诊断断言。compile-fail 测试只断言稳定错误码、主 Span 和必要标签；非稳定文本使用快照版本标记。跨 LLVM/WASM/解释器后端执行差分测试，发现差异必须建 Issue 或 RFC。
+## 变形与故障矩阵
 
-## 3. Flaky 与数据管理
+每个公共契约至少覆盖：空/最大/恶意输入、并发交错、取消/超时、磁盘满、权限撤销、时钟回拨、网络分区、版本 N-1/N/N+1 和损坏制品。生成语料必须记录 seed、缩减器和来源；测试数据不得含真实秘密或未脱敏个人数据。
 
-测试不得用无限重试掩盖失败。Flaky 必须登记 Owner、根因、隔离期限和修复版本；超过期限阻断发布。测试夹具禁止秘密和个人数据，随机测试记录种子，数据库/端口/时钟使用隔离租约。
+## Flaky、隔离和质量预算
 
-## 4. 关闭条件
+测试使用临时目录、随机端口、固定时钟和 seed；并行运行不能共享全局状态。单测 flaky 率目标 <0.1%，E2E <1%；连续两次失败自动隔离并在 2 个工作日内有 Owner。隔离项不能阻断回归修复，且不能被无限重试绕过。
 
-测试任务关闭需附 `source_ids/spec_ids/project_id/test_id`、命令、提交、平台、结果、失败分析、性能/安全影响和回滚验证。
+## 关闭条件
+
+只有当规则清单引用的每个测试均有实际运行记录、T1–T3 通过、T4 风险已接受、覆盖的负向路径完整、性能未越界、无未解释 flaky、回滚演练成功，状态才可从“已验证”进入“已稳定”。测试记录至少包含 Test ID、Rule ID、输入摘要、目标/Profile、预期、实际结果、环境、运行时间和证据路径；没有运行记录时维持 planned。

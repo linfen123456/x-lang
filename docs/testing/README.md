@@ -1,28 +1,27 @@
 ---
 doc_id: DOC-TESTING-README
-authority: implementation
-owner: role/documentation
-backup_owner: role/architecture
-version: "1.0"
-maturity: EXTENDED
-status: 草案
-phase: P2
+authority: evidence
+owner: role/quality-team
+backup_owner: role/security-team
+version: "2.0.0"
+maturity: CORE
+status: 已决策
+phase: P0
 last_reviewed: 2026-08-15
-traceability_scope: [XLF, XLC, XLE]
+traceability_scope: [QUALITY, XLF, XLC, XLE, REVIEW]
 ---
 # X-Lang 测试与质量证据
 
-> 版本：1.0｜状态：已决策｜Owner：role/qa-team
+测试是追溯边的终点，不是发布后的补充。每个稳定规则至少有正向、负向、边界、兼容和回滚测试；测试工件包含提交、工具链、平台、输入哈希、随机种子、开始/结束时间和日志索引。
 
-本目录定义编译器、运行时、标准库、工具链和生态的测试分层、证据格式及发布质量门禁。测试是 `XLF/XLC/XLE → 规范/RFC → 项目 → 测试 → 发布` 追溯链中的权威证据，不以覆盖率单一数字替代正确性。
+## 证据等级
 
-## 质量门禁
+| 等级 | 证据 | 用途 |
+|---|---|---|
+| T0 | Schema/静态检查 | 文档、配置、ID 和依赖方向 |
+| T1 | 单元/属性/模糊测试 | 纯函数、解析器、状态机和错误边界 |
+| T2 | 契约/组件测试 | 编译阶段、Runtime ABI、库和工具协议 |
+| T3 | 跨平台/互操作/E2E | OS、WASM、FFI、IDE、制品和升级 |
+| T4 | 故障/安全/性能/灾备演练 | 生产门禁和 LTS 证据 |
 
-- `docs-lint`：标题、围栏、链接、元数据和术语检查。
-- `trace-lint`：定义 ID 唯一、必需边完整、项目/测试存在。
-- `x test conformance`：compile-pass、compile-fail、run 和诊断快照。
-- `x test fuzz`：词法、解析、类型、IR、包清单和不可信输入。
-- `x bench verify`：编译时间、运行时间、内存和尾延迟回归。
-- `x test platform`：Tier 1 平台矩阵；未运行的平台不得标绿。
-
-所有门禁必须保存命令、工具版本、提交 SHA、环境指纹、日志和制品路径。
+失败测试必须保留原始日志和复现命令。重试最多一次且必须标记 `flaky`；重试通过不等于门禁通过。
