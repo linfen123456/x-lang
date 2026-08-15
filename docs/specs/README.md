@@ -1,48 +1,66 @@
 ---
-doc_id: SPEC-INDEX
-title: X-Lang 正式规范索引
-status: draft
+doc_id: DOC-SPECS-INDEX
+title: X-Lang 正式语言规范索引
+authority: normative
+owner: role/language-council
+backup_owner: role/compiler-team
+version: "0.2.0"
 maturity: CORE
-owner: language-architecture
-sources: [XLF-01-001, XLF-01-006, XLC-CORE-001..020]
+status: 草案
+phase: P0
+last_reviewed: 2026-08-15
+applies_to: [x-language, xc, x-lsp, conformance-suite]
+traceability_scope: [XLF, XLC]
+supersedes: [DOC-SPECS-INDEX-LEGACY]
 ---
 
-# X-Lang 正式规范索引
+# X-Lang 正式语言规范索引
 
-## 目标与非目标
+本目录是 X-Lang 可观察语言行为的规范入口。本文档组是 `0.2` 候选规范初稿，不表示编译器已经实现或所有条文已冻结。规范性要求使用“必须/禁止”，实现建议使用“应当”，非规范说明使用“解释”。
 
-本目录是语言可观察行为的唯一规范来源，负责把语言大纲转为可引用的规则、语法和符合性测试。实现细节、标准库 API 和平台适配分别归属编译器、`stdlib` 与平台文档；本目录不承诺未通过 RFC 的实验特性。
+## 规范范围与权威顺序
 
-## 规范文件
+当资料冲突时，优先级为：已批准 RFC/ADR → 本目录已稳定条文 → 本目录草案条文 → 工程实现文档 → 原始材料。原始材料只用于追溯，不自动授予语义。实现不得以“编译器当前行为”替换规范结论。
 
-| 文件 | 范围 | 阶段 |
-|---|---|---|
-| [语言核心](./language-core.md) | 词法、语法、类型、模块、错误、版本 | P0–P2 |
-| [内存与并发](./memory-concurrency.md) | 所有权、RAII、借用、线程、异步和失败边界 | P0–P2 |
-| `evaluation-and-ub.md` | 求值顺序、布局、未定义行为分类 | P1 |
-| `macros-and-consteval.md` | 宏、受限编译期求值、资源预算 | P2 |
-| [符合性](./conformance.md) | 规则 ID、实现状态、符合性等级和发布门禁 | P0 |
+| 文件 | 责任域 | 当前阶段 | 主要内容 |
+|---|---|---|---|
+| [language-core.md](./language-core.md) | 词法、EBNF、表达式、类型、Trait、模式、模块、Edition、错误 | P0–P2 | `RULE-LANG-*` |
+| [memory-concurrency.md](./memory-concurrency.md) | 所有权、借用、生命周期、Drop、内存模型、线程、原子、async 取消 | P0–P3 | `RULE-MEM-*`、`RULE-CONC-*` |
+| [conformance.md](./conformance.md) | 术语、实现等级、诊断、测试和发布门禁 | P0–P4 | `RULE-CONF-*` |
 
-## 统一条文格式
+### 规划中的规范文件
 
-每条规则使用 `XSP-<DOMAIN>-<NNN>`，必须写明：规范性措辞、实现状态、反例诊断、平台差异、兼容性影响和测试 ID。`CORE` 规则不得依赖 `ecosystem/`、`ai/` 或 `labs/`。
+`evaluation-and-ub.md`（`RULE-EVAL-*`）、`macros-and-consteval.md`（`RULE-META-*`）和 `abi-layout.md`（`RULE-ABI-*`）应在对应 RFC 通过后拆出。当前文件中的边界条文仅作为实现门禁，不是这些领域的完整决定。
 
-## 统一契约示例
+## 统一规则记录格式
 
-```x
-fn add(a: Int, b: Int) -> Result<Int, Error> { Ok(a + b) }
+每一个规范规则必须使用全仓库唯一的 `RULE-域-NNN` ID，域由大写 ASCII 组成，例如 `RULE-LANG-001`、`RULE-MEM-014`。历史规则前缀不再作为规范 ID 使用。每条规则都必须包含以下字段：
+
+1. **规范性条文**：能直接实现和判定的 MUST/ MUST NOT；
+2. **解释**：条文意图和与相邻规则的关系；
+3. **正例**与**反例**：反例必须给出预期诊断码；
+4. **边界**：未指定、实现定义、平台能力或资源耗尽时的行为；
+5. **诊断**：稳定诊断码和最小 span 要求；
+6. **测试**：至少一个 `TEST-域-类型-NNN`，含 pass/fail/boundary 分类；
+7. **追溯**：`XLF-*`、`XLC-*`（若有）和本规则关联的 RFC/ADR；
+8. **待决 RFC**：已决策则写 `无（已决策依据：...）`，未决则写候选方案、决策门禁和最迟阶段。
+
+规则状态和成熟度正交：`CORE` 不是“已实现”，`草案` 不是“可随意改变”。所有未决语义必须保留候选和退出条件，不得用示例暗示已批准结论。
+
+## 诊断与测试命名
+
+诊断码采用 `X-E####`（编译错误）、`X-W####`（警告）和 `X-R####`（运行时可报告错误）。诊断文本可本地化，代码、严重级别、主 span 和结构化参数必须稳定。测试 ID 采用 `TEST-[域]-[类型]-NNN`，定义在测试注册表或 conformance manifest 中；正文引用不算重复定义。
+
+## 追溯与实现边界
+
+正式条文必须能够沿以下链路反查：
+
+```text
+XLF/XLC → RULE → RFC/ADR → compiler/runtime/library module → TEST → phase/release
 ```
 
-非法程序必须产生稳定诊断码，不得静默改变所有权、同步或异常语义。
+本轮文档只修改 `docs/specs`、`docs/stdlib`、`docs/ffi`、`docs/web`、`docs/style`；治理目录保持不变。`XLF` 来源见 [原始功能全量追溯矩阵](../X-Lang原始功能全量追溯矩阵.md)，对标来源见 [多语言对标大纲](../X-Lang多语言对标与全栈能力补全大纲.md)。
 
-## 边界、性能与安全
+## 最小符合性门槛
 
-规范只规定可观察语义；优化可改变执行计划但不得改变结果、资源安全和数据竞争规则。编译期资源上限、诊断时间和运行时开销写入基准登记表，未测量值只能标记为目标。
-
-## 测试与回滚
-
-规则映射至 `tests/conformance` 的 pass/fail、诊断快照、布局探针和跨后端差分测试。规范变更通过 RFC/Edition；若回归失败，保留旧规则并以 feature gate 或迁移工具回滚，不删除历史条文。
-
-## 追溯
-
-来源：`XLF-*` 由[原始功能全量追溯矩阵](../X-Lang原始功能全量追溯矩阵.md)维护，`XLC-CORE-*` 由[多语言对标大纲](../X-Lang多语言对标与全栈能力补全大纲.md)维护；工程落点见项目目录架构中的 `specs/` 与 `tests/conformance/`。
+P0 实现必须能解析本文件中的稳定词法和最小语法，并对每条 CORE 规则提供 pass/fail/boundary 测试；P1 必须提供类型、模块、错误和 MIR/LLVM 端到端证据；P2 才能考虑 Trait、泛型和基础标准库稳定化；P3 之前不得将实验后端、GC、GPU、热重载或自动插锁列为默认语义。
