@@ -49,7 +49,9 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-02-001, XLF-02-002, XLF-02-004,
 
 - [架构与阶段边界](./architecture.md)
 - [前端与语义分析](./frontend.md)
+- [前端算法、数据结构与阶段任务](./frontend-algorithms.md)
 - [HIR/MIR 与验证器](./hir-mir.md)
+- [HIR/MIR 验证、Move/借用数据流与 Pass 义务](./ir-verification.md)
 - [优化 Pass](./optimizer.md)
 - [TargetSpec、Backend 与代码生成](./codegen.md)
 - [Driver、查询和制品](./driver.md)

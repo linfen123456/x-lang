@@ -25,3 +25,9 @@ traceability_scope: [QUALITY, XLF, XLC, XLE, REVIEW]
 | T4 | 故障/安全/性能/灾备演练 | 生产门禁和 LTS 证据 |
 
 失败测试必须保留原始日志和复现命令。重试最多一次且必须标记 `flaky`；重试通过不等于门禁通过。
+
+## 文档入口
+
+- [测试策略与符合性套件](./test-strategy.md)
+- [性能、兼容和可复现性](./performance-and-compatibility.md)
+- [Planned 符合性与企业能力案例目录](./conformance-case-catalog.md)

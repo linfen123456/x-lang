@@ -25,7 +25,7 @@ supersedes: [DOC-STDLIB-INDEX-LEGACY]
 | core | Option、Result、基础 Trait、Slice、迭代器、数值和字符 | 无 OS、可 no_std | CORE，P2 |
 | alloc | Vec、String、Box、分配器 | allocator、core | CORE，P2 |
 | alloc::shared | Rc、Arc、Weak 与循环所有权工具 | alloc、原子/线程模型 | EXTENDED，P3；RFC 通过前不进入稳定 Prelude |
-| std | fs、path、time、thread、sync、process、net、term、log | PAL、XRT | EXTENDED，P3 |
+| std | fs、path、time、thread、sync、process、net、term、log | PAL、XRT | EXTENDED；P2 只冻结 RFC/接口，P3 才交付实现 |
 | official | http、tls、serde、db、cli、observability、arrow | std/外部标准 | EXTENDED，P4/P5 |
 | experimental | tensor、gpu、gui、media、replay、zk | feature gate | EXPERIMENTAL/RESEARCH |
 
@@ -39,7 +39,7 @@ supersedes: [DOC-STDLIB-INDEX-LEGACY]
 - status: 草案
 - phase: P2
 
-**规范性条文。** 每个公共函数必须写出参数类型、返回类型、所有权借用、错误类型、取消点、阻塞行为、线程安全、复杂度、分配和平台矩阵。可恢复失败必须使用 Result 或 Option；不得用空值、哨兵数字或字符串错误替代。错误类型的 variant 名和机器码稳定，文本可本地化。
+**规范性条文。** 每个公共函数必须写出参数类型、返回类型、所有权借用、错误类型、取消点、阻塞行为、线程安全、复杂度、分配和平台矩阵。专题中的代码块默认只是非规范性接口草图，只有上述字段齐全并通过 API RFC 后才成为候选公共契约。可恢复失败必须使用 Result 或 Option；不得用空值、哨兵数字或字符串错误替代。错误类型的 variant 名和机器码稳定，文本可本地化。
 
 **解释。** API 文档是编译器、IDE 和 Agent 的机器可消费契约，示例不能取代签名。
 
@@ -124,6 +124,12 @@ supersedes: [DOC-STDLIB-INDEX-LEGACY]
 核心 API 的测试目录为 tests/stdlib/core；平台 API 为 tests/stdlib/platform；官方包为 tests/stdlib/official。每个函数至少有 doc-test、错误注入、边界输入和线程/取消测试；网络和文件测试必须支持临时目录、虚拟时钟和可注入 PAL，禁止连接真实生产服务。
 
 API 变更流程：提交 API diff → 检查错误/取消/线程/复杂度/平台字段 → RFC/ADR → N-1/N/N+1 示例和迁移 → 文档测试 → 版本发布。失败时保留旧实现和签名，扩展包可回滚；不修改核心语言规则。
+
+### 详细专题入口
+
+- [核心容器、错误与所有权 API](./core-api.md)
+- [系统、I/O、网络与消息 API](./system-io-network.md)
+- [文本、时间、安全、序列化与数据 API](./text-time-security-data.md)
 
 ### 待决 RFC
 

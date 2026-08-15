@@ -20,9 +20,9 @@ traceability_scope: [XLF-01-009, XLF-03-003, XLF-05-001, XLF-05-002, XLF-12-006,
 
 ## Task、Waker、Cancel
 
-异步运行时不是默认能力：`async-runtime` feature gate 默认关闭，必须关联 `RFC-ASYNC-001`（待决策）和语言规则 `XSP-MEM-004`。gate 未打开时，Task/await API 返回 `XRT_E_FEATURE_DISABLED`；RFC 通过后才允许把这些 API 标为 EXTENDED/已验证。
+异步运行时不是默认能力：唯一决策 ID 为 `RFC-ASYNC-001`，当前状态 `待决策`，最迟决策门为 P2/TASK-P2-RT-001 的 async 子切片启动前。`async-runtime` feature gate 默认关闭，并关联 `RULE-CONC-004` 与 `RULE-CONC-005`。gate 未打开时，Task/await API 返回 `XRT_E_FEATURE_DISABLED`；只有 RFC 状态达到 `已决策` 后才可实施，获得真实验证证据后才可标记 `已验证`。
 
-`TaskState` 状态机为 `Created → Queued → Running → {Waiting,Completed,Cancelled,Panicked}`；`Waiting → Queued` 仅由有效 Waker，终态拒绝 wake/join 以外操作。`TaskSpec` 字段为 `future:Pin<Box<dyn Future>>`、`budget:TaskBudget`、`cancel:CancelToken`、`parent:TaskId?`、`priority:Priority`。`spawn(spec)->Result<JoinHandle,TaskError>` 要求 future 满足 Send（跨线程调度时），后置是 task 可被 join/cancel 且占用 quota。`JoinHandle` 字段为 `task_id:TaskId`、`generation:u32`、`state:Atomic<JoinState>`、`result_slot:OnceCell<TaskResult>`；drop 默认 detach 并触发取消策略，显式 `join(deadline,cancel)` 等待终态并释放 quota。`Waker` 只有 `task_id:generation`，`wake()->Result<(),WakeError>` 必须幂等，过期 generation 返回 `XRT_E_STALE_HANDLE`。
+`TaskState` 状态机为 `Created → Queued → Running → {Waiting,Completed,Cancelled,Panicked}`；`Waiting → Queued` 仅由有效 Waker，终态拒绝 wake/join 以外操作。`TaskSpec` 字段为 `future:Pin<Box<dyn Future>>`、`budget:TaskBudget`、`cancel:CancelToken`、`parent:TaskId?`、`priority:Priority`。`spawn(spec)->Result<JoinHandle,TaskError>` 要求 future 满足 Send（跨线程调度时），后置是 task 可被 join/cancel 且占用 quota。`JoinHandle` 字段为 `task_id:TaskId`、`generation:u32`、`state:Atomic<JoinState>`、`result_slot:CompletionCell<TaskResult>`；它是唯一结果消费者，多个 waiter 只能收到就绪广播，不能重复移动结果。drop 默认 detach 并触发取消策略，显式 `join(deadline,cancel)` 等待终态并释放 quota。`Waker` 只有 `task_id:generation`，`wake()->Result<(),WakeError>` 必须幂等，过期 generation 返回 `XRT_E_STALE_HANDLE`。
 
 取消为协作式：`CancelToken{state:Atomic<CancelState>,deadline:Instant?,reason:CancelReason,quota_lease:LeaseId?}`；任务、Timer、I/O、阻塞池必须观察它，取消 quota lease 时先标记 `CancelRequested`，阻止新资源 acquire，最后由 owner 释放 lease。返回值区分 `cancelled|deadline_exceeded|completed`。Future 被 drop 时释放注册的 waker、I/O op 和句柄；不可取消 syscall 放入隔离线程并计入泄漏预算，不能阻塞调度器线程。
 

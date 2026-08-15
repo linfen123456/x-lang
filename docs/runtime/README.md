@@ -46,8 +46,10 @@ Tier 1 Windows/Linux/macOS x86_64/ARM64 必须通过 ABI、内存、panic、线�
 - [Allocator、OOM 与配额](./allocation.md)
 - [Panic、unwind 与 abort](./panic.md)
 - [线程、原子、Task/Waker/Cancel](./concurrency.md)
+- [调度器、取消树与异步 I/O 状态机](./scheduler-io-state-machines.md)
 - [Reactor/Proactor I/O](./io.md)
 - [平台抽象层](./pal.md)
+- [Windows/Linux/macOS 平台后端实施细则](./platform-backends.md)
 - [观测、追踪和故障制品](./observability.md)
 - [完整接口表](./contracts/contract.md)
 

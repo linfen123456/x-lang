@@ -206,9 +206,9 @@ supersedes: [DOC-SPECS-MEMORY-CONCURRENCY-LEGACY]
 
 **反例。** 单线程 executor 中阻塞 read 报 X-W4301；取消后写 future 状态报 X-E4302。
 
-**边界。** Pin、生成器、async trait、select 和 executor 公平性由 RFC-ASYNC-01 决定；M:N 不是语言保证。
+**边界。** Pin、生成器、async trait、select 和 executor 公平性由 canonical `RFC-ASYNC-001` 决定；M:N 不是语言保证。
 
-**诊断/测试/追溯。** X-W4301、X-E4302；TEST-CONC-ASYNC-001..006；来源 XLF-05-006、XLF-10-004、XLC-CORE-014..015；RFC-ASYNC-01（P3）。
+**诊断/测试/追溯。** X-W4301、X-E4302；TEST-CONC-ASYNC-001..006；来源 XLF-05-006、XLF-10-004、XLC-CORE-014..015；`RFC-ASYNC-001` 当前待决策，P2 决策、P3 实施与验证。
 
 ### RULE-CONC-005：并发失败与清理
 
@@ -257,6 +257,6 @@ supersedes: [DOC-SPECS-MEMORY-CONCURRENCY-LEGACY]
 | RFC-CONC-STRUCTURED-01 | scoped join/explicit detach | panic 聚合、孤儿任务、泄漏 | P2 |
 | RFC-MEMMODEL-01 | C11-like/stronger abstract model | litmus、模型检查、C FFI | P2 |
 | RFC-CONC-CHANNEL-01 | bounded default/explicit unbounded | 关闭、背压、取消 | P2 |
-| RFC-ASYNC-01 | executor-independent Future | cancellation、blocking、I/O matrix | P3 |
+| RFC-ASYNC-001 | executor-independent Future | cancellation、blocking、I/O matrix；async 切片启动前必须已决策 | P2 决策/P3 实施 |
 
 每个 RULE-MEM/RULE-CONC 至少需要 pass、fail、boundary 三类测试，并在 tests/conformance、tests/memory、tests/concurrency 保留最小复现。实验实现可使用 feature gate，但不得改变默认借用、Drop 或 happens-before。

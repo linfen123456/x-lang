@@ -16,7 +16,7 @@ traceability_scope: [XLF-05-008, XLF-05-009, XLF-05-010, XLF-12-006, XLF-12-007]
 
 ## 统一契约
 
-`IoState` 状态机为 `Created → Submitted → {Ready,Cancelled,TimedOut,Failed}`；`Submitted → Closing` 只允许 shutdown，`Closing → Closed` 必须发布一次完成结果。重复 complete/cancel/close 返回幂等状态，不重复释放 buffer 或 quota。
+公开 `IoState` 是用户可观察状态：`Created → Submitted → {Ready,Cancelled,TimedOut,Failed}`。资源关闭另用 `ResourceState: Open → Closing → Closed`，不得把 `Closing/Closed` 当作第二组 I/O 完成终态。一次操作只发布一个用户终态；重复 complete/cancel/close 返回幂等观察结果。若 Cancelled/TimedOut 后内核仍持有请求，内部回收态为 `OrphanedKernelOp → Reaped`：后到 completion 只释放 buffer/quota 并记录 OS 摘要，不得改写公开终态或二次发布。
 
 `IoOp` 字段为 `op_id:u64`、`resource:Handle`、`kind:Read|Write|Accept|Connect|Poll`、`buffer:BorrowedSlice|OwnedBuffer`、`offset:u64?`、`deadline:Instant?`、`cancel:CancelToken`。`Io::submit(op)->Result<OpId,IoError>` 前置是 handle capability、buffer 生命周期、长度和对齐（Direct I/O）合法；后置只表示已入队，不表示完成。`Io::complete(op_id)->Result<IoResult,IoError>` 返回 bytes/status/OS code，完成、取消和关闭只能发布一次。
 

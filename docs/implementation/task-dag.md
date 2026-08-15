@@ -23,7 +23,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `status`: 草案; `phase`: P0; `milestone`: M0
 - `last_reviewed`: 2026-08-15
 - `source_ids`: `XLF-02-001`, `XLF-11-001`, `XLF-11-003`, `XLF-11-013`
-- `spec_or_rfc`: `RULE-GOV-001`, `RULE-GOV-002`
+- `spec_or_rfc`: `DOC-GOVERNANCE-README`, `DOC-GOVERNANCE-STATUS-AND-ID-RULES`
 - `project_id`: `PROJ-TESTING`; `project_path`: `tests/`
 - `dependencies`: 无
 - `inputs`: `docs/governance/`, 原始追溯矩阵、目标专题 Markdown
@@ -39,21 +39,21 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 
 ### TASK-P0-COMP-001 语言与 IR 契约冻结
 
-- `title`: Token/AST/TypedHIR/MIR/Verifier 字段和不变量
+- `title`: Token/AST/TypedHirModule/MIR/Verifier 字段和不变量
 - `owner`: `role/compiler-team`; `backup_owner`: `role/language-team`
 - `status`: 草案; `phase`: P0; `milestone`: M0
 - `last_reviewed`: 2026-08-15
 - `source_ids`: `XLF-01-001`, `XLF-01-002`, `XLF-01-003`, `XLF-01-006`
-- `spec_or_rfc`: `XSP-LANG-001`, `XSP-LANG-002`, `XSP-MEM-001`, `RULE-COMPILER-001`
+- `spec_or_rfc`: `RULE-LANG-001`, `RULE-LANG-005`, `RULE-LANG-006`, `RULE-LANG-007`, `RULE-LANG-008`, `RULE-MEM-001`, `RULE-MEM-002`, `RULE-MEM-004`, `RULE-CONF-002`
 - `project_id`: `PROJ-COMPILER-CORE`; `project_path`: `compiler/`
 - `dependencies`: `TASK-P0-GOV-001`
 - `inputs`: `docs/specs/language-core.md`, `docs/specs/memory-concurrency.md`
 - `outputs`: planned `compiler/x-syntax/README.md`, planned `compiler/x-hir/README.md`, planned `compiler/x-mir/README.md`
-- `api_or_artifacts`: `TypedAst`, `HirBody`, `MirBody`, `VerifierReport`
+- `api_or_artifacts`: `TypedAst`, `TypedHirModule{HirBody[]}`, `VerifiedHirModule{VerifiedHirBody[]}`, `MirBody`, `VerifierReport`
 - `test_ids`: `TEST-COMPILER-SCHEMA-001`, `TEST-COMPILER-SCHEMA-002`（planned registry）
 - `performance_budget`: schema round-trip 1 分钟、单工件 2 GiB
 - `security_budget`: 拒绝截断、未知主版本和越界 Span
-- `acceptance`: 规定 `Resolver/Type/Trait → TypedHIR → MIR → Borrow`；HIR 节点数约束明确；每个 MIR block 有 terminator
+- `acceptance`: 规定 `Resolver/Type/Trait → TypedHirModule → VerifiedHirBody → MIR → Borrow`；HIR 节点数约束明确；每个 MIR block 有 terminator
 - `evidence`: planned schema diff、planned verifier fixture、planned RFC/ADR
 - `rollback`: 保留上一 IR 版本并关闭新 lowering gate
 - `estimate`: 24h; `non_goals`: 不实现 async 稳定语义
@@ -67,7 +67,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `status`: 草案; `phase`: P1; `milestone`: M1
 - `last_reviewed`: 2026-08-15
 - `source_ids`: `XLF-01-002`, `XLF-02-002`, `XLF-02-004`, `XLF-11-013`
-- `spec_or_rfc`: `XSP-LANG-001`, `RULE-COMPILER-002`
+- `spec_or_rfc`: `RULE-LANG-001`, `RULE-LANG-002`, `RULE-LANG-003`, `RULE-LANG-004`, `RULE-LANG-005`, `RULE-CONF-004`
 - `project_id`: `PROJ-DOMAIN-X-SYNTAX`; `project_path`: `compiler/x-syntax/`
 - `dependencies`: `TASK-P0-COMP-001`
 - `inputs`: planned `FileSnapshot`、UTF-8 bytes、LSP document snapshot
@@ -81,38 +81,38 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `rollback`: 切换旧 parser gate，保留旧快照
 - `estimate`: 40h; `non_goals`: 不执行类型或 borrow 检查
 
-### TASK-P1-COMP-002 Resolver、Type/Trait 与 TypedHIR
+### TASK-P1-COMP-002 Resolver、Type/Trait 与 TypedHirModule
 
-- `title`: 名称解析、类型/Trait 求解和 TypedHIR lowering
+- `title`: 名称解析、类型/Trait 求解和 TypedHirModule lowering/verification
 - `owner`: `role/compiler-team`; `backup_owner`: `role/language-team`
 - `status`: 草案; `phase`: P1; `milestone`: M1
 - `last_reviewed`: 2026-08-15
 - `source_ids`: `XLF-01-002`, `XLF-01-006`, `XLF-01-010`
-- `spec_or_rfc`: `XSP-LANG-002`, `XSP-LANG-004`, `RULE-COMPILER-003`
+- `spec_or_rfc`: `RULE-LANG-006`, `RULE-LANG-007`, `RULE-LANG-008`, `RULE-TYPE-001`, `RULE-TYPE-002`, `RULE-TYPE-003`, `RULE-TYPE-004`, `RULE-TYPE-005`, `RULE-PAT-001`, `RULE-PAT-002`, `RULE-CONF-004`
 - `project_id`: `PROJ-DOMAIN-X-TYPES`; `project_path`: `compiler/x-types/`
 - `dependencies`: `TASK-P1-COMP-001`
 - `inputs`: planned AST、module graph、feature set
-- `outputs`: planned DefMap、TypeTable、ObligationReport、TypedHIR
-- `api_or_artifacts`: `Resolver`, `TypeChecker`, `TraitSolver`, `HirLowerer`
+- `outputs`: planned DefMap、TypeTable、ObligationReport、TypedHirModule、VerifiedHirModule
+- `api_or_artifacts`: `Resolver`, `TypeChecker`, `TraitSolver`, `HirLowerer`, `HirVerifier`
 - `test_ids`: `TEST-COMPILER-SEM-001`, `TEST-COMPILER-SEM-002`, `TEST-COMPILER-HIR-001`（planned registry）
 - `performance_budget`: trait depth 128、候选 10k、单函数 10M 节点、512 MiB
 - `security_budget`: 不猜 ambiguous trait；未知名称/循环导入阻断
-- `acceptance`: 输出只引用 DefId/TypeId；TypedHIR 不依赖 BorrowReport；async gate 未通过时产生 feature-disabled 诊断
+- `acceptance`: 输出只引用 DefId/TypeId；TypedHirModule/VerifiedHirModule 不依赖 BorrowReport；async gate 未通过时产生 feature-disabled 诊断
 - `evidence`: planned resolver trace、planned type diagnostics、planned HIR verifier report
-- `rollback`: 回退到 AST-only diagnostics，禁用 TypedHIR gate
+- `rollback`: 回退到 AST-only diagnostics，禁用 TypedHirModule/VerifiedHirModule gate
 - `estimate`: 56h; `non_goals`: 不实现 MIR borrow
 
 ### TASK-P1-COMP-003 MIR、Borrow 和优化前 verifier
 
-- `title`: TypedHIR→MIR、节点约束、Borrow 两阶段检查
+- `title`: VerifiedHirBody→MIR、节点约束、Borrow 两阶段检查
 - `owner`: `role/compiler-team`; `backup_owner`: `role/memory-team`
 - `status`: 草案; `phase`: P1; `milestone`: M1
 - `last_reviewed`: 2026-08-15
 - `source_ids`: `XLF-01-003`, `XLF-01-006`, `XLF-10-002`, `XLF-12-014`
-- `spec_or_rfc`: `XSP-MEM-001`, `XSP-MEM-002`, `RULE-COMPILER-004`
+- `spec_or_rfc`: `RULE-MEM-001`, `RULE-MEM-002`, `RULE-MEM-003`, `RULE-MEM-004`, `RULE-MEM-005`, `RULE-CONF-005`
 - `project_id`: `PROJ-DOMAIN-X-MIR`; `project_path`: `compiler/x-mir/`
 - `dependencies`: `TASK-P1-COMP-002`
-- `inputs`: planned TypedHIR、Drop/unwind policy、Target-independent types
+- `inputs`: planned VerifiedHirBody、Drop/unwind policy、Target-independent types
 - `outputs`: planned MIR、BorrowReport、VerifierReport
 - `api_or_artifacts`: `MirBuilder`, `BorrowChecker`, `MirVerifier`
 - `test_ids`: `TEST-COMPILER-IR-001`, `TEST-COMPILER-IR-002`, `TEST-COMPILER-BORROW-001`（planned registry）
@@ -130,13 +130,13 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `status`: 草案; `phase`: P1; `milestone`: M1
 - `last_reviewed`: 2026-08-15
 - `source_ids`: `XLF-01-001`, `XLF-02-002`, `XLF-02-003`, `XLF-02-011`
-- `spec_or_rfc`: `RULE-COMPILER-005`, `RULE-FFI-001`
+- `spec_or_rfc`: `RULE-CONF-005`, `RULE-FFI-001`, `RFC-ABI-01`
 - `project_id`: `PROJ-DOMAIN-X-CODEGEN-LLVM`; `project_path`: `compiler/x-codegen-llvm/`
 - `dependencies`: `TASK-P1-COMP-003`, `TASK-P0-COMP-001`；P1 使用 MirVerifier→O0 Backend 冷路径，不依赖 P2 Query/Optimizer
 - `inputs`: planned verified MIR、公开 `PalTargetRequest`、ABI header、TargetSpec
 - `outputs`: planned object、executable、debug map、ArtifactManifest、Hello World run log
 - `api_or_artifacts`: `Backend.compile`, `Linker.link`, `OperationContext`, `ArtifactManifest`
-- `test_ids`: `TEST-COMPILER-CODEGEN-001`, `TEST-COMPILER-LINK-001`, `TEST-COMPILER-E2E-001`（planned registry）
+- `test_ids`: `TEST-COMPILER-CODEGEN-001`, `TEST-COMPILER-LINK-001`, `TEST-COMPILER-E2E-001`, `TEST-RUNTIME-PAL-001`, `TEST-RUNTIME-PAL-002`（planned registry；PAL 项验证 Tier 1 目标支撑，不表示当前已晋级）
 - `performance_budget`: Backend/Linker 共用 10 分钟 deadline、单制品 2 GiB、temp 4 GiB
 - `security_budget`: sysroot/linker 在授权根；无隐式 host config；panic 不跨 C ABI
 - `acceptance`: Windows/Linux/macOS Tier 1 至少完成 Hello World compile→link→run；Backend 和 Linker 共享 cancel/timeout 状态；失败无半成品
@@ -151,7 +151,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `status`: 草案; `phase`: P1; `milestone`: M1
 - `last_reviewed`: 2026-08-15
 - `source_ids`: `XLF-02-013`, `XLF-02-014`, `XLF-11-013`
-- `spec_or_rfc`: `RULE-TOOLS-001`, `XSP-LANG-005`
+- `spec_or_rfc`: `RULE-PKG-001`, `RULE-PKG-002`, `RULE-PKG-003`, `RULE-MOD-001`, `RULE-MOD-002`, `RULE-MOD-003`, `RULE-MOD-004`, `DOC-TOOLS-CLI`
 - `project_id`: `PROJ-TOOLS-XCLI`; `project_path`: `tools/x-cli/`
 - `dependencies`: `TASK-P1-COMP-004`
 - `inputs`: planned `x.toml` with `package.entry`、source、TargetSpec、ProfileSpec
@@ -172,7 +172,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `title`: Query、Pass 和增量缓存
 - `owner`: `role/compiler-team`; `backup_owner`: `role/architecture`; `status`: 草案; `phase`: P2; `milestone`: M2
 - `last_reviewed`: 2026-08-15
-- `source_ids`: `XLF-01-003`, `XLF-02-004`, `XLF-12-020`; `spec_or_rfc`: `RULE-COMPILER-006`
+- `source_ids`: `XLF-01-003`, `XLF-02-004`, `XLF-12-020`; `spec_or_rfc`: `RULE-CONF-005`, `DOC-COMPILER-DRIVER`, `DOC-COMPILER-OPTIMIZER`
 - `project_id`: `PROJ-COMPILER-CORE`; `project_path`: `compiler/`; `dependencies`: `TASK-P1-COMP-003`
 - `inputs`: planned MIR、schema/pass/pipeline fingerprints; `outputs`: planned cache index、PassReport
 - `api_or_artifacts`: `QueryKey`, `QueryState`, `CacheEntry`, `PassReport`
@@ -188,11 +188,11 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `title`: Task、I/O、配额和 shutdown
 - `owner`: `role/runtime-team`; `backup_owner`: `role/architecture`; `status`: 草案; `phase`: P2; `milestone`: M2
 - `last_reviewed`: 2026-08-15
-- `source_ids`: `XLF-01-009`, `XLF-02-009`, `XLF-05-001`, `XLF-05-008`, `XLF-12-016`; `spec_or_rfc`: `XSP-MEM-004`, `RFC-ASYNC-001`
-- `project_id`: `PROJ-RUNTIME-XRT`; `project_path`: `runtime/xrt/`; `dependencies`: `TASK-P0-COMP-001`, `TASK-P1-COMP-004`，以及 async 子范围的 `RFC-ASYNC-001` 已决策
+- `source_ids`: `XLF-01-009`, `XLF-02-009`, `XLF-05-001`, `XLF-05-008`, `XLF-12-016`; `spec_or_rfc`: `RULE-CONC-004`, `RULE-CONC-005`, `RFC-ASYNC-001`
+- `project_id`: `PROJ-RUNTIME-XRT`; `project_path`: `runtime/xrt/`; `dependencies`: `TASK-P0-COMP-001`, `TASK-P1-COMP-004`；canonical `RFC-ASYNC-001` 当前为 `待决策`，async 子范围只有在其达到 `已决策` 后才可启动
 - `inputs`: planned JoinHandle/IoOp/Quota/Cancel; `outputs`: planned runtime state-machine report
 - `api_or_artifacts`: `JoinHandle`, `TaskState`, `IoState`, `ShutdownState`, `QuotaLease`
-- `test_ids`: `TEST-RUNTIME-CONC-001`, `TEST-RUNTIME-IO-001`, `TEST-RUNTIME-SHUTDOWN-001`（planned registry）
+- `test_ids`: `TEST-RUNTIME-CONC-001`, `TEST-RUNTIME-IO-001`, `TEST-RUNTIME-SHUTDOWN-001`, `TEST-RUNTIME-PAL-003`（planned registry）
 - `performance_budget`: 任务 1M、并发 I/O 100k、单 I/O 64 MiB、取消宽限 1 秒
 - `security_budget`: C ABI 仅固定布局 XrtStatus；句柄 generation 防重用
 - `acceptance`: RFC 未通过时只实现同步 I/O、配额和 shutdown，async gate 保持关闭；RFC 通过后才实现 Future/Task/Waker 子范围；Task/I/O/shutdown 状态机无重复完成；quota cancel 阻止新 acquire；C ABI 仅 XrtStatus
@@ -204,7 +204,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `title`: XPM registry、依赖求解、x.lock、离线缓存与签名验证
 - `owner`: `role/package-team`; `backup_owner`: `role/security-team`; `status`: 草案; `phase`: P3; `milestone`: M3
 - `last_reviewed`: 2026-08-15
-- `source_ids`: `XLF-02-005`, `XLF-11-001`, `XLF-11-006`; `spec_or_rfc`: `RULE-TOOLS-002`
+- `source_ids`: `XLF-02-005`, `XLF-11-001`, `XLF-11-006`; `spec_or_rfc`: `RULE-PKG-002`, `RULE-PKG-003`, `DOC-TOOLS-PACKAGE-MANAGER`
 - `project_id`: `PROJ-TOOLS-XPM`; `project_path`: `tools/xpm/`; `dependencies`: `TASK-P1-TOOLS-001`
 - `inputs`: planned x.toml、旧 lock、registry snapshot、target/features；`outputs`: planned resolution、x.lock、下载/签名报告
 - `api_or_artifacts`: `Resolution`, `Lockfile`, `RegistrySnapshot`, `PackageSignature`
@@ -219,7 +219,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `title`: 增量语言服务、调试协议与 Snapshot 一致性
 - `owner`: `role/ide-team`; `backup_owner`: `role/compiler-team`; `status`: 草案; `phase`: P3; `milestone`: M3
 - `last_reviewed`: 2026-08-15
-- `source_ids`: `XLF-02-007`, `XLF-11-003`; `spec_or_rfc`: `RULE-TOOLS-003`
+- `source_ids`: `XLF-02-007`, `XLF-11-003`; `spec_or_rfc`: `RULE-CONF-004`, `DOC-TOOLS-LSP-DAP`
 - `project_id`: `PROJ-TOOLS-XLSP`; `project_path`: `tools/x-lsp/`; `dependencies`: `TASK-P2-COMP-001`
 - `inputs`: planned document snapshots、capabilities、source maps、cancel tokens；`outputs`: planned diagnostics/completion/navigation/debug transcripts
 - `api_or_artifacts`: `LspSnapshot`, `LspRequest`, `DapSession`, `SourceMap`
@@ -234,7 +234,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `title`: xfmt、xdoc/doc-test 与 xtest 的一致执行契约
 - `owner`: `role/tooling-team`; `backup_owner`: `role/quality-team`; `status`: 草案; `phase`: P3; `milestone`: M3
 - `last_reviewed`: 2026-08-15
-- `source_ids`: `XLF-02-014`, `XLF-03-010`, `XLF-11-004`; `spec_or_rfc`: `RULE-TOOLS-004`
+- `source_ids`: `XLF-02-014`, `XLF-03-010`, `XLF-11-004`; `spec_or_rfc`: `RULE-CONF-003`, `DOC-TOOLS-FORMATTER-DOC`, `DOC-TOOLS-TEST-RUNNER`
 - `project_id`: `PROJ-TOOLS-XFMT`; `project_path`: `tools/xfmt/`; `dependencies`: `TASK-P1-TOOLS-001`, `TASK-P2-COMP-001`
 - `inputs`: planned AST/HIR、FormatConfig、DocIndex、TestPlan；`outputs`: planned patches、文档、TestReport
 - `api_or_artifacts`: `FormatResult`, `DocIndex`, `TestPlan`, `TestReport`
@@ -249,7 +249,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `title`: 插件 manifest、能力授权、隔离执行与审计
 - `owner`: `role/security-team`; `backup_owner`: `role/tooling-team`; `status`: 草案; `phase`: P3; `milestone`: M3
 - `last_reviewed`: 2026-08-15
-- `source_ids`: `XLF-10-012`, `XLF-11-006`; `spec_or_rfc`: `RULE-SECURITY-001`
+- `source_ids`: `XLF-10-012`, `XLF-11-006`; `spec_or_rfc`: `DOC-TOOLS-PLUGIN-SANDBOX`, `DOC-AI-THREAT-MODEL`
 - `project_id`: `PROJ-TOOLS-XPLUGIN`; `project_path`: `tools/x-plugin-host/`; `dependencies`: `TASK-P1-TOOLS-001`, `TASK-P3-TOOLS-001`
 - `inputs`: planned signed PluginManifest、声明输入/输出、limits；`outputs`: planned plugin output、审计摘要、拒绝原因
 - `api_or_artifacts`: `PluginManifest`, `SandboxProfile`, `PluginOutcome`
@@ -264,7 +264,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `title`: 冻结、兼容、安全和性能
 - `owner`: `role/release-team`; `backup_owner`: `role/security-team`; `status`: 草案; `phase`: P4; `milestone`: M4
 - `last_reviewed`: 2026-08-15
-- `source_ids`: `XLF-11-001`, `XLF-11-004`, `XLF-12-020`; `spec_or_rfc`: `RULE-RELEASE-001`
+- `source_ids`: `XLF-11-001`, `XLF-11-004`, `XLF-12-020`; `spec_or_rfc`: `RULE-CONF-006`, `DOC-CI-RELEASE-CHANNELS`
 - `project_id`: `PROJ-RELEASE`; `project_path`: `release/`; `dependencies`: `TASK-P2-COMP-001`, `TASK-P3-TOOLS-001`, `TASK-P3-TOOLS-002`, `TASK-P3-TOOLS-003`, `TASK-P3-TOOLS-004`
 - `inputs`: planned API/ABI diff、SBOM、benchmark baseline; `outputs`: planned compatibility/security/performance report
 - `api_or_artifacts`: `CompatReport`, `SbomReport`, `BenchmarkReport`, `RollbackDrill`
@@ -310,7 +310,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 ## 阶段门禁
 
 - P0：规范、真实追溯和前置/后置不变量齐全。
-- P1：Source→TypedHIR→MIR→Borrow→Backend→Linker→CLI 的 Hello World 闭环可规划验收，所有测试仍标记 planned。
+- P1：Source→TypedHirModule→VerifiedHirBody→MIR→Borrow→Backend→Linker→CLI 的 Hello World 闭环可规划验收，所有测试仍标记 planned。
 - P2：Query/Task/I/O/cache/profile 状态机和资源取消契约完成。
 - P3：工具协议和沙箱完成兼容/安全规划。
 - P4：只有获得实际测试、性能、安全和制品证据后才允许升级成熟度。

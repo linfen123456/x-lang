@@ -41,7 +41,7 @@
 
 ### 0.6 正式专题文档入口
 
-本大纲的正式规则由专题文档承载：[核心语言规范](./specs/language-core.md)、[内存与并发](./specs/memory-concurrency.md)、[符合性](./specs/conformance.md)、[标准库](./stdlib/README.md)、[互操作](./ffi/README.md)、[Web](./web/README.md)和[样式](./style/README.md)。本大纲保留学习路线、规范目录、成熟度和来源边界；专题文档负责逐条规则、示例、接口和测试证据。
+本大纲的正式规则由专题文档承载：[核心语言规范](./specs/language-core.md)、[类型/Trait/模式](./specs/types-traits-patterns.md)、[模块/包/Edition](./specs/modules-packages-editions.md)、[内存与并发](./specs/memory-concurrency.md)、[符合性](./specs/conformance.md)、[标准库](./stdlib/README.md)、[互操作](./ffi/README.md)、[Web](./web/README.md)和[样式](./style/README.md)。学习路线从[快速入门](./guide/getting-started.md)、[核心语言教程](./guide/core-language-tutorial.md)和[所有权、错误与并发教程](./guide/ownership-errors-concurrency.md)开始。大纲保留目录、成熟度和来源边界；专题文档负责逐条规则、示例、接口和测试证据。
 
 ---
 
@@ -72,7 +72,7 @@
 
 | 编号 | 主题 | 分级/状态 | 详细目录内容与大纲说明 | 输出与验收 |
 |---|---|---|---|---|
-| 2.1 | 安装与 Hello World | `CORE/草案` | 覆盖安装、版本检查、`x new`、`x run`、`x build`、目录结构和首个诊断。来源：2、12。 | Windows/Linux/macOS 三套可复现步骤；命令由 CI 验证。 |
+| 2.1 | 安装与 Hello World | `CORE/草案` | 覆盖安装、版本检查、规范命令 `x init`（`x new` 为兼容别名）、`x run`、`x build`、目录结构和首个诊断。来源：2、12。 | Windows/Linux/macOS 三套可复现步骤；命令由 CI 验证。 |
 | 2.2 | 源文件、模块与入口 | `CORE/草案` | 解释 `.x` 文件、包、模块树、导入导出、入口函数和命名约定。来源：2。 | 单文件与多模块示例均可构建。 |
 | 2.3 | 绑定与作用域 | `CORE/草案` | 讲解变量、常量、可变性、遮蔽、词法作用域和初始化规则。 | 正例、未初始化/越界作用域反例及诊断。 |
 | 2.4 | 基础类型与运算 | `CORE/草案` | 数值、布尔、字符、字符串、字面量、转换、溢出和位操作。来源：10。 | 每类运算说明类型结果、错误和 Debug/Release 差异。 |

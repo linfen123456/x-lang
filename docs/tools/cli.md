@@ -35,6 +35,8 @@ traceability_scope: [XLF-02-013, XLF-02-014, XLF-03-005, XLF-10-012, XLF-11-003,
 
 所有命令支持 `--help`、取消 token、超时和结构化诊断。`x run` 的子进程继承最小环境；`x repl` 默认不加载任意插件和网络；`x clean` 必须展示待删除清单并拒绝 workspace 根或未解析路径。
 
+`x init` 是创建项目的规范命令；`x new` 是完全等价的兼容别名，帮助、JSON 结果和审计记录必须保留用户实际输入，同时将内部操作规范化为 `init`。发布 Profile 的规范写法是 `x build --profile release`；`x build --release` 是等价短别名。若 `--release` 与非 release 的 `--profile` 同时出现，CLI 必须报告参数冲突，不得按参数顺序覆盖。
+
 ## JSON 与资源边界
 
 JSON `CommandResult` 字段统一为 `schema_version:"1.0"`、`command:String`、`status:success|user_error|build_failed|environment_failed|cancelled|internal_error`、`exit_code:u8`、`request_id:String`（16-byte u128 的 canonical 32-hex 表示）、`diagnostics:Vec<Diagnostic>`、`artifacts:Vec<ArtifactRef>`、`duration_ms:u64`、`resource:{peak_memory_bytes:u64,network_bytes:u64,children:u16}`。该结构与 `docs/compiler/interfaces/contract.md`、`docs/tools/contracts/contract.md` 相同；单 JSON 1 GiB、诊断 10k、子进程 64。超过声明的输出/资源预算属于环境或配额失败，返回 3 并保留截断标记；只有工具自身不变量被破坏才返回 5。

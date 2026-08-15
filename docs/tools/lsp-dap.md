@@ -18,7 +18,7 @@ traceability_scope: [XLF-02-004, XLF-02-005, XLF-02-007, XLF-02-008, XLF-02-015,
 
 每个请求包含 `jsonrpc:"2.0"`、`id:String|u64`、`method:String`、`params`、`document_version:i64?`、`cancel_id:String?`；server context 为 `WorkspaceSnapshotId`。`initialize` 协商 `protocol_version`、`capabilities`、`position_encoding`；不支持能力返回标准 `MethodNotFound/InvalidParams`，不猜测客户端版本。
 
-打开/变更文档使用 `uri:String`、`version:i64`、`text:String|content_changes`，版本回退或旧 snapshot 请求返回 `X-LSP-STALE-DOCUMENT`。completion/hover/definition/diagnostics/formatting 结果带 snapshot version 和 source span；超过 deadline 可返回 partial + `retryable:true`。取消必须传播到 Compiler Query；取消后不得发布旧版本编辑。
+打开/变更文档使用 `uri:String`、`version:i64`、`text:String|content_changes`，版本回退或旧 snapshot 请求返回 `X-LSP-STALE-DOCUMENT`。同一 `didChange` 的 `contentChanges` 按数组顺序应用，每个 range 相对前一 change 后的临时文本；在私有 rope 上全部验证成功后才发布新 version，任一步失败回滚整批。completion/hover/definition/diagnostics/formatting 结果带 snapshot version 和 source span；超过 deadline 可返回 partial + `retryable:true`。取消必须传播到 Compiler Query；取消后不得发布旧版本编辑。
 
 默认单文档 16 MiB、workspace 64 MiB、并发请求 32、诊断 10k、补全项 5k、请求 2 s；`ci`/低内存 Profile 可收紧。LSP server 线程安全，长查询不阻塞消息循环，workspace snapshot 只读。
 

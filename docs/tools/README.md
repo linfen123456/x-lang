@@ -39,3 +39,4 @@ traceability_scope: [XLF-02-005, XLF-02-007, XLF-02-013, XLF-02-014, XLF-02-015,
 - [LSP/DAP](./lsp-dap.md)
 - [插件沙箱](./plugin-sandbox.md)
 - [统一协议结构](./contracts/contract.md)
+- [CLI 执行流水线、XPM 求解与 LSP/DAP 细则](./xpm-lsp-cli-details.md)

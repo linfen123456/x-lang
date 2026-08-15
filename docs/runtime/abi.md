@@ -16,7 +16,7 @@ traceability_scope: [XLF-02-011, XLF-10-003, XLF-11-008, XLF-12-014]
 
 ## ABI 版本与数据布局
 
-入口导出为 `extern "C"`，固定字段使用 `u8/u16/u32/u64/i32/i64`, `bool:u8`、`XrtSemVer{major:u16,minor:u16,patch:u16,reserved:u16}`、`XrtRequestId{hi:u64,lo:u64}`（语义为 u128）和 `XrtSlice{ptr:*const u8,len:u64}`。句柄统一为 `XrtHandle{raw:u64,kind:u32,generation:u32}`，错误统一为 `XrtStatus{code:u32,detail:u32,retryable:u8,reserved:u8,request_id:XrtRequestId}`；结构体附带 `size:u32`、`abi_version:u16`、`flags:u32`。指针只在调用期间借用，句柄为不透明 owner token，不能按整数推断布局。
+入口导出为 `extern "C"`，固定字段使用 `u8/u16/u32/u64/i32/i64`, `bool:u8`、`XrtSemVer{major:u16,minor:u16,patch:u16,reserved:u16}`、`XrtRequestId{hi:u64,lo:u64}`（语义为 u128）和 `XrtSlice{ptr:*const u8,len:u64}`。外部句柄统一为 `XrtHandle{raw:u64,kind:u32,generation:u32}`，错误统一为 `XrtStatus{code:u32,detail:u32,retryable:u8,reserved:u8,request_id:XrtRequestId}`；结构体附带 `size:u32`、`abi_version:u16`、`flags:u32`。`XrtHandle` 与运行时内部 `SlotHandle{slot,generation,kind,flags}` 是不同层：每次 ABI 调用都经 handle table 验证 owner、kind、generation 和 context 后转换，禁止 bitcast 或把 raw 当 slot。指针只在调用期间借用，句柄为不透明 owner token，不能按整数推断布局。
 
  C ABI 禁止 `Result`、Rust enum、trait object、Rust slice 或 panic 穿越边界。`xrt_init(req:*const XrtInit,out_ctx:*mut XrtHandle)->XrtStatus` 前置是 req/out_ctx 非空、版本和 target hash 匹配；后置是成功写入 context handle，失败不写入 out。`xrt_shutdown(ctx:XrtHandle)->XrtStatus` 要求无活跃 lease 或按策略取消并等待，后置为所有 runtime 线程/句柄关闭。版本不匹配返回 `XRT_E_ABI_MISMATCH`，不做隐式转换。
 

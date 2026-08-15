@@ -180,3 +180,7 @@ supersedes: [DOC-WEB-CONTRACT-LEGACY]
 | RFC-WEB-SEC-01 | 安全策略 helper | OWASP/WPT、CSP/CORS | P4 |
 
 原始愿景中的小程序转译、WebGPU、冷启动快照和 HMR 均保持独立适配器；未通过 RFC 不得写入核心语言或默认 Web runtime。
+
+## 7. 全栈与部署专题
+
+HTTP/RPC 服务、可信代理、容器、Kubernetes、Serverless、配置秘密、Canary 和回滚的实施边界见[全栈服务、云原生与部署实施规范](./fullstack-cloud-deployment.md)。该专题消费本文件的宿主语义，不改变 X-Lang 核心语言规则。

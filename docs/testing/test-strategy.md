@@ -14,7 +14,7 @@ traceability_scope: [QUALITY, XLF, XLC, XLE]
 
 ## 分层与最小覆盖
 
-本文件描述未来测试工程，并不声称测试目录或运行结果已经存在。所有 `TEST-*` 在测试卡和可执行案例落地前均为 planned；只有实际运行记录可作为“已验证”证据。
+本文件描述未来测试工程，并不声称测试目录或运行结果已经存在。所有 `TEST-*` 在测试卡和可执行案例落地前均为 planned；只有实际运行记录可作为“已验证”证据。[符合性案例目录](./conformance-case-catalog.md)中的 `CASE-*` 只是人类可读别名，落地时必须映射到一个全仓唯一 canonical `TEST-*` 和规范 Rule/XLF；CI、追溯与发布证据只引用 canonical Test ID。
 
 1. 解析器：Unicode、恢复、空输入、超长输入、注入样本和 fuzz；任何输入不得崩溃。
 2. 语义：每条规则的 compile-pass/compile-fail、诊断稳定性、所有权/Effect/错误路径和属性测试。

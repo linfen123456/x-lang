@@ -16,7 +16,7 @@ traceability_scope: [XLF-01-002, XLF-01-003, XLF-01-006, XLF-02-002, XLF-10-002,
 
 ## HIR 结构
 
-HIR 是脱糖后仍保留语义边界的树/图。`HirBody` 字段为 `owner:DefId`、`params:Vec<LocalDecl>`、`exprs:Vec<HirExpr>`、`patterns:Vec<HirPattern>`、`source_map:SpanMap`、`effect_set:EffectSet`。表达式引用 `HirId:u32`，类型引用已 canonicalize 的 `TypeId`；所有名字已解析为 `DefId`，不能保留字符串查找。
+HIR 是脱糖后仍保留语义边界的树/图。`HirBody` 是单 owner 的有类型、尚未验证 body，字段为 `owner:DefId`、`params:Vec<LocalDecl>`、`exprs:Vec<HirExpr>`、`patterns:Vec<HirPattern>`、`source_map:SpanMap`、`effect_set:EffectSet`。`TypedHirModule` 聚合 `Vec<HirBody>`、DefMap、TypeTable 和 module source map；`HirVerifier` 输出名义包装 `VerifiedHirModule`，MIR Builder 只能按 owner 消费其中的 `VerifiedHirBody`。表达式引用 `HirId:u32`，类型引用已 canonicalize 的 `TypeId`；所有名字已解析为 `DefId`，不能保留字符串查找。
 
 Lowering 前置：AST root 通过 AST verifier，Resolver/Type/Trait 已产生 `TypedAst`；不读取 BorrowReport，也不要求 borrow 诊断完成。后置：每个 AST 可观察构造恰好有一个 HIR 语义节点；`defer`、`?`、模式匹配、隐式 drop 和闭包捕获均显式化。错误返回 `X-E-HIR-LOWER`，取消返回 `X-E-CANCELLED`，任何失败都不提交 body cache。
 

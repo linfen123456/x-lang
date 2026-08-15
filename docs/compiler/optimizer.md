@@ -16,7 +16,7 @@ traceability_scope: [XLF-01-003, XLF-02-004, XLF-12-011, XLF-12-012]
 
 ## Pass 契约
 
-`PassSpec` 字段为 `id:String`、`version:SemVer`、`requires:Vec<Invariant>`、`preserves:Vec<Invariant>`、`profile_gate:ProfileGate`、`max_cpu_ms:u64`、`max_memory_bytes:u64`、`determinism:Determinism`。`PassManager::run(pipeline:Vec<PassSpec>, body:MirBody, cancel:CancelToken)->Result<OptimizedBody,PassReport>` 的前置是输入 verifier 通过且 pipeline DAG 无环；后置是每个 Pass 产生输入/输出 hash、变更统计和 verifier 报告。
+`PassSpec` 字段为 `id:String`、`version:SemVer`、`requires:Vec<Invariant>`、`preserves:Vec<Invariant>`、`profile_gate:ProfileGate`、`max_cpu_ms:u64`、`max_memory_bytes:u64`、`determinism:Determinism`。`PassManager::run(pipeline:Vec<PassSpec>, body:VerifiedMir, cancel:CancelToken)->Result<OptimizedBody,PassReport>` 的前置是输入完整 verifier 通过且 pipeline DAG 无环；每个 Pass 输出都必须重新运行完整结构/类型/CFG/move/borrow/Drop verifier，并对全部 `preserves` 声明核对 analysis fingerprint 后才可交给下一 Pass。抽样只允许作为 debug 额外诊断，不能成为正式接受条件。后置是每个 Pass 产生输入/输出 hash、变更统计和完整 verifier 报告。
 
 默认管线按 `const-fold → cfg-simplify → copy-prop → dead-block → drop-elaboration-check` 执行；O0 只运行必要 lowering，O1 可启用局部传播，O2 才能启用内联/逃逸分析。TCO、likely/unlikely、自动微分和平台专用向量化需独立 RFC/feature gate，不得改变失败、Drop、借用或 ABI 语义。
 

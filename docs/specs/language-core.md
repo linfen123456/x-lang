@@ -4,7 +4,7 @@ title: X-Lang 核心语言规范（词法、语法、类型与模块）
 authority: normative
 owner: role/language-council
 backup_owner: role/compiler-team
-version: "0.2.0"
+version: "0.2"
 maturity: CORE
 status: 草案
 phase: P0
@@ -161,7 +161,12 @@ call           = "(" [ args ] ")" ;
 index          = "[" expr "]" ;
 member         = "." IDENT ;
 await_suffix   = "." "await" ;
-primary        = literal | path | "(" expr ")" | block | unsafe_block | async_block | if_expr | match_expr | loop_expr | closure ;
+primary        = literal | tuple_or_group | array_expr | struct_expr | panic_expr | path | block | unsafe_block | async_block | if_expr | match_expr | loop_expr | closure ;
+tuple_or_group = "(" [ expr { "," expr } [ "," ] ] ")" ;
+array_expr     = "[" [ expr { "," expr } [ "," ] ] "]" ;
+struct_expr    = path "{" [ field_init { "," field_init } [ "," ] ] "}" ;
+field_init     = IDENT [ ":" expr ] ;
+panic_expr     = "panic" "(" expr ")" ;
 unsafe_block   = "unsafe" block ;
 async_block    = "async" [ "move" ] block ;
 if_expr        = "if" expr block { "else" "if" expr block } [ "else" block ] ;
@@ -232,7 +237,7 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 
 **解释。** 类型安全优先于便利；不同宽度转换的溢出策略必须由 API 名称表达。
 
-**正例。** let n: u32 = u16_value as u32; let id = text.parse::<u64>()?。
+**正例。** `let n: u32 = u16_value as u32; let id: u64 = text.parse()?;`。调用结果的显式类型为泛型解析提供约束，不引入尚未定义的尖括号调用语法。
 
 **反例。** let n: i32 = true 报 X-E2001 incompatible types。
 
@@ -326,7 +331,7 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 
 **正例。** f({log("a");1},{log("b");2}) 总是先 a 后 b。
 
-**反例。** 返回字符串到 i32 报 X-E2501；false && panic() 不执行 panic。
+**反例。** 返回字符串到 i32 报 X-E2501；`false && panic("unreachable")` 不执行 panic。
 
 **边界。** effect、生成器和并行求值不属于核心；FFI 调用约定见 FFI 文档。
 
@@ -358,11 +363,11 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 - status: 草案
 - phase: P0
 
-**规范性条文。** 包由 x.toml 定义名称、版本、edition、入口和依赖；依赖图必须确定且无循环初始化，锁文件固定结果和来源哈希。模块默认私有，pub 可导出。Edition 隔离解析/类型/语义变化，不改变包版本；未声明 edition 必须拒绝或采用清单默认并警告。
+**规范性条文。** 包由 x.toml 定义名称、版本、edition 和依赖表；依赖表允许为空，入口按规范默认位置发现或由扩展目标配置显式指定。依赖图必须确定且无循环初始化，锁文件固定结果和来源哈希。模块默认私有，pub 可导出。Edition 隔离解析/类型/语义变化，不改变包版本；当前清单版本未声明 edition 必须拒绝，不得按编译器版本猜测默认值。
 
 **解释。** Edition 是迁移边界。依赖解析、feature、平台条件的完整 Schema 由 XPM 文档定义。
 
-**正例。** x.toml 声明 edition=2026 并提交 lockfile；pub fn api() 可外部引用。
+**正例。** x.toml 声明 name、version、edition 和允许为空的 dependencies 表；pub fn api() 可外部引用。
 
 **反例。** 不确定依赖图报 X-E2701；越过私有边界报 X-E2702。
 
@@ -438,9 +443,9 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 
 **反例。** Stable 普通函数中写 await，报告 X-E2810。
 
-**边界。** no_std async 可需手工 executor；阻塞检测、select 和 async trait 由 RFC-ASYNC-01 决定。
+**边界。** no_std async 可需手工 executor；阻塞检测、select 和 async trait 由唯一决策 `RFC-ASYNC-001` 决定。
 
-**诊断/测试/追溯。** X-E2810、X-E2811；TEST-LANG-ASYNC-001..008；来源 XLF-05-006、XLF-10-004、XLC-CORE-014..015；RFC-ASYNC-01（P3）。
+**诊断/测试/追溯。** X-E2810、X-E2811；TEST-LANG-ASYNC-001..008；来源 XLF-05-006、XLF-10-004、XLC-CORE-014..015；`RFC-ASYNC-001` 当前待决策，必须在 P2 async 实施切片启动前完成决策，能力实现与稳定化仍在 P3。
 
 ### RULE-LANG-019：panic、unwind、abort 与溢出 profile
 
@@ -466,7 +471,7 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 - status: 草案
 - phase: P0
 
-**规范性条文。** x.toml 最小必须包含 package.name、package.version、package.edition、[dependencies]；缺失 edition 使用治理规定的 manifest 默认并产生诊断，禁止按编译器版本猜测。解析顺序固定为清单、锁文件、registry/source、feature/cfg，再进行模块解析；锁文件必须记录精确版本、来源和 hash。依赖图中的循环必须在解析阶段拒绝；同一 feature 解析结果必须可重现。
+**规范性条文。** x.toml 最小必须包含 package.name、package.version、package.edition、[dependencies]；没有外部依赖时 `[dependencies]` 允许为空。缺失 edition 必须产生 X-E2831 并拒绝构建，禁止按编译器版本猜测。解析顺序固定为清单、锁文件、registry/source、feature/cfg，再进行模块解析；锁文件必须记录精确版本、来源和 hash。依赖图中的循环必须在解析阶段拒绝；同一 feature 解析结果必须可重现。
 
 **解释。** Edition 选择语法和语义规则，不改变包版本；cfg 只能来自受信 manifest/target，不得由源码隐式改写依赖图。
 

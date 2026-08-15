@@ -22,9 +22,11 @@ traceability_scope: [XLF-02-013, XLF-02-014, XLF-03-011, XLF-10-012, XLF-10-014,
 
 ## 锁文件和求解器
 
-`x.lock` 字段为 `schema_version:SemVer`、`root:PackageId`、`packages:Vec<{id,name,version,source,checksum,dependencies,features}>`、`target_sets`、`toolchain_fingerprint`。canonical 排序为 name/source/version，换行和编码固定；锁文件缺 hash、重复 package、循环不可解析或工具链 fingerprint 不兼容都拒绝。
+`x.lock` 字段为 `schema_version:SemVer`、`root:PackageId`、`packages`、`target_sets`、`toolchain_fingerprint`。来源信任字段不能混用：Registry 项记录 registry/revision/checksum/signature-policy/revocation snapshot；Git 项记录 canonical repository、immutable commit、tree digest 和签名验证状态；Path 项记录 workspace/vendor 相对路径、content digest 与 `local=true`，不得伪造远端签名。canonical 排序为 name/source/version，换行和编码固定；锁文件缺其来源必需字段、重复 package、循环不可解析或工具链 fingerprint 不兼容都拒绝。
 
-求解器输入 `RootManifest + RegistrySnapshot + TargetSpec + FeatureSet + toolchain_fingerprint`，输出唯一 `Resolution{packages,edges,explanation,lock_digest}`。算法必须确定性：版本优先级、源优先级、feature 合并和冲突解释有固定规则；无解返回 `XPM_E_CONFLICT` 并列出最小冲突集合。`--locked` 禁止更新，`--offline` 只允许本地索引/cache，`x update` 生成预览 diff 后才写锁。Profile 采用共享 `ProfileSpec`，优先级为 `CLI > x.toml profile > TargetSpec defaults > toolchain defaults`，环境变量仅进入 declared inputs。
+求解器输入 `RootManifest + RegistrySnapshot + TargetSpec + FeatureSet + toolchain_fingerprint`，输出唯一 `Resolution{packages,edges,explanation,lock_digest}`。算法必须确定性：版本/源/feature/tie-break 固定；候选列表在求解开始前冻结为有限集合，耗尽即生成 NoSolution incompatibility，已尝试 `(package,version,decision-context)` 不重复。每次决策消耗候选、每次冲突学习新 canonical incompatibility 并向更低层回跳，从而终止；预算耗尽返回 `XPM_E_SOLVER_LIMIT`，与语义无解 `XPM_E_CONFLICT` 区分。`--locked` 禁止更新，`--offline` 只允许本地索引/cache，`x update` 生成预览 diff 后才写锁。Profile 采用共享 `ProfileSpec`，优先级为 `CLI > x.toml profile > TargetSpec defaults > toolchain defaults`，环境变量仅进入 declared inputs。
+
+`RegistrySnapshot.fetched_at` 只用于缓存过期与审计展示，不进入 snapshot digest、求解、lock 或 build fingerprint。build fingerprint 只含 manifest/lock/source/toolchain/target/profile/Edition/Feature/declared-env 等语义输入；LSP runtime snapshot ID、下载时间和本地缓存路径不得进入。
 
 下载、校验、解包和构建分阶段隔离，分别有 URL/文件大小/CPU/并发上限。哈希或签名不匹配、撤回包、供应链审计失败不得使用缓存；坏缓存被 quarantine，不直接删除证据。默认 registry 10 并发、包 512 MiB、解包 2 GiB、网络 60 s，Profile 可收紧。
 

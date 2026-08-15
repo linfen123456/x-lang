@@ -24,3 +24,9 @@ AI 是受限建议者，不是隐含的发布者。默认只读；任何写入�
 - 权限：读、写、执行、网络、秘密、发布五类 capability 分开授予；默认 deny，路径和命令白名单，时间/Token/文件预算有限。
 - 多 Agent：文件/模块租约带 owner、epoch、TTL、读写范围和冲突 hash；租约失效或重叠写入必须停止，禁止 Last-writer-wins。
 - 审计：记录模型/Prompt/规则/工具版本、输入输出摘要、权限决策、人工批准、diff、测试和制品哈希；不记录原始秘密。
+
+## 专题入口
+
+- [Agent 工作流与评测](./agent-workflow-and-evaluation.md)
+- [AI 与 Agent 威胁模型](./threat-model.md)
+- [Tensor、GPU、模型服务与 Agent 平台研究边界](./tensor-gpu-agent-platform.md)

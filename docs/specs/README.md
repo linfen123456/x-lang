@@ -25,6 +25,8 @@ supersedes: [DOC-SPECS-INDEX-LEGACY]
 | 文件 | 责任域 | 当前阶段 | 主要内容 |
 |---|---|---|---|
 | [language-core.md](./language-core.md) | 词法、EBNF、表达式、类型、Trait、模式、模块、Edition、错误 | P0–P2 | `RULE-LANG-*` |
+| [types-traits-patterns.md](./types-traits-patterns.md) | 类型统一、约束求解、Trait 候选/一致性、方法解析和模式穷尽性算法 | P1–P2 | `RULE-TYPE-*`、`RULE-TRAIT-*`、`RULE-PAT-*` |
+| [modules-packages-editions.md](./modules-packages-editions.md) | 模块发现、名称解析、可见性、清单、依赖、Feature 和 Edition | P1–P3 | `RULE-MOD-*`、`RULE-PKG-*`、`RULE-EDITION-*` |
 | [memory-concurrency.md](./memory-concurrency.md) | 所有权、借用、生命周期、Drop、内存模型、线程、原子、async 取消 | P0–P3 | `RULE-MEM-*`、`RULE-CONC-*` |
 | [conformance.md](./conformance.md) | 术语、实现等级、诊断、测试和发布门禁 | P0–P4 | `RULE-CONF-*` |
 
@@ -34,7 +36,7 @@ supersedes: [DOC-SPECS-INDEX-LEGACY]
 
 ## 统一规则记录格式
 
-每一个规范规则必须使用全仓库唯一的 `RULE-域-NNN` ID，域由大写 ASCII 组成，例如 `RULE-LANG-001`、`RULE-MEM-014`。历史规则前缀不再作为规范 ID 使用。每条规则都必须包含以下字段：
+每一个规范规则必须使用全仓库唯一的 `RULE-域-NNN` ID，域由大写 ASCII 组成，例如 `RULE-LANG-001`、`RULE-MEM-001`。历史规则前缀不再作为规范 ID 使用。每条规则都必须包含以下字段：
 
 1. **规范性条文**：能直接实现和判定的 MUST/ MUST NOT；
 2. **解释**：条文意图和与相邻规则的关系；
@@ -59,7 +61,7 @@ supersedes: [DOC-SPECS-INDEX-LEGACY]
 XLF/XLC → RULE → RFC/ADR → compiler/runtime/library module → TEST → phase/release
 ```
 
-本轮文档只修改 `docs/specs`、`docs/stdlib`、`docs/ffi`、`docs/web`、`docs/style`；治理目录保持不变。`XLF` 来源见 [原始功能全量追溯矩阵](../X-Lang原始功能全量追溯矩阵.md)，对标来源见 [多语言对标大纲](../X-Lang多语言对标与全栈能力补全大纲.md)。
+`XLF` 来源见 [原始功能全量追溯矩阵](../X-Lang原始功能全量追溯矩阵.md)，对标来源见 [多语言对标大纲](../X-Lang多语言对标与全栈能力补全大纲.md)。学习者应从[快速入门](../guide/getting-started.md)开始；教程只解释和练习本目录规则，不拥有独立语义权威。
 
 ## 最小符合性门槛
 
