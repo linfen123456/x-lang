@@ -7,7 +7,7 @@ version: "2.0.0"
 maturity: CORE
 status: 已决策
 phase: P0
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [GOVERNANCE, XLF, XLC, XLE, REVIEW]
 ---
 # X-Lang 文档治理与证据规范
@@ -20,14 +20,14 @@ traceability_scope: [GOVERNANCE, XLF, XLC, XLE, REVIEW]
 
 1. `docs/原始文档/1.txt` 至 `12.txt` 是不可改的历史输入。文档阶段通过 Git 差异确认这 12 个文件没有改动；建立正式发布流水线时再生成并签署来源哈希清单。
 2. 8 份主大纲分别承载规范、架构、对标、追溯、复审和工程风险事实；专题文档只能解释或链接，不能悄然改写结论。
-3. [文档元数据约定](document-metadata-schema.yaml)、[追溯字段约定](traceability-manifest.yaml)和[项目登记示例](project-registry.yaml)只提供最小辅助格式；正式说明与决策以 Markdown 文档为准。
+3. 历史遗留的[文档元数据约定](document-metadata-schema.yaml)、[追溯字段约定](traceability-manifest.yaml)和[项目登记示例](project-registry.yaml)只提供辅助字段参考，不是本阶段交付主体，也不覆盖 Markdown 正文。新增专题不要求创建新的 YAML/JSON；字段能以可读 Markdown 元数据块表达时优先使用正文。
 4. RFC/ADR 记录冲突和变更原因；状态只能沿状态机迁移，不能直接编辑成“已稳定”。
 
 ## 统一文档契约
 
-专题 Markdown 使用 front matter 记录 `doc_id/authority/owner/version/maturity/status/phase/last_reviewed/traceability_scope`。8 份 `docs/X-Lang*.md` 主大纲沿用文件开头的可读元数据块，属于明确例外；它们仍必须记录版本、状态、日期、职责和权威引用。定义表的 XLF/XLC/XLE ID 只能出现在各自权威矩阵；复审表重复引用是边，不是新定义。
+专题 Markdown 使用“YAML front matter 或标题后的可读 Markdown 元数据块”记录 `doc_id/authority/owner/version/maturity/status/phase/last_reviewed/traceability_scope`；两种形式语义相同，不要求为了机器格式复制正文。8 份 `docs/X-Lang*.md` 主大纲继续使用文件开头的可读元数据块。所有文档都必须记录版本、状态、日期、职责和权威引用。定义表的 XLF/XLC/XLE ID 只能出现在各自权威矩阵；复审表重复引用是边，不是新定义。
 
-专题完成定义（DoD）包含：目标和非目标、术语、输入/输出契约、正反例、边界与失败语义、性能预算、安全边界、兼容/迁移、测试 ID、回滚、Owner/备份 Owner、来源和证据。缺一项只能标记为 `草案` 或 `待决策`。
+专题完成定义（DoD）包含：目标和非目标、术语、输入/输出契约、正反例、边界与失败语义、性能预算或明确“尚无基线”、安全边界、兼容/迁移、canonical 测试 ID、回滚、Owner/备份 Owner、来源和证据状态。尚无实现时证据必须写 `planned`，不得填写不存在的文件或运行结果。缺一项只能标记为 `草案` 或 `待决策`。
 
 ## 可执行检查
 

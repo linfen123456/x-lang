@@ -7,7 +7,7 @@ version: "1.1"
 maturity: CORE
 status: 草案
 phase: P2
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-02-013, XLF-02-014, XLF-03-011, XLF-10-012, XLF-10-014, XLF-11-001, XLF-11-004]
 ---
 # XPM、`x.toml`/`x.lock` 与依赖求解
@@ -28,7 +28,7 @@ traceability_scope: [XLF-02-013, XLF-02-014, XLF-03-011, XLF-10-012, XLF-10-014,
 
 `RegistrySnapshot.fetched_at` 只用于缓存过期与审计展示，不进入 snapshot digest、求解、lock 或 build fingerprint。build fingerprint 只含 manifest/lock/source/toolchain/target/profile/Edition/Feature/declared-env 等语义输入；LSP runtime snapshot ID、下载时间和本地缓存路径不得进入。
 
-下载、校验、解包和构建分阶段隔离，分别有 URL/文件大小/CPU/并发上限。哈希或签名不匹配、撤回包、供应链审计失败不得使用缓存；坏缓存被 quarantine，不直接删除证据。默认 registry 10 并发、包 512 MiB、解包 2 GiB、网络 60 s，Profile 可收紧。
+下载、校验、解包和构建分阶段隔离，分别有 URL/文件大小/CPU/并发上限。哈希或签名不匹配、撤回包、供应链审计失败不得使用缓存；坏缓存被 quarantine，不直接删除证据。registry 10 并发、包 512 MiB、解包 2 GiB、网络 60 s 是 `candidate_default`，遵循 [工具链 Budget 治理](./README.md#安全profile-与完成定义)，由 Profile 提供且不是 registry 容量承诺。
 
 ## 负向测试、版本与回滚
 

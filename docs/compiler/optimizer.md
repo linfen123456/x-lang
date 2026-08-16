@@ -7,7 +7,7 @@ version: "1.1"
 maturity: EXTENDED
 status: 草案
 phase: P2
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-01-003, XLF-02-004, XLF-12-011, XLF-12-012]
 ---
 # MIR 优化 Pass 实施规范
@@ -26,7 +26,7 @@ traceability_scope: [XLF-01-003, XLF-02-004, XLF-12-011, XLF-12-012]
 
 ## 并发、取消和资源 Profile
 
-不同函数的纯 Pass 可并行，但同一 `MirBody` 的 Pass 串行；共享 analysis cache 采用不可变快照。每个 Pass 在循环回边和节点批次检查取消，返回 `E-CANCELLED` 且不提交 cache。默认 Profile：单函数 10M 节点、Pass 30 s、256 MiB；超过返回 `E-PASS-LIMIT`。`release` 允许显式更高上限并在 ArtifactManifest 记录。
+不同函数的纯 Pass 可并行，但同一 `MirBody` 的 Pass 串行；共享 analysis cache 采用不可变快照。每个 Pass 在循环回边和节点批次检查取消，返回 `E-CANCELLED` 且不提交 cache。单函数 10M 节点、Pass 30 s、256 MiB 只是 `candidate_default` 防御预算，遵循 [编译器 Budget 治理](./README.md#资源预算治理)，由 Profile 提供且不得硬编码；超过返回 `E-PASS-LIMIT`。`release` 只有在 Budget ADR 批准并写入 ArtifactManifest 后才可提高。
 
 ## 负向测试与回滚
 

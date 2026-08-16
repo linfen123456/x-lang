@@ -7,7 +7,7 @@ version: "1.1"
 maturity: EXTENDED
 status: 草案
 phase: P3
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-02-004, XLF-02-005, XLF-02-007, XLF-02-008, XLF-02-015, XLF-11-006, XLF-11-007]
 ---
 # LSP 与 DAP 实施规范
@@ -20,7 +20,7 @@ traceability_scope: [XLF-02-004, XLF-02-005, XLF-02-007, XLF-02-008, XLF-02-015,
 
 打开/变更文档使用 `uri:String`、`version:i64`、`text:String|content_changes`，版本回退或旧 snapshot 请求返回 `X-LSP-STALE-DOCUMENT`。同一 `didChange` 的 `contentChanges` 按数组顺序应用，每个 range 相对前一 change 后的临时文本；在私有 rope 上全部验证成功后才发布新 version，任一步失败回滚整批。completion/hover/definition/diagnostics/formatting 结果带 snapshot version 和 source span；超过 deadline 可返回 partial + `retryable:true`。取消必须传播到 Compiler Query；取消后不得发布旧版本编辑。
 
-默认单文档 16 MiB、workspace 64 MiB、并发请求 32、诊断 10k、补全项 5k、请求 2 s；`ci`/低内存 Profile 可收紧。LSP server 线程安全，长查询不阻塞消息循环，workspace snapshot 只读。
+单文档 16 MiB、workspace 64 MiB、并发请求 32、诊断 10k、补全项 5k、请求 2 s 只是 `candidate_default`，遵循 [工具链 Budget 治理](./README.md#安全profile-与完成定义)，不是响应时间或工作区容量承诺；`ci`/低内存 Profile 可收紧。LSP server 线程安全，长查询不阻塞消息循环，workspace snapshot 只读。
 
 ## DAP
 

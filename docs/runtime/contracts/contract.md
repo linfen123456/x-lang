@@ -7,12 +7,14 @@ version: "1.1"
 maturity: CORE
 status: 草案
 phase: P2
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-02-009, XLF-02-011, XLF-05-001, XLF-05-005, XLF-05-008, XLF-10-003, XLF-12-014]
 ---
 # XRT 全量接口契约
 
 > 状态：草案｜Owner：`role/runtime-team`
+
+表中的固定资源数字均为 Profile 的 `candidate_default`，遵循 [运行时 Budget 治理](../README.md#资源预算治理)。它们用于限制失控输入，不是并发、吞吐或稳定 ABI 承诺；P4 前须由 Budget ADR 决定发布值。
 
 | 接口 | 输入字段类型 | 前置/后置 | 错误 | 取消 | 并发/资源上限 |
 |---|---|---|---|---|---|

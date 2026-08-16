@@ -8,9 +8,9 @@ version: "0.2"
 maturity: CORE
 status: 草案
 phase: P0
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 applies_to: [x-source, lexer, parser, resolver, type-checker, hir]
-traceability_scope: [XLF, XLC]
+traceability_scope: [XLF, XLC, XLE]
 supersedes: [DOC-SPECS-LANGUAGE-CORE-LEGACY]
 ---
 
@@ -271,7 +271,7 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 
 **规范性条文。** 有符号整数为规定宽度二进制补码；无符号整数按模 2^N。检查 profile 检测溢出并报告 X-R3001；release 策略必须由 RFC 决定，程序不得依赖 LLVM poison/UB。浮点为 IEEE 754 binary32/binary64，NaN 比较遵循 IEEE，total order 使用显式 API。
 
-**解释。** decimal32/64/128 是标准库/扩展候选，不是 P0 原生类型。
+**解释。** decimal32/64/128 是标准库/扩展候选，不是 P0 原生类型。整数、NaN、FMA 和严格/快速模式的决策门见[求值与 UB 规范](./evaluation-and-ub.md)。
 
 **正例。** u8::wrapping_add(a,b)；f64::total_cmp(a,b)。
 
@@ -279,7 +279,7 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 
 **边界。** FMA、fast-math、SIMD、舍入和端序必须由 target/profile 开启；strict 模式才提供跨后端相同结果。
 
-**诊断/测试/追溯。** X-R3001、X-E2004；TEST-LANG-NUM-001..006；来源 XLF-10-004、XLF-12-012、XLC-CORE-010；RFC-NUM-01（P1 差分）。
+**诊断/测试/追溯。** X-R3001、X-E2004；TEST-LANG-NUM-001..006；来源 XLC-CORE-011、XLC-CORE-019、XLE-DATA-006；decimal 扩展来源 XLF-10-004，但不由本条实现；RFC-NUM-01（P1 差分）。
 
 ### RULE-LANG-010：复合类型与布局
 
@@ -327,7 +327,7 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 
 **规范性条文。** 函数实参按源代码从左到右；&&/|| 短路，普通算术不短路。函数返回表达式必须满足返回类型；块尾表达式为返回值，return 提前退出。闭包不得隐式克隆非 Copy 值。
 
-**解释。** 明确顺序避免后端差异；尾调用优化不能改变 Drop 顺序。
+**解释。** 明确顺序避免后端差异；尾调用优化不能改变 Drop 顺序。参数、短路、临时和 cleanup edge 的实现规则见[求值与 UB 规范](./evaluation-and-ub.md)。
 
 **正例。** f({log("a");1},{log("b");2}) 总是先 a 后 b。
 
@@ -335,7 +335,7 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 
 **边界。** effect、生成器和并行求值不属于核心；FFI 调用约定见 FFI 文档。
 
-**诊断/测试/追溯。** X-E2501、X-E2502；TEST-LANG-EVAL-001..003；来源 XLF-03-001、XLC-CORE-010；RFC-EVAL-01（P1）。
+**诊断/测试/追溯。** X-E2501、X-E2502；TEST-LANG-EVAL-001..003；来源 XLF-11-005、XLC-CORE-011、XLC-CORE-019；RFC-EVAL-01（P1）。
 
 ## 6. 错误、模块、包与 Edition
 
@@ -463,7 +463,7 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 
 **边界。** panic hook、backtrace、信号、OOM 和宿主 terminate 由 runtime profile 补充；不得把 hook 当作恢复机制。
 
-**诊断/测试/追溯。** X-E2820、X-R3001；TEST-LANG-PANIC-001..008；来源 XLF-10-001、XLF-12-012、XLC-CORE-010；RFC-ERROR-01（P1）。
+**诊断/测试/追溯。** X-E2820、X-R3001；TEST-LANG-PANIC-001..008；来源 XLF-10-001、XLF-10-003、XLF-12-014、XLC-CORE-011；RFC-ERROR-01（P1）。
 
 ### RULE-LANG-020：清单、Edition 与依赖解析
 
@@ -495,5 +495,6 @@ LIFETIME       = /* 单引号后接非关键字 IDENT，例如 'a；字符字面
 | RFC-ERROR-01 | Result+panic，unwind/abort profile | Drop/FFI/资源证据 | P1 |
 | RFC-MODULE-01 | 清单+锁文件+Edition | 确定解析、N-1/N-2 迁移 | P2 |
 | RFC-ABI-01 | 非 repr 布局不稳定，C ABI 显式 | ABI goldens、provenance | P2 |
+| RFC-META-01 | P0 仅接受无需执行用户代码的常量；宏/comptime 默认关闭 | 阶段顺序、确定输入、CPU/内存/递归预算、卫生与 Span、过程能力沙箱、缓存键和生成代码追溯；来源 XLF-01-008、XLF-10-012、XLC-CORE-001、XLC-CORE-002、XLC-CORE-003 | P2 |
 
 RFC 未通过前可有 feature-gate 原型，但不得把原型示例当作 CORE 语义。

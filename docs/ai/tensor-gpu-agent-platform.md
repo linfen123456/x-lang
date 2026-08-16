@@ -7,7 +7,7 @@ version: "0.1"
 maturity: RESEARCH
 status: 研究
 phase: P3
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF, XLC, XLE, AI, SECURITY]
 ---
 # X-Lang Tensor、GPU、模型服务与 AI Agent 平台实施规范
@@ -226,7 +226,7 @@ MCP Resource 只读暴露最小上下文；Tool 按 read/write/execute/network/s
 
 Tensor/GPU 通过的最低标准是 CPU Reference、错误/资源契约、差分数值、设备矩阵和可关闭回退。Agent 通过的最低标准是权限默认 deny、来源可见、审计、注入拒绝、最小 diff、真实测试和人工审批。
 
-回滚粒度包括算子、Pass、GPU 后端、模型版本、Agent 工具和索引版本；关闭实验 Feature 后核心工程仍可构建。研究连续两个里程碑无法达到正确性、安全、价值或成本阈值时出具退出报告并归档，不允许无限消耗主线资源。
+回滚粒度包括算子、Pass、GPU 后端、模型版本、Agent 工具和索引版本；关闭实验 Feature 后核心工程仍可构建。每项研究在 Charter 约定的评审点检查正确性、安全、价值和成本；未达到 Go 阈值或触发预算/安全停止条件时出具退出报告并归档，不允许通过顺延里程碑无限消耗主线资源。
 
 ## 15. 原始资料追溯
 

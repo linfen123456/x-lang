@@ -7,7 +7,7 @@ version: "1.1"
 maturity: CORE
 status: 草案
 phase: P2
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-01-002, XLF-01-003, XLF-01-006, XLF-02-002, XLF-10-002, XLF-12-014]
 ---
 # HIR、MIR 与 Verifier 实施规范
@@ -28,7 +28,7 @@ Verifier 必须检查：所有 BlockId/LocalId/TypeId 有界且存在；CFG 从 
 
 ## 变换接口
 
-`MirPass::run(input:&MirBody, ctx:&PassContext)->Result<PassOutput,PassError>`：前置为 input verifier 通过、Pass 版本匹配；后置为 output verifier 通过且 source map 可回溯；错误不替换 input。`PassOutput` 字段为 `body:MirBody`、`changed:bool`、`stats:PassStats`、`proof:ProofSummary`。Pass 在每个 block/循环头检查 `CancelToken`；`ci` Profile 的单 Pass 默认 30 s、256 MiB，超限返回 `X-E-PASS-001`。
+`MirPass::run(input:&MirBody, ctx:&PassContext)->Result<PassOutput,PassError>`：前置为 input verifier 通过、Pass 版本匹配；后置为 output verifier 通过且 source map 可回溯；错误不替换 input。`PassOutput` 字段为 `body:MirBody`、`changed:bool`、`stats:PassStats`、`proof:ProofSummary`。Pass 在每个 block/循环头检查 `CancelToken`；30 s、256 MiB 仅为 `ci` Profile 的 `candidate_default`，遵循 [编译器 Budget 治理](./README.md#资源预算治理)，超限返回 `X-E-PASS-001`。
 
 ## 解释器与差分
 

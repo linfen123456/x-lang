@@ -41,7 +41,7 @@
 
 ### 0.6 正式专题文档入口
 
-本大纲的正式规则由专题文档承载：[核心语言规范](./specs/language-core.md)、[类型/Trait/模式](./specs/types-traits-patterns.md)、[模块/包/Edition](./specs/modules-packages-editions.md)、[内存与并发](./specs/memory-concurrency.md)、[符合性](./specs/conformance.md)、[标准库](./stdlib/README.md)、[互操作](./ffi/README.md)、[Web](./web/README.md)和[样式](./style/README.md)。学习路线从[快速入门](./guide/getting-started.md)、[核心语言教程](./guide/core-language-tutorial.md)和[所有权、错误与并发教程](./guide/ownership-errors-concurrency.md)开始。大纲保留目录、成熟度和来源边界；专题文档负责逐条规则、示例、接口和测试证据。
+本大纲的正式规则由专题文档承载：[核心语言规范](./specs/language-core.md)、[类型/Trait/模式](./specs/types-traits-patterns.md)、[模块/包/Edition](./specs/modules-packages-editions.md)、[内存与并发](./specs/memory-concurrency.md)、[求值/数值/UB](./specs/evaluation-and-ub.md)、[符合性](./specs/conformance.md)、[标准库](./stdlib/README.md)、[互操作](./ffi/README.md)、[Web](./web/README.md)和[样式](./style/README.md)。学习路线从[快速入门](./guide/getting-started.md)、[核心语言教程](./guide/core-language-tutorial.md)和[所有权、错误与并发教程](./guide/ownership-errors-concurrency.md)开始。大纲保留目录、成熟度和来源边界；专题文档负责逐条规则、示例、接口和测试证据。
 
 ---
 
@@ -308,7 +308,7 @@
 |---|---|---|---|---|
 | 13.1 | 宏系统 | `CORE+EXTENDED/待决策` | Token Tree、卫生、名称解析阶段、递归/资源上限、过程宏进程隔离、权限和确定缓存键；不采用 C 式文本替换。对应 `XLC-CORE-001~003`。 | 宏 RFC、展开 SourceMap、逃逸/超时/可复现测试。 |
 | 13.2 | 高级泛型与 Trait | `EXTENDED/待决策` | Const Generics、Associated Types/GAT、Trait Object、Variance/HRTB、Auto/Negative Trait；Specialization 默认不稳定。对应 `XLC-CORE-004~009`。 | 求解终止性和一致性规则、对象安全规则、诊断符合性套件。 |
-| 13.3 | 正式求值与内存模型 | `CORE/待决策` | 初始化与求值顺序、对象生命周期、别名、Padding、未初始化、Pointer Provenance 和 UB 分类。对应 `XLC-CORE-010~013`。 | 规范规则 ID、MIR 解释器反例、跨后端差分和布局探针。 |
+| 13.3 | [正式求值与内存模型](./specs/evaluation-and-ub.md) | `CORE/待决策` | 初始化与求值顺序、对象生命周期、别名、Padding、未初始化、Pointer Provenance 和 UB 分类。对应 `XLC-CORE-010~013`。 | `RULE-EVAL/NUM/UB`、MIR 解释器反例、跨后端差分和布局探针；待决策略须经 RFC。 |
 | 13.4 | 正式并发与异步模型 | `CORE/待决策` | Happens-before、数据竞争、原子顺序、Fence、Future 生命周期、取消安全、结构化作用域和析构时序。对应 `XLC-CORE-014~015`。 | Litmus tests、取消/泄漏测试、平台映射证明。 |
 | 13.5 | Dynamic 与反射边界 | `EXTENDED/待决策` | `Dynamic` 仅用于 JSON/FFI/脚本边界，转换必须显式；反射默认编译期，运行时元数据按需保留。对应 `XLC-CORE-016~017`。 | 无隐式鸭子类型；裁剪、错误路径和兼容测试齐全。 |
 | 13.6 | Edition 与可观察行为 | `CORE治理/草案` | Edition 隔离解析/语义变化；定义顺序、布局、诊断、时间相关行为与实现自由；列明不支持原型链、元类和隐式 GC。对应 `XLC-CORE-018~020`。 | N-1/N-2 迁移项目和兼容评审清单。 |

@@ -4,11 +4,11 @@ title: X-Lang 正式语言规范索引
 authority: normative
 owner: role/language-council
 backup_owner: role/compiler-team
-version: "0.2.0"
+version: "0.2"
 maturity: CORE
 status: 草案
 phase: P0
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 applies_to: [x-language, xc, x-lsp, conformance-suite]
 traceability_scope: [XLF, XLC]
 supersedes: [DOC-SPECS-INDEX-LEGACY]
@@ -28,11 +28,12 @@ supersedes: [DOC-SPECS-INDEX-LEGACY]
 | [types-traits-patterns.md](./types-traits-patterns.md) | 类型统一、约束求解、Trait 候选/一致性、方法解析和模式穷尽性算法 | P1–P2 | `RULE-TYPE-*`、`RULE-TRAIT-*`、`RULE-PAT-*` |
 | [modules-packages-editions.md](./modules-packages-editions.md) | 模块发现、名称解析、可见性、清单、依赖、Feature 和 Edition | P1–P3 | `RULE-MOD-*`、`RULE-PKG-*`、`RULE-EDITION-*` |
 | [memory-concurrency.md](./memory-concurrency.md) | 所有权、借用、生命周期、Drop、内存模型、线程、原子、async 取消 | P0–P3 | `RULE-MEM-*`、`RULE-CONC-*` |
+| [evaluation-and-ub.md](./evaluation-and-ub.md) | 求值顺序、清理路径、整数/浮点、有效值、provenance 与 UB 分类 | P1–P2 | `RULE-EVAL-*`、`RULE-NUM-*`、`RULE-UB-*` |
 | [conformance.md](./conformance.md) | 术语、实现等级、诊断、测试和发布门禁 | P0–P4 | `RULE-CONF-*` |
 
 ### 规划中的规范文件
 
-`evaluation-and-ub.md`（`RULE-EVAL-*`）、`macros-and-consteval.md`（`RULE-META-*`）和 `abi-layout.md`（`RULE-ABI-*`）应在对应 RFC 通过后拆出。当前文件中的边界条文仅作为实现门禁，不是这些领域的完整决定。
+`macros-and-consteval.md`（`RULE-META-*`）和 `abi-layout.md`（`RULE-ABI-*`）只应在对应 RFC 形成可评审草案后拆出；当前宏/consteval 与显式 ABI 边界仍由核心、互操作规范和待决 RFC 管理，不以空文件冒充完成。`evaluation-and-ub.md` 已形成 P1–P2 决策草案，但其中待决策略在 RFC 通过前不是稳定承诺。
 
 ## 统一规则记录格式
 

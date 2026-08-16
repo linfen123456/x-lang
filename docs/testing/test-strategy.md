@@ -7,7 +7,7 @@ version: "2.0.0"
 maturity: CORE
 status: 已决策
 phase: P1
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [QUALITY, XLF, XLC, XLE]
 ---
 # 测试策略与符合性套件
@@ -29,7 +29,7 @@ traceability_scope: [QUALITY, XLF, XLC, XLE]
 
 ## Flaky、隔离和质量预算
 
-测试使用临时目录、随机端口、固定时钟和 seed；并行运行不能共享全局状态。单测 flaky 率目标 <0.1%，E2E <1%；连续两次失败自动隔离并在 2 个工作日内有 Owner。隔离项不能阻断回归修复，且不能被无限重试绕过。
+测试使用临时目录、随机端口、固定时钟和 seed；并行运行不能共享全局状态。Flaky 预算按测试层、平台和实测基线由质量 RFC 批准，在没有历史数据前不预设百分比。发现不确定性后立即登记 Owner、影响和处置期限；核心语义、安全、ABI、数据完整性与回滚测试不允许以 Flaky 预算放行。其他隔离项必须有替代门禁，且不能被无限重试绕过。
 
 ## 关闭条件
 

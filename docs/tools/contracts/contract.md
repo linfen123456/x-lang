@@ -7,12 +7,14 @@ version: "1.1"
 maturity: CORE
 status: 草案
 phase: P2
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-02-005, XLF-02-013, XLF-02-014, XLF-02-015, XLF-03-007, XLF-10-012, XLF-11-001, XLF-11-013]
 ---
 # 工具链公共接口契约
 
 > 状态：草案｜Owner：`role/tooling-team`
+
+表中的固定资源数字均为 Profile 的 `candidate_default`，遵循 [工具链 Budget 治理](../README.md#安全profile-与完成定义)。它们不是响应时间、容量或 SLA 承诺，P4 前须由 Budget ADR 和跨平台证据决定发布值。
 
 | 接口 | 字段类型 | 前置/后置 | 错误/取消 | 并发/资源 |
 |---|---|---|---|---|

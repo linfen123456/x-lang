@@ -6,8 +6,8 @@ backup_owner: role/security-team
 version: "2.1.0"
 maturity: RESEARCH
 status: 已决策
-phase: P4
-last_reviewed: 2026-08-15
+phase: P6
+last_reviewed: 2026-08-16
 traceability_scope: [LAB, XLF, REVIEW]
 ---
 # Labs 研究 Charter 模板
@@ -38,7 +38,7 @@ traceability_scope: [LAB, XLF, REVIEW]
 
 ## 5. 预算与资源上限
 
-记录 CPU/GPU 小时、存储、网络、费用、最长日历时间和负责审批的人。达到 80% 预算触发复审，达到 100% 自动停止；不得以拆分任务规避预算。
+记录 CPU/GPU 小时、存储、网络、费用、最长日历时间和负责审批的人。Charter 必须指定早期预警点；达到批准预算上限自动停止并重新审批，不得以拆分任务规避预算。预警比例由项目风险和资源回收时间决定，不使用全项目统一百分比。
 
 ## 6. 威胁、安全、伦理与法规
 

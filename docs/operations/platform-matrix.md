@@ -7,14 +7,16 @@ version: "2.0.0"
 maturity: CORE
 status: 已决策
 phase: P3
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [QUALITY, XLF, XLC, XLE]
 ---
 # 平台支持与发布矩阵
 
+本文是目标支持矩阵，不是当前支持声明。文档阶段尚无编译器、安装包、真机测试和发布证据，因此所有平台都只能是候选 Tier；只有具体“平台×架构×工具链版本”记录通过下述门禁后，发布说明才能使用 supported/Stable。目录或交叉编译脚本存在不等于平台已支持。
+
 | Tier | 平台范围 | 支持级别 | 必须证据 |
 |---|---|---|---|
-| Tier 1 | Linux x86_64、Windows x86_64、macOS arm64/x86_64 | Stable/LTS 候选 | 构建、安装、运行、升级、回滚、性能和安全 |
+| Tier 1 目标 | Linux x86_64、Windows x86_64、macOS arm64/x86_64 | Stable/LTS 候选，不代表当前已支持 | 构建、安装、运行、升级、回滚、性能和安全 |
 | Tier 2 | WASM/WASI、Linux arm64、Windows arm64、主流容器 | Beta/Stable 子集 | 互操作、资源限制、浏览器/运行时 E2E、ARM64 真机与安装验证 |
 | Tier 3 | Android/iOS、GPU、BSD、嵌入式/QEMU | Experimental | 能力探测、最小样例、明确缺口和退出条件 |
 | Research | eBPF、ZK、脑机、硬实时认证、未知硬件 | Labs only | Charter、预算、威胁模型、Go/No-Go、退出报告 |
@@ -39,7 +41,7 @@ Linux ARM64 与容器支持需要覆盖基础镜像、libc、证书存储、时�
 
 ## 移动、GPU 与嵌入式
 
-Android/iOS 分别记录 NDK/SDK、最低系统版本、应用生命周期、后台限制、权限、签名、商店政策和 FFI 边界。GPU 目标按 CUDA、ROCm、Metal 等后端独立登记，必须有 CPU 回退或明确拒绝路径。嵌入式目标记录芯片、内核/裸机、链接脚本、内存预算、中断、时钟、原子能力和硬件在环测试。
+Android/iOS 分别记录 NDK/SDK、最低系统版本、应用生命周期、后台限制、权限、签名、商店政策和 FFI 边界。GPU 目标按 CUDA、ROCm、Metal 等后端独立登记，调用者显式选择 `AllowCpu` 回退或 `Deny` 拒绝；不得按运行环境静默回退。嵌入式目标记录芯片、内核/裸机、链接脚本、内存预算、中断、时钟、原子能力和硬件在环测试。
 
 这些目标在进入 Tier 2 以前不得改变 CORE 语言语义，也不得要求核心标准库依赖专有 SDK。
 

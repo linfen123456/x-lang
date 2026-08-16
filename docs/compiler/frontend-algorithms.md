@@ -7,7 +7,7 @@ version: "1.0"
 maturity: CORE
 status: 草案
 phase: P1
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-01-002, XLF-01-006, XLF-01-010, XLF-02-002, XLF-02-004, XLF-02-012, XLF-11-005, XLF-11-013]
 ---
 # 编译器前端算法与任务拆分
@@ -118,7 +118,7 @@ P1 先实现全文件线性 lex。P2 可按“安全重启点”增量扫描：�
 - 局部跳过：消费到当前产生式 FOLLOW 集或声明 FIRST 集，最多 `max_skip_tokens`。
 - 项级同步：在 `}`、声明关键字或 EOF 恢复；生成一个覆盖被跳过 token 的 `ErrorNode`。
 
-去重键为 `(diagnostic_code,primary_span,recovery_context)`。默认单文件错误预算 100、递归深度 256、节点 10,000,000；任一耗尽只追加一次 `X-E-PARSE-LIMIT` 并快速构造剩余错误节点。Parser 每创建 4096 节点或跨函数体边界检查取消。
+去重键为 `(diagnostic_code,primary_span,recovery_context)`。单文件错误预算 100、递归深度 256、节点 10,000,000 以及每 4096 节点检查取消均为 `candidate_default`，遵循 [编译器 Budget 治理](./README.md#资源预算治理)并由 Profile 提供；任一预算耗尽只追加一次 `X-E-PARSE-LIMIT` 并快速构造剩余错误节点。Parser 还必须在跨函数体边界检查取消。
 
 ### 5.4 CST 到 AST
 

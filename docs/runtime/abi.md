@@ -7,7 +7,7 @@ version: "1.1"
 maturity: CORE
 status: 草案
 phase: P2
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-02-011, XLF-10-003, XLF-11-008, XLF-12-014]
 ---
 # XRT ABI 与 FFI 契约
@@ -28,4 +28,4 @@ traceability_scope: [XLF-02-011, XLF-10-003, XLF-11-008, XLF-12-014]
 
 ## 负向、资源和回滚
 
-ABI 黄金测试覆盖错误 size/version、错对齐、空指针与溢出长度、重复 close、跨线程错误句柄、panic 穿越 FFI、不同 endianness/指针宽度和 allocator 不匹配。单次 slice 最大 64 MiB、句柄 100k、回调栈深度 64；超过返回 `XRT_E_LIMIT`。每次 ABI 变更增加 versioned symbol/adapter，保留旧 header 与探针一个稳定周期；回归时依据 feature gate 恢复上一版本，不覆盖旧制品。
+ABI 黄金测试覆盖错误 size/version、错对齐、空指针与溢出长度、重复 close、跨线程错误句柄、panic 穿越 FFI、不同 endianness/指针宽度和 allocator 不匹配。单次 slice 64 MiB、句柄 100k、回调栈深度 64 当前仅为 Profile 的 `candidate_default` 防御预算，遵循 [运行时 Budget 治理](./README.md#资源预算治理)，不属于 ABI 容量承诺；超过采用值返回 `XRT_E_LIMIT`。每次 ABI 变更增加 versioned symbol/adapter，旧 header 与探针的保留期限由兼容政策决定；回归时依据 feature gate 恢复上一版本，不覆盖旧制品。

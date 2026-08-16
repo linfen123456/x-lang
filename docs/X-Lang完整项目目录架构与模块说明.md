@@ -319,7 +319,7 @@ x-lang/
 ├─ fuzz/                            # fuzz targets、corpora、dictionaries
 ├─ benchmarks/                      # compiler/runtime/std/ecosystem 基准
 ├─ examples/                        # 版本化示例和端到端样板
-├─ templates/                       # `x new` 项目模板
+├─ templates/                       # `x init` 项目模板；`x new` 为兼容别名
 ├─ sdk/                             # 跨语言 SDK；各自独立版本和平台矩阵
 │  ├─ x-ffi-c/                      # C 数据模型、ABI 探针和导出运行时
 │  ├─ x-python/                     # CPython/GIL/Buffer/async 桥

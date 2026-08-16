@@ -4,11 +4,11 @@ title: X-Lang 外部函数与语言互操作规范
 authority: normative
 owner: role/interoperability
 backup_owner: role/security-team
-version: "0.2.0"
+version: "0.2"
 maturity: EXTENDED
 status: 草案
 phase: P3
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 applies_to: [extern-c, x-bindgen, c-shim, python, jni, js-wasm, plugins]
 traceability_scope: [XLF, XLC, XLE, SECURITY]
 supersedes: [DOC-FFI-INTEROP-LEGACY]
@@ -42,7 +42,7 @@ supersedes: [DOC-FFI-INTEROP-LEGACY]
 
 **边界。** packed、union、bitfield、long double 和 C++ bool 的布局需平台 probe；不匹配必须拒绝生成头文件。
 
-**诊断/测试/追溯。** X-E7001；TEST-FFI-C-001..006；来源 XLF-11-005、XLC-FFI-001..003；RFC-FFI-C-01（C ABI 子集，P3）。
+**诊断/测试/追溯。** X-E7001；TEST-FFI-C-001..006；来源 XLF-02-011、XLF-11-008、XLC-FFI-001、XLC-FFI-002、XLC-FFI-003、XLC-FFI-012；RFC-FFI-C-01（C ABI 子集，P3）。
 
 ### RULE-FFI-002：资源生命周期与 allocator
 
@@ -60,7 +60,7 @@ supersedes: [DOC-FFI-INTEROP-LEGACY]
 
 **边界。** 进程崩溃可能遗留 OS 资源；API 应提供幂等 destroy 或文档化一次性 close。共享内存/DMABUF 需安全标签。
 
-**诊断/测试/追溯。** X-E7002；TEST-FFI-LIFE-001..005；来源 XLF-05-003、XLF-10-008、XLC-FFI-004；RFC-FFI-OWN-01（P3）。
+**诊断/测试/追溯。** X-E7002；TEST-FFI-LIFE-001..005；来源 XLF-02-011、XLF-10-015、XLC-FFI-005、XLC-FFI-012；RFC-FFI-OWN-01（P3）。
 
 ### RULE-FFI-003：错误、panic、取消和回调
 
@@ -78,7 +78,7 @@ supersedes: [DOC-FFI-INTEROP-LEGACY]
 
 **边界。** 信号处理器只能调用 async-signal-safe shim；JNI/JS 回调可能只能排队到宿主线程。
 
-**诊断/测试/追溯。** X-E7003；TEST-FFI-ERR-001..005；来源 XLF-10-001、XLF-11-004、XLC-FFI-005、XLE-OPS-001；RFC-FFI-ERR-01（P3）。
+**诊断/测试/追溯。** X-E7003；TEST-FFI-ERR-001..005；来源 XLF-10-003、XLF-10-015、XLF-12-014、XLC-FFI-004、XLC-FFI-008、XLC-FFI-009、XLC-FFI-010、XLC-FFI-012；RFC-FFI-ERR-01（P3）。
 
 **回调状态机。** 异步 callback 必须可观测地经过 `Created → Registered → Invoked* → CancelRequested → Completed|Cancelled|Destroyed`。`destroy` 必须与 callback 注册同一 owner 域；并发 destroy 要么等待 in-flight callback 完成，要么原子地标记取消并保证 callback 不再访问 user_data，禁止 use-after-free。重复 cancel/destroy 必须幂等并返回已完成状态。
 
@@ -129,4 +129,4 @@ WASM 模块必须声明 imports/exports、线性内存、memory growth、alignme
 | RFC-FFI-JNI-01 | direct buffer 与线程附着 | JDK/Android 真机、GC | P4 |
 | RFC-FFI-JS-01 | WASM Promise/Abort/SourceMap | 浏览器 WPT、内存增长 | P4 |
 
-规则来源为 XLF-01-013、XLF-10-014、XLF-11-009 和 XLC-FFI-*；工程落点为 tools/x-bindgen、sdk、tests/interoperability。失败时回滚绑定版本或切换 shim，不改变核心语言类型。
+规则来源为 XLF-02-011、XLF-10-003、XLF-10-014、XLF-10-015、XLF-11-008、XLF-11-009、XLF-12-014 和对标大纲中的 XLC-FFI 系列；工程落点为 tools/x-bindgen、sdk、tests/interoperability。失败时回滚绑定版本或切换 shim，不改变核心语言类型。

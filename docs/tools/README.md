@@ -7,7 +7,7 @@ version: "1.1"
 maturity: CORE
 status: 草案
 phase: P2
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-02-005, XLF-02-007, XLF-02-013, XLF-02-014, XLF-02-015, XLF-03-005, XLF-10-012, XLF-11-001, XLF-11-003, XLF-11-004, XLF-11-013]
 ---
 # X-Lang 工具链工程实施规范
@@ -26,7 +26,7 @@ traceability_scope: [XLF-02-005, XLF-02-007, XLF-02-013, XLF-02-014, XLF-02-015,
 
 ## 安全、Profile 与完成定义
 
-`offline` 禁止网络；`ci` 固定工具链/locale/时区和随机种子；`repro` 禁止隐式环境；`interactive` 可询问但 stdin EOF 必须安全失败。工具使用共享 `ProfileSpec`，优先级为 `CLI > x.toml profile > TargetSpec defaults > toolchain defaults`。默认单输入 64 MiB、命令 10 min、输出 1 GiB、并发 32、插件 CPU 30 s/内存 256 MiB；Profile 只能收紧，放宽需要审计。所有命令支持 cancel，外部进程用进程组清理。
+`offline` 禁止网络；`ci` 固定工具链/locale/时区和随机种子；`repro` 禁止隐式环境；`interactive` 可询问但 stdin EOF 必须安全失败。工具使用共享 `ProfileSpec`，优先级为 `CLI > x.toml profile > TargetSpec defaults > toolchain defaults`。文档中的单输入 64 MiB、命令 10 min、输出 1 GiB、并发 32、插件 CPU 30 s/内存 256 MiB 仅为 `candidate_default` 防御预算，不是容量或响应时间承诺；P4 前须以真实项目、恶意输入和跨平台 P50/P95/P99/峰值证据形成 Budget ADR。实现从 Profile 读取而非硬编码；收紧可安全失败，放宽需要资源/安全审计。所有命令支持 cancel，外部进程用进程组清理。
 
 完成定义：命令 help、text/json、非 TTY、坏配置、网络中断、锁冲突、取消和权限测试；x.lock 可重现；LSP/DAP 版本协商；fmt 幂等；doc/test/repl 有可执行样例；插件越权被终止；失败保留最小复现和制品。回滚通过旧 CLI/schema/lockfile、禁用实验 plugin gate 和离线缓存完成。
 

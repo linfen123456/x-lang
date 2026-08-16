@@ -4,11 +4,11 @@ title: X-Lang 所有权、内存与并发规范
 authority: normative
 owner: role/runtime-team
 backup_owner: role/compiler-team
-version: "0.2.0"
+version: "0.2"
 maturity: CORE
 status: 草案
 phase: P0
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 applies_to: [borrow-checker, mir, xrt, core-sync, async-runtime]
 traceability_scope: [XLF, XLC]
 supersedes: [DOC-SPECS-MEMORY-CONCURRENCY-LEGACY]
@@ -106,7 +106,7 @@ supersedes: [DOC-SPECS-MEMORY-CONCURRENCY-LEGACY]
 
 **规范性条文。** 读取未初始化值、越界、解除无效/未对齐指针、整数任意转可解引用指针、访问已结束 lifetime 的对象均禁止。安全代码不能观察普通类型 padding/字段偏移。只有 repr(C)/明确布局属性形成稳定 FFI 布局；raw pointer、volatile、MMIO、自定义分配器必须在 unsafe 中并满足前置条件。
 
-**解释。** 该条文建立保守 provenance 边界，避免把 LLVM UB 直接暴露给用户。unsafe 是调用者证明义务，不是关闭全部检查的开关。
+**解释。** 该条文建立保守 provenance 边界，避免把 LLVM UB 直接暴露给用户。unsafe 是调用者证明义务，不是关闭全部检查的开关。有效值、对象生命周期、整数地址往返和 UB 分类的决策门见[求值与 UB 规范](./evaluation-and-ub.md)。
 
 **正例。** unsafe 中使用 read_unaligned，且 API 前置条件证明指针指向已初始化对象。
 
@@ -114,7 +114,7 @@ supersedes: [DOC-SPECS-MEMORY-CONCURRENCY-LEGACY]
 
 **边界。** 具体布局、空指针 niche、packed 引用、地址空间和 PMEM/GPU 一致性待 RFC-ABI-01；sanitizer 不是规范保证。
 
-**诊断/测试/追溯。** X-E4101、X-R4102；TEST-MEM-UB-001..006；来源 XLF-05-003、XLF-06-006、XLC-CORE-010..013；RFC-ABI-01（P2，MIR interpreter/跨后端/布局探针）。
+**诊断/测试/追溯。** X-E4101、X-R4102；TEST-MEM-UB-001..006；来源 XLF-05-006、XLF-06-009、XLC-CORE-012、XLC-CORE-013；RFC-ABI-01、RFC-PROVENANCE-01（P2，MIR interpreter/跨后端/布局探针）。
 
 ### RULE-MEM-006：分配失败、容量和资源
 

@@ -7,7 +7,7 @@ version: "1.1"
 maturity: CORE
 status: 草案
 phase: P2
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-01-001, XLF-01-002, XLF-02-001, XLF-02-002, XLF-02-004, XLF-02-009, XLF-02-012, XLF-02-014, XLF-10-001, XLF-10-002, XLF-11-013]
 ---
 # X-Lang 编译器工程实施规范
@@ -30,15 +30,17 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-02-001, XLF-02-002, XLF-02-004,
 
 ## 公共 Profile（唯一 schema 与优先级）
 
-所有编译器、XRT 和工具共享 `ProfileSpec{name:ProfileId,base:ProfileId?,optimization:OptimizationLevel,limits:ResourceLimits,capabilities:BTreeSet<Capability>,network:NetworkPolicy,determinism:Determinism,diagnostics:DiagnosticPolicy}`。`ResourceLimits` 字段为 `max_source_bytes:u64`、`max_ir_nodes:u64`、`max_cpu_ms:u64`、`max_memory_bytes:u64`、`max_parallelism:u16`、`cancel_grace_ms:u64`。优先级固定为 `CLI 显式值 > x.toml [profile.<name>] > TargetSpec 默认 > 工具链默认`；环境变量只能作为 `DeclaredInputs` 显式加入，不能覆盖 Profile。`dev` 默认诊断完整、`O0`、IR 可倾印；`release` 使用显式 `O2`；`ci` 固定随机种子、禁止网络；`conformance` 禁止未决 feature；`cross` 使用显式 sysroot。未知 Profile/字段拒绝；提高上限需审计，降低上限必须报告。
+所有编译器、XRT 和工具共享 `ProfileSpec{name:ProfileId,base:ProfileId?,optimization:OptimizationLevel,limits:ResourceLimits,capabilities:BTreeSet<Capability>,network:NetworkPolicy,determinism:Determinism,diagnostics:DiagnosticPolicy}`。`ResourceLimits` 字段为 `max_source_bytes:u64`、`max_ir_nodes:u64`、`max_cpu_ms:u64`、`max_memory_bytes:u64`、`max_parallelism:u16`、`cancel_grace_ms:u64`。优先级固定为 `CLI 显式值 > x.toml [profile.<name>] > TargetSpec 默认 > 工具链默认`；环境变量只能作为 `DeclaredInputs` 显式加入，不能覆盖 Profile。`dev` 默认诊断完整、`O0`、IR 可倾印；`release` 使用显式 `O2`；`ci` 固定随机种子、禁止网络；`conformance` 禁止未决 feature；`cross` 使用显式 sysroot。未知 Profile/字段拒绝。
+
+本目录出现的 16 MiB、10M 节点、30 秒、256 MiB 等数字全部是 `candidate_default` 候选防御预算，用于防止失控输入，不是性能、容量或稳定 ABI 承诺。进入 P4 前必须由固定语料的峰值/P50/P95/P99、恶意输入和跨目标测试形成 Budget ADR，记录采用值、上下限与修改原因。实现从 Profile 读取而非硬编码；收紧必须明确失败，放宽必须审计并写入制品报告。
 
 ## 阶段和完成定义
 
 | 阶段 | 输入→输出 | 必须验证 | 失败与回滚 |
 |---|---|---|---|
 | Source/Lex/Parse | 文件→Token/AST | 编码、Span、AST 结构 | 保留旧 AST，返回诊断 |
-| Semantic | AST→Def/Type/Trait/Borrow | 名称、类型、能力和借用 | 不写入增量缓存 |
-| Lowering | AST→HIR→MIR | CFG、Place、Drop、类型 | 回退上一 schema |
+| Semantic | AST→Def/Type/Trait→TypedHirModule | 名称、类型、Trait 和 Feature | 不写入增量缓存 |
+| Lowering/Verify | TypedHirModule→VerifiedHirBody→MIR→VerifiedMir | HIR、CFG、Place、Borrow、Drop、类型 | 回退上一 schema |
 | Optimize | MIR→MIR | Pass 前后 verifier 与差分 | 关闭单 Pass，回到 O0 |
 | Backend | MIR+TargetSpec→Object | 目标、ABI、汇编和链接 | 切换已验证后端或失败 |
 | Driver | 工件→ArtifactManifest | 原子输出、签名和重现 | 删除临时目录，保留日志 |
@@ -59,7 +61,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-02-001, XLF-02-002, XLF-02-004,
 
 ## 统一负向验收集
 
-至少覆盖非法 UTF-8、未闭合 token、深嵌套、恢复后重复错误、重复定义、歧义 trait、递归类型、借用冲突、未知工件 schema、错误 fingerprint、查询循环、缓存污染、Pass 误变换、未知 target、链接器失败、磁盘满、并发取消和诊断输出超限。规划中的案例使用明确注册项 `TEST-COMPILER-NEG-001` 至 `TEST-COMPILER-NEG-003`，状态为 `planned`，不得在测试实现前声称已有证据。
+至少覆盖非法 UTF-8、未闭合 token、深嵌套、恢复后重复错误、重复定义、歧义 trait、递归类型、借用冲突、未知工件 schema、错误 fingerprint、查询循环、缓存污染、Pass 误变换、未知 target、链接器失败、磁盘满、并发取消和诊断输出超限。案例归入 task-dag 已登记的 `TEST-COMPILER-FRONT-*`、`TEST-COMPILER-SEM-*`、`TEST-COMPILER-IR-*`、`TEST-COMPILER-QUERY-001` 和 `TEST-COMPILER-CODEGEN-001`，状态均为 `planned`。
 
 ## 版本与回滚
 

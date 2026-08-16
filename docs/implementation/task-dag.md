@@ -3,16 +3,18 @@ doc_id: DOC-IMPLEMENTATION-TASK-DAG
 authority: implementation
 owner: role/architecture
 backup_owner: role/program-management
-version: "1.2"
+version: "1.3"
 maturity: CORE
 status: 草案
 phase: P0
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009, XLF-02-001, XLF-02-002, XLF-02-003, XLF-02-004, XLF-02-009, XLF-02-011, XLF-02-013, XLF-02-014, XLF-02-015, XLF-05-001, XLF-05-002, XLF-05-005, XLF-05-008, XLF-09-006, XLF-10-001, XLF-10-002, XLF-10-003, XLF-10-012, XLF-11-001, XLF-11-004, XLF-11-013, XLF-12-016, XLF-12-020]
 ---
 # X-Lang P0–P6 实施任务 DAG
 
 本 DAG 采用 Markdown 任务卡，字段名与治理模板一致。所有测试、报告、基准和审计目前均为 `planned`，这里只定义注册项和证据类型，不声称已经存在实现证据。阶段主链为 `P0 规范与探针 → P1 前端/IR/Backend/Linker/CLI 闭环 → P2 语义/运行时/增量 → P3 LSP/DAP/XPM/沙箱 → P4 冻结/安全/性能 → P5 扩展 → P6 研究`。
+
+任务卡中的时间、内存、并发、节点和制品大小均为 `candidate_default` 实施预算，用于拆工和防止无界执行，不是正式性能/SLA/平台容量承诺。P0–P3 可由 Profile 配置；进入 P4 必须用固定环境基准、峰值、恶意输入和 P50/P95/P99 证据形成 Budget ADR 后才可冻结。预算调整必须保留旧 Profile、理由和回滚记录。
 
 ## P0：基线
 
@@ -50,7 +52,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `inputs`: `docs/specs/language-core.md`, `docs/specs/memory-concurrency.md`
 - `outputs`: planned `compiler/x-syntax/README.md`, planned `compiler/x-hir/README.md`, planned `compiler/x-mir/README.md`
 - `api_or_artifacts`: `TypedAst`, `TypedHirModule{HirBody[]}`, `VerifiedHirModule{VerifiedHirBody[]}`, `MirBody`, `VerifierReport`
-- `test_ids`: `TEST-COMPILER-SCHEMA-001`, `TEST-COMPILER-SCHEMA-002`（planned registry）
+- `test_ids`: `TEST-COMPILER-SCHEMA-001`, `TEST-COMPILER-SCHEMA-002`, `TEST-COMPILER-ARCH-001`, `TEST-COMPILER-ARCH-002`, `TEST-COMPILER-ARCH-003`, `TEST-COMPILER-ARCH-004`, `TEST-COMPILER-CONTRACT-001`, `TEST-COMPILER-CONTRACT-002`, `TEST-COMPILER-CONTRACT-003`, `TEST-COMPILER-CONTRACT-004`（planned registry）
 - `performance_budget`: schema round-trip 1 分钟、单工件 2 GiB
 - `security_budget`: 拒绝截断、未知主版本和越界 Span
 - `acceptance`: 规定 `Resolver/Type/Trait → TypedHirModule → VerifiedHirBody → MIR → Borrow`；HIR 节点数约束明确；每个 MIR block 有 terminator
@@ -115,7 +117,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `inputs`: planned VerifiedHirBody、Drop/unwind policy、Target-independent types
 - `outputs`: planned MIR、BorrowReport、VerifierReport
 - `api_or_artifacts`: `MirBuilder`, `BorrowChecker`, `MirVerifier`
-- `test_ids`: `TEST-COMPILER-IR-001`, `TEST-COMPILER-IR-002`, `TEST-COMPILER-BORROW-001`（planned registry）
+- `test_ids`: `TEST-COMPILER-IR-001`, `TEST-COMPILER-IR-002`, `TEST-COMPILER-IR-003`, `TEST-COMPILER-BORROW-001`（planned registry）
 - `performance_budget`: 单函数 10M 节点、30 秒、256 MiB
 - `security_budget`: move/loan/Drop 不变量；raw pointer 不进入 safe MIR
 - `acceptance`: MIR 后才开始 Borrow；每个 block 一个 terminator；Drop 恰好一次；节点计数等于结构遍历计数
@@ -157,7 +159,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `inputs`: planned `x.toml` with `package.entry`、source、TargetSpec、ProfileSpec
 - `outputs`: planned CommandResult、executable、manifest、退出码报告
 - `api_or_artifacts`: `CommandRequest`, `CommandResult`, `x.toml`, `ArtifactManifest`
-- `test_ids`: `TEST-TOOLS-CLI-001`, `TEST-TOOLS-CLI-002`, `TEST-TOOLS-CLI-003`（planned registry）
+- `test_ids`: `TEST-TOOLS-CLI-001`, `TEST-TOOLS-CLI-002`, `TEST-TOOLS-CLI-003`, `TEST-TOOLS-CONTRACT-001`, `TEST-TOOLS-CONTRACT-002`, `TEST-TOOLS-CONTRACT-003`, `TEST-TOOLS-CONTRACT-004`, `TEST-TOOLS-CONTRACT-005`（planned registry）
 - `performance_budget`: 命令 10 分钟、JSON 1 GiB、子进程 64
 - `security_budget`: entry 必须 workspace-relative；stdout/stderr 分离；无秘密回显
 - `acceptance`: `x.toml` entry 合法性明确；compiler/tool JSON 结构一致；冷编译可生成并运行 Hello World
@@ -176,7 +178,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `project_id`: `PROJ-COMPILER-CORE`; `project_path`: `compiler/`; `dependencies`: `TASK-P1-COMP-003`
 - `inputs`: planned MIR、schema/pass/pipeline fingerprints; `outputs`: planned cache index、PassReport
 - `api_or_artifacts`: `QueryKey`, `QueryState`, `CacheEntry`, `PassReport`
-- `test_ids`: `TEST-COMPILER-QUERY-001`, `TEST-COMPILER-OPT-001`（planned registry）
+- `test_ids`: `TEST-COMPILER-QUERY-001`, `TEST-COMPILER-OPT-001`, `TEST-COMPILER-OPT-002`, `TEST-COMPILER-OPT-003`（planned registry）
 - `performance_budget`: cache 10 GiB、Pass 单次 30 秒/256 MiB、并发由 Profile 决定
 - `security_budget`: content hash、schema/pass/pipeline fingerprint；坏缓存隔离
 - `acceptance`: Query 状态 `Vacant→Running→Ready|Poisoned`；key 含 schema/pass/pipeline；取消 waiter 不毒化 owner
@@ -192,7 +194,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `project_id`: `PROJ-RUNTIME-XRT`; `project_path`: `runtime/xrt/`; `dependencies`: `TASK-P0-COMP-001`, `TASK-P1-COMP-004`；canonical `RFC-ASYNC-001` 当前为 `待决策`，async 子范围只有在其达到 `已决策` 后才可启动
 - `inputs`: planned JoinHandle/IoOp/Quota/Cancel; `outputs`: planned runtime state-machine report
 - `api_or_artifacts`: `JoinHandle`, `TaskState`, `IoState`, `ShutdownState`, `QuotaLease`
-- `test_ids`: `TEST-RUNTIME-CONC-001`, `TEST-RUNTIME-IO-001`, `TEST-RUNTIME-SHUTDOWN-001`, `TEST-RUNTIME-PAL-003`（planned registry）
+- `test_ids`: `TEST-RUNTIME-ALLOC-001`, `TEST-RUNTIME-ALLOC-002`, `TEST-RUNTIME-ALLOC-003`, `TEST-RUNTIME-PANIC-001`, `TEST-RUNTIME-PANIC-002`, `TEST-RUNTIME-PANIC-003`, `TEST-RUNTIME-CONC-001`, `TEST-RUNTIME-CONC-002`, `TEST-RUNTIME-CONC-003`, `TEST-RUNTIME-IO-001`, `TEST-RUNTIME-IO-002`, `TEST-RUNTIME-IO-003`, `TEST-RUNTIME-OBS-001`, `TEST-RUNTIME-OBS-002`, `TEST-RUNTIME-OBS-003`, `TEST-RUNTIME-CONTRACT-001`, `TEST-RUNTIME-CONTRACT-002`, `TEST-RUNTIME-CONTRACT-003`, `TEST-RUNTIME-SHUTDOWN-001`, `TEST-RUNTIME-PAL-003`（planned registry）
 - `performance_budget`: 任务 1M、并发 I/O 100k、单 I/O 64 MiB、取消宽限 1 秒
 - `security_budget`: C ABI 仅固定布局 XrtStatus；句柄 generation 防重用
 - `acceptance`: RFC 未通过时只实现同步 I/O、配额和 shutdown，async gate 保持关闭；RFC 通过后才实现 Future/Task/Waker 子范围；Task/I/O/shutdown 状态机无重复完成；quota cancel 阻止新 acquire；C ABI 仅 XrtStatus
@@ -208,7 +210,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `project_id`: `PROJ-TOOLS-XPM`; `project_path`: `tools/xpm/`; `dependencies`: `TASK-P1-TOOLS-001`
 - `inputs`: planned x.toml、旧 lock、registry snapshot、target/features；`outputs`: planned resolution、x.lock、下载/签名报告
 - `api_or_artifacts`: `Resolution`, `Lockfile`, `RegistrySnapshot`, `PackageSignature`
-- `test_ids`: `TEST-TOOLS-XPM-001`, `TEST-TOOLS-XPM-002`, `TEST-TOOLS-XPM-OFFLINE-001`（planned）
+- `test_ids`: `TEST-TOOLS-XPM-001`, `TEST-TOOLS-XPM-002`, `TEST-TOOLS-XPM-003`, `TEST-TOOLS-XPM-OFFLINE-001`（planned registry）
 - `performance_budget`: 包 512 MiB、下载并发 10、求解 60 秒；`security_budget`: hash/signature/SBOM、路径与解包上限、构建脚本默认禁用
 - `acceptance`: 相同输入产生唯一 lock；offline 不联网；签名/哈希错误不写缓存；冲突给出最小解释
 - `evidence`: planned resolution fixtures、planned offline transcript；`rollback`: 恢复旧 lock/registry snapshot 并冷解析
@@ -238,7 +240,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `project_id`: `PROJ-TOOLS-XFMT`; `project_path`: `tools/xfmt/`; `dependencies`: `TASK-P1-TOOLS-001`, `TASK-P2-COMP-001`
 - `inputs`: planned AST/HIR、FormatConfig、DocIndex、TestPlan；`outputs`: planned patches、文档、TestReport
 - `api_or_artifacts`: `FormatResult`, `DocIndex`, `TestPlan`, `TestReport`
-- `test_ids`: `TEST-TOOLS-FMT-001`, `TEST-TOOLS-DOC-001`, `TEST-TOOLS-RUNNER-001`（planned）
+- `test_ids`: `TEST-TOOLS-FMT-001`, `TEST-TOOLS-DOC-001`, `TEST-TOOLS-RUNNER-001`, `TEST-TOOLS-RUNNER-002`, `TEST-TOOLS-RUNNER-003`（planned）
 - `performance_budget`: 单文件 16 MiB、单 test 5 分钟、输出 64 MiB；`security_budget`: doc-test 隔离、子进程树清理、无隐式网络
 - `acceptance`: formatter 幂等且保持语义；doc-test 失败阻止发布；测试 retry 不掩盖首次失败；退出码遵守统一矩阵
 - `evidence`: planned round-trip corpus、planned report fixtures；`rollback`: 固定旧 format_version/test schema
@@ -280,7 +282,7 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `title`: 扩展目标与生态适配
 - `owner`: `role/compiler-team`; `backup_owner`: `role/runtime-team`; `status`: 草案; `phase`: P5; `milestone`: M5
 - `last_reviewed`: 2026-08-15
-- `source_ids`: `XLF-01-005`, `XLF-02-011`, `XLF-05-009`; `spec_or_rfc`: `RULE-TARGET-EXT-001`
+- `source_ids`: `XLF-01-005`, `XLF-02-011`, `XLF-05-009`; `spec_or_rfc`: `DOC-COMPILER-CODEGEN`, `DOC-OPERATIONS-PLATFORM-MATRIX`（目标专用规则/RFC 尚待建立，不引用虚构 Rule ID）
 - `project_id`: `PROJ-COMPILER-WASM`; `project_path`: `backends/x-codegen-wasm/`; `dependencies`: `TASK-P4-REL-001`
 - `inputs`: planned target capability、ABI adapter; `outputs`: planned wasm/native extension artifacts
 - `api_or_artifacts`: `TargetAdapter`, `ExtensionArtifactManifest`
@@ -307,11 +309,26 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-01-003, XLF-01-006, XLF-01-009,
 - `evidence`: planned charter、planned benchmark、planned exit report; `rollback`: 归档并移除 gate
 - `non_goals`: 不生成稳定实现或生产制品; `estimate`: 80h
 
+## 需求到任务的闭合状态与补齐方法
+
+本 DAG 当前采用**任务包级映射**，不是 318 个 `XLF/XLC/XLE` 的逐 ID 闭环表。2026-08-16 主审基线显示：318 个权威定义中，本文件只精确引用约 40 个；另有约 120 个 ID 除三份权威矩阵外没有被其他专题精确引用。该数字会随本轮其他域文档合并变化，因此每次发布候选必须重新计数，但当前验收状态明确为：**未完成，不得声称 318 项已追踪到任务、测试和版本。**
+
+逐 ID 闭合不通过复制 318 行空模板完成，而按以下顺序处理：
+
+1. 从三份权威矩阵取得唯一 ID、原始来源、成熟度和处置，不在 task-dag 重新定义需求文字。
+2. 为每个 ID 指定一个 primary task；同一能力可有 secondary task，但不能没有 primary owner。纯治理/研究项分别归治理或 P6 task，不强塞进编译器主线。
+3. primary task 必须指向实际存在的规范/RFC/专题、项目责任域、至少一个 `planned` 测试 ID 和目标阶段；不存在时登记为 gap，禁止填写虚构路径。
+4. 对 `RETURN/SPLIT` 项把稳定价值和实验机制拆到不同 task；`CONDITIONAL/RESEARCH` 写明 Go/No-Go 门与禁止反向依赖 CORE。
+5. 双向复核：每个权威 ID 恰有 primary task；每个 task 的 source ID 在权威矩阵存在；重复/孤儿/仅范围表达均列入缺口。
+6. TASK-P0-GOV-001 的 planned `TraceabilityReport` 负责输出“已闭合、缺规范、缺任务、缺测试、缺阶段、研究隔离”六类清单；报告真实生成并人工复核前，P4 冻结门不得通过。
+
+当前任务关系只保证 P0–P4 工程主链可拆分，不代表下列大域已经逐项闭合：标准库长尾、Web/CSS/GUI/移动、小程序、AI/Tensor/GPU、数据/媒体、云原生、Agent 与 P6 研究。它们应由各自专题的 primary task 回链本 DAG 或后续经治理批准新增任务卡，不能用 `TASK-P5-EXT-001`/`TASK-P6-RES-001` 两张总卡假装全部完成。
+
 ## 阶段门禁
 
-- P0：规范、真实追溯和前置/后置不变量齐全。
+- P0：核心规范、任务包级真实追溯和前置/后置不变量齐全；318 项逐 ID 闭合仍为未完成，记录为治理缺口。
 - P1：Source→TypedHirModule→VerifiedHirBody→MIR→Borrow→Backend→Linker→CLI 的 Hello World 闭环可规划验收，所有测试仍标记 planned。
 - P2：Query/Task/I/O/cache/profile 状态机和资源取消契约完成。
 - P3：工具协议和沙箱完成兼容/安全规划。
-- P4：只有获得实际测试、性能、安全和制品证据后才允许升级成熟度。
+- P4：只有获得实际测试、性能、安全、制品证据和逐 ID TraceabilityReport 后才允许升级成熟度；当前不得通过。
 - P5/P6：扩展或研究失败只能局部回滚，不得影响 CORE。

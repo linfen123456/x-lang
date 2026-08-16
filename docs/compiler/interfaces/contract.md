@@ -7,7 +7,7 @@ version: "1.1"
 maturity: CORE
 status: 草案
 phase: P2
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-01-001, XLF-01-002, XLF-02-002, XLF-02-004, XLF-02-011, XLF-02-014, XLF-11-013]
 ---
 # 编译器公共接口契约
@@ -15,6 +15,8 @@ traceability_scope: [XLF-01-001, XLF-01-002, XLF-02-002, XLF-02-004, XLF-02-011,
 > 状态：草案｜Owner：`role/compiler-team`
 
 本文件是 Driver、LSP、DAP 和后端的接口基线。字段类型使用 Rust 风格记法只是规范表示；实现必须提供等价的稳定 ABI/JSON Schema。
+
+表中的固定资源数字均为 `candidate_default`，遵循 [编译器 Budget 治理](../README.md#资源预算治理)。它们由 Profile 提供，不是 ABI、容量或性能承诺；P4 前须以 Budget ADR 决定发布值。
 
 ## 接口表
 

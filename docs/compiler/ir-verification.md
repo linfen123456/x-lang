@@ -7,7 +7,7 @@ version: "1.0"
 maturity: CORE
 status: 草案
 phase: P1
-last_reviewed: 2026-08-15
+last_reviewed: 2026-08-16
 traceability_scope: [XLF-01-003, XLF-01-006, XLF-02-002, XLF-02-004, XLF-10-002, XLF-10-003, XLF-12-014, XLF-12-020]
 ---
 # HIR/MIR 验证器、Borrow 数据流与 Pass 证明义务
@@ -211,7 +211,7 @@ MIR interpreter 是验证工具，不是生产语言的第二语义源。它支�
 
 `VerifyReport` 最少包含 `status,ir_hash,schema,invariant_set,violations,checked_nodes,max_worklist,cancelled,resource_usage`。违规路径限制为最短反例 block 序列，最多 64 个节点；更多内容以截断标志表示。
 
-默认上限沿用架构 Profile：单函数 10M 节点、projection 深度 256、Verifier 30 秒/256 MiB（CI 可更严）。每个 block、工作队列批次和关系迭代检查取消。取消或超限不缓存 `VerifiedMir`；原始输入保留供诊断。
+候选上限沿用架构 Profile：单函数 10M 节点、projection 深度 256、Verifier 30 秒/256 MiB（CI 可更严）。这些是 `candidate_default` 防御预算，遵循 [编译器 Budget 治理](./README.md#资源预算治理)，不是容量或性能承诺。每个 block、工作队列批次和关系迭代检查取消。取消或超限不缓存 `VerifiedMir`；原始输入保留供诊断。
 
 ## 13. 实施任务切片
 
