@@ -199,23 +199,9 @@ docs/
 └─ traceability/
 ```
 
-### 5.1 已落地专题文档入口
+### 5.1 专题文档生成状态
 
-上面的目录是长期责任域蓝图；当前已落地的专题文件按责任域直接挂载在 `docs/` 下，并由以下索引维护：
-
-| 责任域 | 专题入口 | 覆盖范围 |
-|---|---|---|
-| 文档治理 | [governance](./governance/README.md) | 元数据、状态机、ID、任务模板、项目注册、追溯规则 |
-| 语言规范 | [specs](./specs/README.md) | 核心规则、内存/并发、符合性 |
-| 标准库 | [stdlib](./stdlib/README.md) | Core/Alloc API、错误、线程安全和平台等级 |
-| 互操作/Web/样式 | [ffi](./ffi/README.md)、[web](./web/README.md)、[style](./style/README.md) | C/C++/Python/JNI/JS、浏览器、SSR、CSS、A11y |
-| 编译器 | [compiler](./compiler/README.md) | 前端、HIR/MIR、优化、后端、Driver、查询和接口 |
-| 运行时 | [runtime](./runtime/README.md) | ABI、分配、Panic、并发、I/O、PAL、观测 |
-| 工具链 | [tools](./tools/README.md) | CLI、XPM、LSP/DAP、格式化、文档、测试、沙箱 |
-| 测试/CI/运维 | [testing](./testing/README.md)、[ci](./ci/README.md)、[operations](./operations/README.md) | 测试策略、G0-G6 门禁、平台、发布、SLO、回滚 |
-| AI/Labs | [ai](./ai/README.md)、[labs](../labs/README.md) | Agent 审计、评测、租约、研究 Charter 和退出条件 |
-
-专题文档是正式补写承载层；主文档继续维护目录、边界和全局验收，不复制专题明细。
+专题正文已按项目整理要求移除，当前仓库只保留 8 份目录大纲和 `docs/原始文档/1.txt` 至 `12.txt`。上面的目录仍作为后续正式文档的责任域蓝图；重新展开时必须以本总纲、七份专项大纲和原始需求为输入，按需创建专题，不预建空文件，也不恢复已经删除的重复内容。
 
 ## 6. 每份正式章节的统一内容模板
 
