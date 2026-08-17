@@ -78,7 +78,7 @@
 | 2.6 | 诊断与源码映射 | `CORE/草案` | Span、SourceMap、宏/脱糖来源链、诊断代码、Fix-it 和多格式输出。来源：2、11。 | 文本/JSON 诊断快照稳定且定位准确。 |
 | 2.7 | 插件与扩展点 | `EXTENDED/待决策` | 编译器插件、Lint、后端、构建插件的进程隔离与版本契约。来源：10。 | 默认禁用不可信插件；API 版本不匹配可诊断。 |
 | 2.8 | 非功能预算 | `CORE/草案` | 编译时间、峰值内存、二进制体积、运行时开销、安全和可复现性预算。 | 每项预算有基准、阈值和回归所有者。 |
-| 2.9 | 模块化单体起步 | `CORE/草案` | P0/P1 先以 6～10 个可构建成员承载 Source/Syntax/Semantic/HIR/MIR 等内部模块，按真实消费者、安全边界和独立发布需求再拆 crate。 | 不创建空壳项目；拆分 ADR 提供依赖图、编译收益和所有者。 |
+| 2.9 | 模块化单体起步 | `CORE/草案` | P0/P1 只建立 compiler、runtime、cli、library-core、conformance 等 4～6 个成员；Source/Syntax/Semantic/HIR/MIR 是 compiler 内部模块，按真实消费者、安全边界和测量收益再拆 crate。 | 不创建空壳项目；拆分 ADR 提供契约、无环依赖图、测试、Owner 和回退。 |
 | 2.10 | 双后端验证路线 | `EXTENDED/待决策` | LLVM 负责优化发布构建；MIR 解释器作为语义参考；快速 Debug 后端只在差分与编译时收益通过后引入。 | 三者对代表性程序进行结果、ABI 和失败语义差分。 |
 
 ## 第三篇 仓库与工程基础设施
@@ -90,7 +90,7 @@
 
 | 编号 | 工作包 | 分级/状态 | 实施内容 | 交付与验收 |
 |---|---|---|---|---|
-| 3.1 | Workspace 与模块原则 | `CORE/草案` | 初期只建立 compiler、LLVM 适配、runtime、core、alloc、std、CLI、conformance/spec-check 等最小成员；source、lexer、parser、resolve、type、borrow、HIR/MIR 先作为边界清晰的内部模块。 | 无循环依赖；稳定公共接口有所有者和文档；拆 crate 必须有真实依据。 |
+| 3.1 | Workspace 与模块原则 | `CORE/草案` | P0/P1 只建立 compiler、runtime、cli、library-core、conformance 等 4～6 个成员；LLVM 是 compiler 内部 adapter，alloc/std 到 P2 再按证据拆分；source/lexer/parser/resolve/type/borrow/HIR/MIR 均为内部模块。`dev/xtask` 不计入 Workspace/default-members。 | 无循环依赖；稳定公共接口有所有者和文档；拆 crate 必须有真实依据。 |
 | 3.2 | 仓库目录 | `CORE/草案` | [完整项目目录架构](./X-Lang完整项目目录架构与模块说明.md)是长期能力地图，不是一次性建仓清单；只创建当前阶段可构建、可测试、有负责人和消费者的项目。 | 不提交空目录/空 crate；未进入当前阶段的生态、AI、ML、Labs 不进入默认 Workspace。 |
 | 3.3 | 开发工具链 | `CORE/草案` | Rust toolchain、LLVM、C/C++ 链接器、CMake/Ninja 可选依赖和平台 SDK。 | 锁定版本；检测脚本给出可操作诊断。 |
 | 3.4 | 构建配置 | `CORE/草案` | Debug/Release/Bootstrap、Feature、Target Triple、交叉编译和符号策略。 | 各 Profile 行为文档化；CI 至少构建主机 Debug/Release。 |
@@ -387,12 +387,14 @@
 | WP-13.1 宏与高级泛型 | `x-macro-model`、`x-macro-expand`、`x-macro-host`、`x-traits` | 1.0 后按独立 RFC；不预建空项目 | 宏、Const Generics、GAT、Trait Object 和 Specialization 逐项探针，不作为核心实现前置 | 每项独立通过规范符合性、展开映射、资源逃逸、求解器/代码体积预算和退出评审。 |
 | WP-13.2 语义执行与快速调试 | `x-mir-interpreter`、`x-codegen-fast`、`xrepl`、`x-kernel` | P1-P3 | MIR 执行、UB 检测、快速 Debug、REPL/Notebook 状态模型 | 与 LLVM 差分；失败恢复；冷/增量基准形成 ADR。 |
 | WP-13.3 生产诊断 | `x-ub-check`、`x-vet`、`x-race`、`x-coverage`、`x-profiler`、`x-instrumentation` | P3-P4 | 静态规则、竞态插桩、覆盖率、CPU/Heap/Task、Sanitizer/PGO 接口 | 已知缺陷语料、SourceMap、开销预算及跨平台能力矩阵。 |
-| WP-13.4 多语言 SDK | `x-ffi-c`、`x-bindgen`、`x-python`、`x-python-pack`、`x-jni`、`x-js`、`x-js-pack` | C 子集 P3-P4；其余 P5 | 对象、布局、所有权、异常、线程、异步和发布协议 | C/CPython/JVM/Node/Browser 版本矩阵与泄漏测试。 |
-| WP-13.5 Web 运行与框架 | `x-web-runtime`、`x-dom`、`x-web-api`、`x-web-worker`、`x-web-ui`、`x-web-framework`、`x-web-ssr` | P5 | Event Loop、DOM/Web API、Worker、组件、Router/Form、SSR/Hydration | WPT 子集、Browser E2E、SSR/CSR 一致性、可访问性与安全测试。 |
-| WP-13.6 Web 工具链 | `x-web-bundler`、`x-web-dev-server`、`x-source-map`、`x-web-cli`、`x-web-security` | P5 | Bundler、Tree Shaking、Code Split、HMR、多级 SourceMap、部署适配 | 可复现构建、断点准确、HMR 回滚和 OWASP 场景。 |
-| WP-13.7 样式与布局 | `x-style-*`、`x-layout*`、`x-a11y` | P5 | Selector/Cascade、值、Flex/Grid、响应式、动画、隔离、SSR 和多后端降级 | WPT/截图黄金、WCAG、CSS/Skia/原生能力矩阵。 |
-| WP-13.8 服务器生产闭环 | `x-web-server`、`x-api-schema`、`x-validation`、`x-resilience`、`x-traffic-control`、`x-server-runtime`、`x-cloud-runtime` | P3-P5 | HTTP/API、韧性、流控、生命周期、配置/秘密、可观测和部署 | Fuzz、故障注入、过载公平、集群滚动/回滚和 OTel 互操作。 |
+| WP-13.4 多语言 SDK | Core 的 `x-bindgen` + `x-sdk::{c,python,jvm,node}` | C 子集 P3-P4；其余 P5 联邦仓库 | 对象、布局、所有权、异常、线程、异步和发布协议 | C/CPython/JVM/Node/Browser 版本矩阵与泄漏测试。 |
+| WP-13.5 Web 运行与框架 | `x-web::{runtime,dom,api,worker,ui,framework,ssr}` | P5 联邦仓库 | Event Loop、DOM/Web API、Worker、组件、Router/Form、SSR/Hydration；名称是仓库内逻辑模块，不预设独立项目 | WPT 子集、Browser E2E、SSR/CSR 一致性、可访问性与安全测试。 |
+| WP-13.6 Web 工具链 | `x-web::{tooling,security}` + Core SourceMap 公共契约 | P5 联邦仓库 | Bundler、Tree Shaking、Code Split、HMR、多级 SourceMap 和部署适配先以内部分层实现 | 可复现构建、断点准确、HMR 回滚和 OWASP 场景；拆分须过 ADR 门禁。 |
+| WP-13.7 XUI 与样式互操作 | `x-ui::{style,a11y,native}` + `x-web::ui` | P5 联邦仓库 | 普通 View 类型/函数、Token/CoreStyle、CSS Modules、标准 CSS、SSR 和显式平台降级；不重写浏览器布局 | 类型化 class、WPT/截图、WCAG、CSS/原生能力矩阵；不新增核心语法。 |
+| WP-13.8 服务器生产闭环 | `x-server::{http,api,validation,resilience,traffic,runtime,cloud}` | P3-P5 联邦仓库 | HTTP/API、韧性、流控、生命周期、配置/秘密、可观测和部署 | Fuzz、故障注入、过载公平、集群滚动/回滚和 OTel 互操作。 |
 | WP-13.9 平台与发布契约 | `x-target-spec`、`x-installer`、`distribution/`、`release/`、平台 CI | P0-P4 持续 | Tier、最低版本、CPU/SDK、安装签名、移动打包、崩溃工件和 EOL | 机器可读矩阵、干净机/真机测试、符号定位和退役演练。 |
+
+`x-web::{...}`、`x-ui::{...}`、`x-server::{...}`、`x-sdk::{...}` 均表示联邦仓库内部逻辑模块，不预设独立 crate、项目或额外仓库；任何拆分继续受架构 ADR 门禁约束。
 
 ### 13.1 P 产品阶段与 G 质量门禁的关系
 

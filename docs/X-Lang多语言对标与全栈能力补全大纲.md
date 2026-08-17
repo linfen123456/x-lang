@@ -19,7 +19,7 @@ X-Lang 的待验证设计假设是：借鉴 Rust 的所有权安全、C/LLVM 的
 | Python | REPL、Notebook、数据/AI、FFI | `Dynamic` 仅作边界类型 | Monkey Patch、全局动态语义 |
 | Java | 企业兼容、诊断、制品、LTS | Managed 模式需单独 RFC | 为兼容而复制 JVM/class 继承 |
 | JavaScript | Event Loop、Promise 桥、DOM/Web API、ESM | 动态对象仅在 JS 边界 | 原型链和隐式类型转换 |
-| CSS | 布局、响应式、主题、动画、无障碍 | 设计为 `x-style` 独立 DSL | 把 CSS 级联塞入核心语言 |
+| CSS | 布局、响应式、主题、动画、无障碍 | 标准 CSS + CSS Modules + XStyle Token/CoreStyle 互操作 | 把 CSS 级联塞入核心语言或重写浏览器样式引擎 |
 
 ### 1.2 派生需求成熟度、状态与关闭规则
 
@@ -31,7 +31,7 @@ X-Lang 的待验证设计假设是：借鉴 Rust 的所有权安全、C/LLVM 的
 | `XLC-EXEC-001~012` | `EXTENDED/待决策` | MIR 参考执行可作为 CORE 验证基础；快速后端须经 ADR，所有工具须有统一 SourceMap。 |
 | `XLC-FFI-001~012` | `EXTENDED/待决策` | C ABI 稳定子集可先行；Python/JNI/JS 分别版本化，不共享“全兼容”承诺。 |
 | `XLC-WEB-001~015` | `EXTENDED/待决策` | WASM 可先于框架；浏览器宿主、SSR 和工具链通过 G4 后才能标记稳定。 |
-| `XLC-STYLE-001~015` | `EXTENDED/待决策` | 始终属于独立 DSL/生态；不因实现成熟而转入核心语法。 |
+| `XLC-STYLE-001~015` | `EXTENDED/待决策` | 始终属于 P5+ 联邦生态；采用标准 CSS/CSS Modules 与受限 XStyle IR，不因实现成熟而转入核心语法。 |
 | `XLC-SERVER-001~010` | `EXTENDED/待决策` | 标准库只保留底层 I/O；框架和云适配独立发布。 |
 | `XLC-PLATFORM-001~010` | `CORE/草案` | 作为治理能力，Tier 1 的最低版本、签名和支持期必须在 1.0 前转为已决策并有 CI 证据。 |
 
@@ -128,38 +128,38 @@ X-Lang 的待验证设计假设是：借鉴 Rust 的所有权安全、C/LLVM 的
 | XLC-WEB-003 | Web API | Fetch、Streams、Storage、IndexedDB、Clipboard/File | x-web-api | 浏览器版本矩阵 |
 | XLC-WEB-004 | Worker | Web/Service Worker、消息、共享内存权限 | x-web-worker | 隔离和取消测试 |
 | XLC-WEB-005 | Canvas/WebGL/WebGPU | 资源、错误、设备丢失和 Shader | x-web-graphics | 浏览器/GPU 测试 |
-| XLC-WEB-006 | 组件模型 | Props、State、Lifecycle、Context、Error Boundary | x-web-ui | 行为契约和可访问性 |
+| XLC-WEB-006 | 组件模型 | Props、State、Lifecycle、Context、Error Boundary | `x-web::ui` | 行为契约和可访问性 |
 | XLC-WEB-007 | 响应式状态 | Signal/Computed/Effect、批处理、循环检测 | x-reactivity | 确定更新和泄漏测试 |
 | XLC-WEB-008 | Router/Form | 路由、导航、表单、验证、提交和错误 | x-web-framework | 浏览器 E2E |
-| XLC-WEB-009 | SSR/Hydration | 同构输出、序列化、安全、Mismatch | x-web-ssr | SSR/CSR 一致性 |
-| XLC-WEB-010 | HMR | 模块边界、状态保留和失败回滚 | x-web-dev-server | 编辑到更新延迟基准 |
-| XLC-WEB-011 | Bundler | 依赖图、资产、插件沙箱、缓存 | x-web-bundler | 可复现构建 |
-| XLC-WEB-012 | Tree Shaking/Code Split | ESM 图、副作用、动态导入、Chunk | x-web-bundler | 体积和加载测试 |
+| XLC-WEB-009 | SSR/Hydration | 同构输出、序列化、安全、Mismatch | `x-web::ssr` | SSR/CSR 一致性 |
+| XLC-WEB-010 | HMR | 模块边界、状态保留和失败回滚 | `x-web::tooling` | 编辑到更新延迟基准 |
+| XLC-WEB-011 | Bundler | 依赖图、资产、插件沙箱、缓存 | `x-web::tooling` | 可复现构建 |
+| XLC-WEB-012 | Tree Shaking/Code Split | ESM 图、副作用、动态导入、Chunk | `x-web::tooling` | 体积和加载测试 |
 | XLC-WEB-013 | SourceMap | X→MIR/WASM/JS/CSS 多级映射 | x-source-map | 浏览器断点准确 |
-| XLC-WEB-014 | Dev/Deploy Adapter | 本地服务器、代理、静态/边缘/Node 部署 | x-web-cli | 模板 E2E |
+| XLC-WEB-014 | Dev/Deploy Adapter | 本地服务器、代理、静态/边缘/Node 部署 | `x-web::tooling` | 模板 E2E |
 | XLC-WEB-015 | Web 安全默认 | XSS、CSP、Trusted Types、CSRF、依赖完整性 | x-web-security | OWASP 场景测试 |
 
 ## 7. `XLC-STYLE`：CSS、布局、主题和无障碍
 
-样式系统属于 `ecosystem/x-style`，不改变 X-Lang 核心求值语义。首版可编译为浏览器 CSS，也可降级为桌面/移动渲染树属性。
+样式能力属于 P5+ 联邦生态：XUI 使用普通类型/函数，Web 以标准 CSS 和 CSS Modules 为权威，`x-ui::style` 只提供 Token、类型化值、主题和受限 CoreStyle IR。下表保留能力追踪，但 Selector/Cascade/Flex/Grid 在 Web 上由浏览器实现，不预建对应引擎 crate；原生布局必须另有需求、ADR 和平台测试。
 
 | ID | 能力 | 关键内容 | 目标项目 | 验收 |
 |---|---|---|---|---|
-| XLC-STYLE-001 | 选择器 | type/class/id/attribute、组合器、伪类/伪元素 | x-style-selector | CSS Selector 对照测试 |
-| XLC-STYLE-002 | 级联 | origin、specificity、source order、important 策略 | x-style-cascade | 确定性级联测试 |
-| XLC-STYLE-003 | 继承与初始值 | inherited/non-inherited、unset/revert | x-style-cascade | 属性矩阵 |
-| XLC-STYLE-004 | 变量与 Design Token | 自定义属性、类型 Token、fallback、主题 | x-style-token | 循环和作用域测试 |
-| XLC-STYLE-005 | 单位与颜色 | 长度、角度、时间、百分比、色彩空间 | x-style-values | 解析/插值/平台测试 |
-| XLC-STYLE-006 | Block/Inline | Formatting Context、盒模型、margin collapse | x-layout | WPT 布局子集 |
-| XLC-STYLE-007 | Flexbox | 主/交叉轴、flex basis、wrap、gap | x-layout-flex | 浏览器截图差分 |
-| XLC-STYLE-008 | Grid | track、area、auto placement、subgrid 取舍 | x-layout-grid | 布局黄金测试 |
-| XLC-STYLE-009 | 定位和层叠上下文 | relative/absolute/fixed/sticky、z-index | x-layout | 滚动/嵌套测试 |
-| XLC-STYLE-010 | 响应式查询 | media/container、viewport、DPI、能力查询 | x-style-query | 多尺寸/设备测试 |
-| XLC-STYLE-011 | 动画与过渡 | keyframe、transition、transform、取消、reduced-motion | x-style-animation | 时间线和合成测试 |
-| XLC-STYLE-012 | 样式隔离 | scoped/module/shadow boundary、全局逃逸 | x-style-scope | 组件冲突测试 |
-| XLC-STYLE-013 | SSR 样式 | 提取、去重、关键 CSS、hydration 顺序 | x-style-ssr | 无闪烁和一致性测试 |
-| XLC-STYLE-014 | 无障碍样式 | 对比度、焦点、缩放、高对比、reduced-motion | x-a11y | WCAG 自动和人工检查 |
-| XLC-STYLE-015 | 多后端降级 | CSS、Skia、原生视图属性和不支持诊断 | x-style-codegen | 平台能力矩阵 |
+| XLC-STYLE-001 | 选择器 | type/class/id/attribute、组合器、伪类/伪元素 | 标准 CSS / `x-web::ui` | 浏览器/WPT Selector 对照测试 |
+| XLC-STYLE-002 | 级联 | origin、specificity、source order、important 策略 | 标准 CSS / `x-web::ui` | 浏览器级联结果，不实现第二套规则 |
+| XLC-STYLE-003 | 继承与初始值 | inherited/non-inherited、unset/revert | 标准 CSS / `x-web::ui` | WPT 属性矩阵 |
+| XLC-STYLE-004 | 变量与 Design Token | 自定义属性、类型 Token、fallback、主题 | `x-ui::style` | 循环、作用域和 CSS 生成测试 |
+| XLC-STYLE-005 | 单位与颜色 | 长度、角度、时间、百分比、色彩空间 | `x-ui::style` | 类型、序列化和平台降级测试 |
+| XLC-STYLE-006 | Block/Inline | Formatting Context、盒模型、margin collapse | 标准 CSS；原生 Renderer 待 ADR | WPT 布局子集 |
+| XLC-STYLE-007 | Flexbox | 主/交叉轴、flex basis、wrap、gap | 标准 CSS；原生 Renderer 待 ADR | 浏览器截图差分 |
+| XLC-STYLE-008 | Grid | track、area、auto placement、subgrid 取舍 | 标准 CSS；原生 Renderer 待 ADR | WPT/布局黄金测试 |
+| XLC-STYLE-009 | 定位和层叠上下文 | relative/absolute/fixed/sticky、z-index | 标准 CSS；原生 Renderer 待 ADR | 滚动/嵌套测试 |
+| XLC-STYLE-010 | 响应式查询 | media/container、viewport、DPI、能力查询 | 标准 CSS / `x-web::ui` | 多尺寸/设备测试 |
+| XLC-STYLE-011 | 动画与过渡 | keyframe、transition、transform、取消、reduced-motion | 标准 CSS / `x-web::ui` | 时间线和合成测试 |
+| XLC-STYLE-012 | 样式隔离 | CSS Modules/Shadow boundary、全局逃逸 | `x-web::ui` | 类型化 class 和组件冲突测试 |
+| XLC-STYLE-013 | SSR 样式 | 提取、去重、关键 CSS、hydration 顺序 | `x-web::{ui,tooling}` | 无闪烁和一致性测试 |
+| XLC-STYLE-014 | 无障碍样式 | 对比度、焦点、缩放、高对比、reduced-motion | `x-ui::a11y` | WCAG 自动和人工检查 |
+| XLC-STYLE-015 | 多后端降级 | CSS、Skia、原生视图属性和不支持诊断 | `x-ui::{style,native}` | 平台能力矩阵；禁止静默忽略 |
 
 ## 8. `XLC-SERVER`：生产服务器补全
 
@@ -243,7 +243,7 @@ X-Lang 的待验证设计假设是：借鉴 Rust 的所有权安全、C/LLVM 的
 | 优先级 | 缺口 | 必须交付 | 可证伪关闭条件 |
 |---:|---|---|---|
 | P0 | `GAP-COMP-01` ABI 与数据布局模型缺失 | target 数据布局、标量宽度/对齐、结构体 Padding、调用约定、符号和最小 `extern C` 探针 | 选定一个主机 target 与 C 编译器版本；机器可读布局契约、黄金对象和标量/结构体双向调用探针一致，不形成稳定 ABI 承诺 |
-| P0 | `GAP-COMP-02` MVP 架构仍可能过度拆分 | 模块化单体、6～10 个 Workspace 成员、拆分 ADR 门禁 | 端到端编译闭环存在；无空 crate、循环依赖和无消费者接口 |
+| P0 | `GAP-COMP-02` MVP 架构仍可能过度拆分 | compiler/runtime/cli/library-core/conformance 等 4～6 个 Workspace 成员、阶段化结构和拆分 ADR 门禁 | 端到端编译闭环存在；无空 crate、循环依赖和无消费者接口 |
 | P1 | `GAP-COMP-03` 没有参考执行与优化正确性证据 | MIR 解释器、verifier、reducer、LLVM 差分和优化不变量 | `-O0/-O2`、解释器和后端在定义行为内结果一致，失败可最小化 |
 | P1 | `GAP-COMP-04` 增量编译和缓存模型缺失 | P2 冻结查询键/依赖/失效模型并做本地探针；P3 实现并发、身份/租户、签名与远程缓存威胁模型 | P3 固定变更语料的增量/全量结果 100% 一致；跨版本、越权、篡改和错误签名缓存被拒绝并可安全回退全量构建；收益达到 Benchmark RFC 门槛 |
 | P1 | `GAP-COMP-05` 平台 Tier 契约未实体化 | target triple、CPU/ABI、OS/SDK/linker、证据、降级和退役 Schema | 候选 target 均生成机器可读条目，CI 无静默跳过；连续发布证据是 P4 晋级 Stable 的附加门禁，不阻断 P2 的契约关闭 |
@@ -262,7 +262,7 @@ X-Lang 的待验证设计假设是：借鉴 Rust 的所有权安全、C/LLVM 的
 | P1 | `GAP-DX-04` 并发 Runtime 与语言语义可能耦合 | 结构化并发、取消、阻塞和语言/Executor 契约；P2 使用最小参考 Executor，优化调度器后续实现 | 更换参考 Executor 不改变定义行为；固定取消/Drop/泄漏语料通过。公平性、压力和故障注入是 P3/P4 Runtime 晋级门禁 |
 | P2 | `GAP-DX-05` 工具链闭环未形成 | `check/build/run/test/fmt/doc`、LSP、DAP、包和统一配置 | 新项目从创建到签名发布可在三大 OS 和离线环境复现 |
 | P2 | `GAP-DX-06` 包管理与注册表治理未落地 | resolver、lockfile、缓存、签名、yank、恢复、命名和恶意包策略 | 确定解析、供应链攻防、撤回/恢复和 N-1/N-2 升级演练通过 |
-| P2 | `GAP-DX-07` 生态仍是能力地图 | `ecosystem/adoption.yaml` 登记项目/组织 ID、仓库、维护者确认、版本、平台、使用周期、升级结果和证据链接 | 至少 10 个非模板公开项目，其中 3 个由核心组织之外的维护者独立维护 ≥90 天；3 个间隔 ≥30 天的连续发布周期、两个 Tier 1 OS；固定项目集 N-1 升级成功率 ≥90%。仅称“早期验证生态”，不称成熟生态 |
+| P2 | `GAP-DX-07` 生态仍是能力地图 | `governance/ecosystem-adoption.yaml` 登记联邦仓库/项目 ID、维护者确认、版本、平台、使用周期、升级结果和证据链接 | 至少 10 个非模板公开项目，其中 3 个由核心组织之外的维护者独立维护 ≥90 天；3 个间隔 ≥30 天的连续发布周期、两个 Tier 1 OS；固定项目集 N-1 升级成功率 ≥90%。仅称“早期验证生态”，不称成熟生态 |
 | P2 | `GAP-DX-08` AI/Agent 接口缺少稳定边界 | 版本化机器可读诊断、Rule ID、确定名称解析/语义索引、最小权限、diff/审计与可撤销写操作 | Agent 默认本地只读；写入可追踪、可测试、可回滚且不能覆盖规范；AI 输出不进入编译语义 |
 
 #### 12.1.4 演进、治理与可信度

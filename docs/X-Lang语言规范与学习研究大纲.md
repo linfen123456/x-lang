@@ -111,7 +111,7 @@
 | 2.1 | 安装与 Hello World | `CORE/草案` | 覆盖安装、版本检查、规范命令 `x init`（`x new` 为兼容别名）、`x run`、`x build`、目录结构和首个诊断。来源：2、12。 | Windows/Linux/macOS 三套可复现步骤；命令由 CI 验证。 |
 | 2.2 | 源文件、模块与入口 | `CORE/草案` | 解释 `.x` 文件、包、模块树、导入导出、入口函数和命名约定。来源：2。 | 单文件与多模块示例均可构建。 |
 | 2.3 | 绑定与作用域 | `CORE/草案` | 讲解变量、常量、可变性、遮蔽、词法作用域和初始化规则。 | 正例、未初始化/越界作用域反例及诊断。 |
-| 2.4 | 基础类型与运算 | `CORE/草案` | 数值、布尔、字符、字符串、字面量、转换、溢出和位操作。来源：10。 | 每类运算说明类型结果、错误和 Debug/Release 差异。 |
+| 2.4 | 基础类型与运算 | `CORE/草案` | 数值、布尔、字符、字符串、字面量、转换、溢出和位操作；语言结果不得随 Debug/Release 改变。来源：10。 | 每类运算说明类型结果、错误及 checked/wrapping API。 |
 | 2.5 | 控制流与模式 | `CORE/草案` | 条件、循环、模式匹配、解构和控制流表达式；范围使用库 API，管道操作符不进入 1.0。来源：11。 | 覆盖穷尽性、不可达分支和循环控制测试。 |
 | 2.6 | 函数与闭包 | `CORE/草案` | 参数、返回值、泛型初识和闭包捕获；命名/默认参数、`pure` 不进入 1.0。来源：3、11。 | 说明参数求值顺序、捕获与公开类型边界。 |
 | 2.7 | 数据建模 | `CORE/草案` | 结构体、枚举、元组、方法、Trait 与泛型的渐进式教程。来源：2。 | 完成一个可测试的领域模型示例。 |
@@ -135,14 +135,14 @@
 | 3.4 | Token 与运算符 | `CORE/待决策` | Token 分类、最长匹配、运算符、优先级、结合性和换行敏感性。来源：2、11。 | 词法表、优先级表与歧义用例完整。 |
 | 3.5 | 表达式与语句 | `CORE/待决策` | 主表达式、调用、成员访问、控制流、赋值、块和分号规则。 | 每条产生式有正反例及 AST 预期。 |
 | 3.6 | 声明语法 | `CORE/待决策` | 函数、类型、Trait、实现、模块、导入导出、可见性。来源：2。 | 声明产生式与名称解析前置约束对齐。 |
-| 3.7 | 高级语法 | `EXTENDED/待决策` | 泛型约束、属性、注解、宏边界、条件编译和构建期结构。来源：3、4、10。 | 明确核心/扩展语法，禁止注解无限侵入核心。 |
+| 3.7 | 高级语法 | `CORE+EXTENDED/待决策` | CORE 仅保留 `@repr/@export` 等登记制内建属性和简单泛型约束；用户属性、宏、复杂 cfg 和构建期结构为扩展。来源：3、4、10。 | 未知属性报错；扩展不得无限侵入核心。 |
 | 3.8 | 形式语法总表 | `CORE/草案` | 选择 EBNF 或 PEG 作为规范表示，说明左递归和语法糖脱糖。 | 语法可由工具解析并覆盖全部稳定语法。 |
 | 3.9 | 格式化规范 | `CORE/草案` | `xfmt` 是核心工具链契约而非语言语义；规定缩进、换行、空格、尾逗号和导入排序，禁止多种官方风格。来源：2。 | `parse → format → parse` 语义等价且 `xfmt` 幂等。 |
 | 3.10 | 语法符合性套件 | `CORE/草案` | 合法、非法、恢复、模糊和兼容性语料组织规范。 | 每项语法至少一正一反测试，含诊断代码。 |
 
 ### 3.11 1.0 候选表层语法
 
-候选采用花括号块、显式分号和表达式块；不采用自动分号插入。`if`、`match` 和块可以产生值，所有分支必须类型一致；赋值是语句而非表达式。下面只固定设计评审的最小骨架，完整 Token、模式和优先级表仍由 `GAP-LANG-02` 对应 RFC 生成。
+候选采用 UTF-8、花括号块、显式分号和表达式块；不采用自动分号插入。`if`、`match` 和块可以产生值，所有分支必须类型一致；赋值是语句而非表达式。下面给出可供 RFC、Parser 原型和语料评审的完整候选骨架；字符串插值、用户自定义属性、宏、异步和 DSL 均不在 1.0 语法内。
 
 ```x
 pub fn find_user(id: UserId) -> Result<User, LookupError> {
@@ -155,40 +155,243 @@ struct User {
     name: String,
 }
 
-match maybe_user {
+match (maybe_user) {
     Some(user) => use_user(user),
     None => fallback(),
 }
 ```
 
 ```ebnf
-program     = { item } ;
-item        = [ "pub" ], ( function | struct | enum | trait | impl | const_item ) ;
-function    = "fn", IDENT, [ generic_params ], "(", [ parameters ], ")",
-              [ "->", type ], [ where_clause ], block ;
+program       = { use_decl | item } ;
+use_decl      = [ "pub" ], "use", path, [ "as", IDENT ], ";" ;
+item          = { attribute }, [ "pub" ], ( function | export_function | struct_decl |
+                    enum_decl | trait_decl | impl_decl | type_alias | const_item | extern_block ) ;
+attribute     = "@", IDENT, [ "(", [ arguments ], ")" ] ;
+
+function      = [ "unsafe" ], "fn", IDENT, [ generic_params ],
+                "(", [ parameters ], ")", [ "->", type ], [ where_clause ], block ;
+parameters    = parameter, { ",", parameter }, [ "," ] ;
+parameter     = ( pattern | "self" ), ":", type ;
 generic_params = "<", type_param, { ",", type_param }, [ "," ], ">" ;
-where_clause = "where", bound, { ",", bound }, [ "," ] ;
-struct      = "struct", IDENT, [ generic_params ], "{", { field, [ "," ] }, "}" ;
-enum        = "enum", IDENT, [ generic_params ], "{", { variant, [ "," ] }, "}" ;
-block       = "{", { statement }, [ expression ], "}" ;
-statement   = binding | assignment | return_stmt | break_stmt | continue_stmt | expr_stmt ;
-binding     = ( "let" | "var" ), pattern, [ ":", type ], "=", expression, ";" ;
-assignment  = place, "=", expression, ";" ;
-expression  = if_expr | match_expr | logic_or ;
-logic_or    = logic_and, { "||", logic_and } ;
-logic_and   = equality, { "&&", equality } ;
-equality    = comparison, { ( "==" | "!=" ), comparison } ;
-comparison  = additive, { ( "<" | "<=" | ">" | ">=" ), additive } ;
-additive    = multiplicative, { ( "+" | "-" ), multiplicative } ;
+type_param    = IDENT, [ ":", trait_bounds ] ;
+trait_bounds  = path, { "+", path } ;
+where_clause  = "where", bound, { ",", bound }, [ "," ] ;
+bound         = IDENT, ":", trait_bounds ;
+
+struct_decl   = "struct", IDENT, [ generic_params ], "{",
+                [ field, { ",", field }, [ "," ] ], "}" ;
+field         = [ "pub" ], IDENT, ":", type ;
+enum_decl     = "enum", IDENT, [ generic_params ], "{",
+                [ variant, { ",", variant }, [ "," ] ], "}" ;
+variant       = IDENT, [ "(", [ type_list ], ")" | "{",
+                [ field, { ",", field }, [ "," ] ], "}" ] ;
+trait_decl    = "trait", IDENT, [ generic_params ], "{", { method_signature }, "}" ;
+method_signature = "fn", IDENT, "(", [ parameters ], ")", [ "->", type ], ";" ;
+impl_decl     = "impl", [ generic_params ], type, [ "for", type ],
+                [ where_clause ], "{", { impl_item }, "}" ;
+impl_item     = [ "pub" ], function ;
+type_alias    = "type", IDENT, [ generic_params ], "=", type, ";" ;
+const_item    = "const", IDENT, ":", type, "=", expression, ";" ;
+extern_block  = "extern", STRING, "{", { extern_function }, "}" ;
+extern_function = "unsafe", "fn", IDENT, "(", [ parameters ], ")", [ "->", type ], ";" ;
+export_function = [ "unsafe" ], "extern", STRING, "fn", IDENT,
+                  "(", [ parameters ], ")", [ "->", type ], block ;
+
+block         = "{", { statement }, [ expression ], "}" ;
+statement     = binding | assignment | return_stmt | break_stmt | continue_stmt |
+                while_stmt | for_stmt | expression, ";" ;
+binding       = ( "let" | "var" ), pattern, [ ":", type ], "=", expression, ";" ;
+assignment    = place, assign_op, expression, ";" ;
+assign_op     = "=" | "+=" | "-=" | "*=" | "/=" | "%=" ;
+return_stmt   = "return", [ expression ], ";" ;
+break_stmt    = "break", [ expression ], ";" ;
+continue_stmt = "continue", ";" ;
+while_stmt    = "while", "(", expression, ")", block ;
+for_stmt      = "for", "(", pattern, "in", expression, ")", block ;
+
+expression    = if_expr | match_expr | loop_expr | unsafe_expr | closure | logic_or ;
+if_expr       = "if", "(", expression, ")", block, [ "else", ( block | if_expr ) ] ;
+match_expr    = "match", "(", expression, ")", "{",
+                [ match_arm, { ",", match_arm }, [ "," ] ], "}" ;
+match_arm     = pattern, "=>", expression ;
+loop_expr     = "loop", block ;
+unsafe_expr   = "unsafe", block ;
+closure       = [ "move" ], "fn", "(", [ parameters ], ")", [ "->", type ],
+                ( block | "=>", expression ) ;
+logic_or      = logic_and, { "||", logic_and } ;
+logic_and     = bit_or, { "&&", bit_or } ;
+bit_or        = bit_xor, { "|", bit_xor } ;
+bit_xor       = bit_and, { "^", bit_and } ;
+bit_and       = equality, { "&", equality } ;
+equality      = comparison, { ( "==" | "!=" ), comparison } ;
+comparison    = shift, { ( "<" | "<=" | ">" | ">=" ), shift } ;
+shift         = additive, { ( "<<" | ">>" ), additive } ;
+additive      = multiplicative, { ( "+" | "-" ), multiplicative } ;
 multiplicative = cast, { ( "*" | "/" | "%" ), cast } ;
-cast        = unary, { "as", type } ;
-unary       = [ "!" | "-" | "&" | "&mut" | "*" ], postfix ;
-postfix     = primary, { call | member | index | "?" } ;
-pattern     = "_" | IDENT | literal | constructor_pattern | tuple_pattern | struct_pattern ;
-type        = path_type | tuple_type | array_type | slice_type | reference_type | function_type ;
+cast          = unary, { "as", type } ;
+unary         = ( "!" | "-" | "~" | ( "&", "mut" ) | "&" | "*" ), unary | postfix ;
+postfix       = primary, { call | member | index | "?" } ;
+call          = "(", [ arguments ], ")" ;
+member        = ".", IDENT ;
+index         = "[", expression, "]" ;
+primary       = literal | value_path | tuple_expr | array_expr | struct_expr | block |
+                "(", expression, ")" ;
+tuple_expr    = "(", expression, ",", [ arguments ], ")" ;
+array_expr    = "[", [ arguments ], "]" ;
+struct_expr   = type_path, "{", [ field_init, { ",", field_init }, [ "," ] ], "}" ;
+field_init    = IDENT, ":", expression ;
+
+pattern       = "_" | literal | name_pattern | tuple_pattern | struct_pattern | reference_pattern ;
+name_pattern  = path, [ "(", [ pattern_list ], ")" ] ;
+tuple_pattern = "(", pattern, ",", [ pattern_list ], ")" ;
+struct_pattern = path, "{", [ field_pattern, { ",", field_pattern }, [ "," ] ], "}" ;
+field_pattern = IDENT, ":", pattern ;
+reference_pattern = "&", [ "mut" ], pattern ;
+pattern_list  = pattern, { ",", pattern }, [ "," ] ;
+type          = path_type | tuple_type | array_type | slice_type | reference_type |
+                pointer_type | function_type ;
+path_type     = type_path, [ "<", type_list, [ "," ], ">" ] ;
+tuple_type    = "(", ")" | "(", type, ",", [ type_list ], ")" ;
+array_type    = "[", type, ";", ( INTEGER | IDENT ), "]" ;
+slice_type    = "[", type, "]" ;
+reference_type = "&", [ "mut" ], type ;
+pointer_type  = "*", ( "const" | "mut" ), type ;
+function_type = "fn", "(", [ type_list ], ")", "->", type ;
+path          = IDENT, { "::", IDENT } ;
+value_path    = ( IDENT | "self" ), { "::", IDENT } ;
+type_path     = ( IDENT | "Self" ), { "::", IDENT } ;
+type_list     = type, { ",", type } ;
+arguments     = expression, { ",", expression }, [ "," ] ;
+place         = value_path, { member | index } ;
+literal       = "true" | "false" | INTEGER | FLOAT | CHAR | STRING ;
 ```
 
-最小模式只包含通配、绑定、字面量、构造器、元组和结构体模式；OR-pattern、范围模式、模式守卫和运行时类型测试延期。泛型采用 `<T>` 与 `where T: Trait` 的单一写法；1.0 仅支持类型参数、简单 Trait bound、单态化和静态分派，不含 Const Generics、GAT、HRTB、Specialization 或 Trait Object。`?` 是唯一内建传播后缀，`as` 是唯一通用显式转换入口；二者都必须由类型规则限制。
+EBNF 中未展开的小写节点必须在正式语法中各有唯一产生式；当前不把它们解释为 Parser 自由裁量。最小模式只包含通配、绑定、字面量、构造器、元组和结构体模式；OR-pattern、范围模式、模式守卫和运行时类型测试延期。泛型采用 `<T>` 与 `where T: Trait` 的单一写法；1.0 仅支持类型参数、简单 Trait bound、单态化和静态分派，不含 Const Generics、GAT、HRTB、Specialization 或 Trait Object。`?` 是唯一内建传播后缀，`as` 是唯一通用显式转换入口；二者都必须由类型规则限制。
+
+### 3.12 候选关键字、字面量与符号全集
+
+| 分类 | 候选集合 | 规则 |
+|---|---|---|
+| 声明/模块 | `const enum extern fn impl pub struct trait type unsafe use` | `pub` 只有公开/私有两级；外部函数声明必须标为 `unsafe`。 |
+| 绑定/所有权 | `let move mut var` | `let` 不可变、`var` 可变；`mut` 只修饰独占借用；`move` 只显式改变闭包捕获。 |
+| 控制流/匹配 | `break continue else for if in loop match return while` | 条件必须为 `Bool`；不提供 truthy/falsy、异常控制流或自动 fallthrough。 |
+| 类型与转换 | `as where` | `as` 只做规则允许的显式转换；`where` 仅表达简单 Trait bound。 |
+| 布尔与接收者 | `true false self Self` | 均为硬关键字；方法接收者仍写作显式参数 `self: &Self`。 |
+| 预定义构造器 | `Some None Ok Err` | 标准库 `Option/Result` 构造器，不是关键字，可以通过限定路径消除冲突。 |
+| 明确排除 | `async await catch class comptime default defer dyn effect extends implicit interface macro null operator override proc pure static throw try virtual yield` | 1.0 Lexer 不保留这些词；未来采用时必须由 Edition/RFC 处理兼容。 |
+
+候选共 31 个硬关键字，不为未来特性预留关键字；数量只是当前审查结果，不是无 RFC 可修改的永久上限。文件路径确定模块，包名来自 `x.toml`，因此没有 `mod/module/package` 关键字；导入只允许 `use path::item [as alias];`，1.0 不含 glob 或嵌套导入。标识符区分大小写，源码统一 UTF-8；正式 RFC 必须冻结 Unicode 标识符配置、正规化、混淆字符诊断和原始标识符策略。注释候选为 `//`、`/* ... */` 和 `///` 文档注释；是否允许块注释嵌套由词法 RFC 单独决定。
+
+| 优先级（高→低） | 运算/符号 | 结合性与限制 |
+|---:|---|---|
+| 1 | `()`、`[]`、`.`、后缀 `?` | 左结合；调用、索引、成员和错误传播。 |
+| 2 | `! - ~ & &mut *` | 前缀；引用/解引用受所有权规则限制。 |
+| 3 | `as` | 左结合；禁止链式隐式转换。 |
+| 4 | `* / %` | 左结合。 |
+| 5 | `+ -` | 左结合。 |
+| 6 | `<< >>` | 左结合。 |
+| 7 | `< <= > >=` | 不允许链式比较。 |
+| 8 | `== !=` | 不允许链式比较。 |
+| 9–11 | `&`、`^`、`|` | 左结合的位运算。 |
+| 12–13 | `&&`、`||` | 左结合、从左到右短路。 |
+| 14 | `= += -= *= /= %=` | 仅作为语句；右侧先求值，不产生值。 |
+
+分隔符固定为 `() [] {} , ; : :: . @ -> =>`。属性只允许编译器登记的 `@repr(...)`、`@export(...)` 等受限内建项，未知属性稳定报错，不开放用户宏。1.0 不提供 `++/--`、`?:`、`??`、`?.`、`**`、`|>`、范围运算符或用户自定义运算符；范围、空值组合、幂和集合流水线使用具名 API，以降低优先级和重载歧义。
+
+### 3.13 候选语法的规范写法
+
+```x
+use app::model::User;
+use app::repository as repository;
+
+pub struct Config {
+    pub host: String,
+    pub port: U16,
+}
+
+pub enum LookupError {
+    NotFound(UserId),
+    Storage(StorageError),
+}
+
+pub trait Repository<T> {
+    fn find(self: &Self, id: UserId) -> Result<T, LookupError>;
+}
+
+impl Repository<User> for UserRepository {
+    fn find(self: &Self, id: UserId) -> Result<User, LookupError> {
+        let row = self.database.find(id)?;
+        Ok(User { id: row.id, name: row.name })
+    }
+}
+```
+
+```x
+pub fn summarize<T>(items: &[T]) -> Result<String, SummaryError>
+where T: Display {
+    var output = String::new();
+
+    for (item in items) {
+        output.push(item.display());
+    }
+
+    if (output.is_empty()) {
+        Err(SummaryError::Empty)
+    } else {
+        Ok(output)
+    }
+}
+```
+
+作用域并发保持为普通库 API，闭包捕获和所有权在源码中可见：
+
+```x
+pub fn process_one(job: Job) -> Result<Unit, JobError> {
+    thread::scope(fn(scope: &mut thread::Scope) -> Result<Unit, JobError> {
+        let handle = scope.spawn(move fn() -> Result<Unit, JobError> {
+            process(job)
+        });
+        handle.join()?
+    })
+}
+```
+
+FFI 只允许通过显式不安全边界声明；字符串、切片和拥有资源的结构不能假定与 C 自动兼容：
+
+```x
+@repr(C)
+pub struct XBuffer {
+    pub data: *mut U8,
+    pub length: USize,
+}
+
+extern "C" {
+    unsafe fn x_write(bytes: *const U8, length: USize) -> I32;
+}
+
+@export("x_add")
+pub extern "C" fn add(left: I32, right: I32) -> I32 {
+    left + right
+}
+```
+
+1.0 数值类型候选为 `I8/I16/I32/I64`、`U8/U16/U32/U64/USize`、`F32/F64`，以及 `Bool/Char/Unit/Never`；`String`、数组、切片、元组、`Option` 和 `Result` 是核心库/复合类型。无上下文且无后缀的数字字面量必须诊断，不默认猜测 `Int` 或 `Float`。公开声明不能省略类型；私有非递归函数的返回类型是否允许推断仍须由类型 RFC 用可诊断性实验决定。
+
+### 3.14 语法之外的静态限制
+
+| 范围 | 1.0 候选限制 |
+|---|---|
+| 模块 | 文件路径唯一决定模块；包根路径是绝对解析起点。禁止 glob、嵌套导入、循环值初始化和隐式重导出；名称冲突必须用 `as` 消除。 |
+| 公开边界 | `pub fn`、Trait 方法、extern 导入和 export 函数的参数、返回（包括 `Unit`）及泛型约束全部显式；公开常量、字段和枚举载荷也不得省略类型。EBNF 的可选返回只为允许推断的私有函数/闭包保留。 |
+| 绑定与模式 | `let/var`、函数/闭包参数和 `for` 模式只接受不可失败模式；只有 `match` 分支可使用可失败模式并必须穷尽。名称解析区分单名绑定与无载荷枚举变体；按值匹配默认移动非 `Copy` 字段，`&`/`&mut` 模式显式借用且不存在自动解引用。 |
+| 转换 | `as` 只接受 RFC 白名单内的无损或表示保持转换；窄化使用 `T::try_from`，环绕使用 `T::wrapping_from`，指针/位重解释只允许受审计的 unsafe API。 |
+| 错误传播 | `Result<T,E>` 的 `?` 只向返回 `Result<_,E>` 的函数传播同一 `E`；`Option<T>` 只向 `Option<_>` 传播。禁止二者桥接和隐藏的 `From` 式转换。 |
+| 求值 | 实参、操作数和 place 从左到右且各求值一次；`&&/||` 短路。整数溢出和除零采用单一、跨 Profile 规则，另一行为只能通过具名 checked/wrapping API 请求。 |
+| 控制头 | `if/match/while/for` 的头部统一使用圆括号，消除 `path { ... }` 与结构体构造歧义；不提供第二套省略括号写法。 |
+| 闭包/并发 | 闭包只有 `fn(...) {}` 与 `move fn(...) {}`；`thread::scope`、`scope.spawn`、Channel 和取消均为库 API，不是关键字。作用域退出强制 join。 |
+| Trait | 1.0 只允许普通方法、`Self`、简单 bound、静态分派和唯一 impl；`Send/Sync` 是编译器内建结构属性，不开放用户负实现。 |
+| FFI | 仅允许 RFC 列出的固定/目标宽度标量、`@repr(C)` 聚合和 opaque handle；外部调用必须位于 `unsafe {}`，该块只开启证明义务并保留尾表达式类型。排除 varargs、C++ ABI、跨边界 unwind、自动 String/拥有资源聚合。 |
+| 工具生成 | 关键字、Token、EBNF、优先级和 Rule ID 必须由一个规范数据源生成 Parser 表、formatter、Tree-sitter/高亮和速查表，禁止多份手写真相。 |
 
 ## 第四篇 类型系统与程序语义
 
@@ -201,12 +404,12 @@ type        = path_type | tuple_type | array_type | slice_type | reference_type 
 | 编号 | 主题 | 分级/状态 | 详细目录内容与大纲说明 | 输出与验收 |
 |---|---|---|---|---|
 | 4.1 | 类型分类与推断 | `CORE/待决策` | 名义标量/复合/引用/函数/底类型；局部绑定和泛型实参可局部推断，公开边界必须显式，禁止跨模块和全程序推断。 | 给出判断式和不可推断诊断。 |
-| 4.2 | 数值语义 | `CORE/待决策` | 明确宽度整数与 IEEE 754 浮点、溢出、NaN 和位操作；转换使用 `as`/检查 API，禁止用户自定义隐式转换和隐式窄化。来源：10。 | 平台无关规则与硬件差异明确。 |
+| 4.2 | 数值语义 | `CORE/待决策` | 明确宽度整数与 IEEE 754 浮点、溢出、NaN 和位操作；`as` 只允许无损/表示保持白名单，窄化和环绕使用具名 API，禁止用户隐式转换。来源：10。 | 规则跨 Debug/Release/优化级别一致；硬件差异明确。 |
 | 4.3 | 复合类型 | `CORE/待决策` | 数组、切片、元组、结构体、枚举、联合/变体及布局可见性。 | 类型相等、构造、访问和匹配规则完整。 |
 | 4.4 | Trait 与泛型 | `CORE/待决策` | 1.0 候选仅含类型参数、简单约束、孤儿规则、禁止重叠实现、单态化和静态分派；高级能力进入独立 RFC。来源：2、10。 | 求解器有步骤/内存/代码体积预算，歧义或超预算产生稳定诊断。 |
 | 4.5 | 模式匹配 | `CORE/待决策` | 1.0 候选只含有限解构、绑定、穷尽性和不可达模式；守卫、OR/范围模式延期。来源：11。 | 穷尽性算法输入输出和诊断测试。 |
 | 4.6 | 函数与纯度 | `CORE+EXPERIMENTAL/待决策` | 函数类型、调用求值顺序、闭包捕获；`pure` 与 effect 先作为实验扩展。来源：3。 | 核心函数语义稳定；纯度规则有独立 RFC。 |
-| 4.7 | 常量与编译期 | `EXTENDED/待决策` | 常量求值、comptime、`build.x`、文件嵌入和资源限制。来源：1、10。 | 明确沙箱、确定性和可复现构建约束。 |
+| 4.7 | 常量与编译期 | `CORE+EXTENDED/待决策` | CORE 只含受限 `const` 声明和固定数组长度求值；通用 comptime、`build.x`、文件嵌入为后续 EXTENDED。来源：1、10。 | 核心常量解释器确定终止；扩展必须有沙箱、资源预算和缓存键。 |
 | 4.8 | Effect 与确定性 | `RESEARCH/待决策` | 研究副作用标注、可重试性、AI 安全重构和确定性边界。来源：3。 | 独立研究报告，不影响核心类型检查。 |
 | 4.9 | 形式化规则 | `CORE/草案` | 汇总名称、类型、子类型/约束和求值判断式。 | 规则与参考实现及测试一一映射。 |
 | 4.10 | 演进与兼容 | `CORE/草案` | 类型规则变更、推断变化、Trait 增补和 Edition 迁移。来源：11。 | 列出兼容分类与自动迁移要求。 |
@@ -228,7 +431,7 @@ type        = path_type | tuple_type | array_type | slice_type | reference_type 
 | 5.5 | 分配与布局 | `EXTENDED/待决策` | 栈/堆、Arena、分配器 API、布局、对齐和 OOM。来源：5、10。 | 稳定可观察语义与实现自由分离。 |
 | 5.6 | 智能指针与循环结构 | `EXTENDED/待决策` | `Box/Rc/Arc/Weak`、内部可变性和循环打破。来源：10。 | 引用计数线程语义和 Weak 访问规则明确。 |
 | 5.7 | unsafe 与硬件访问 | `CORE/待决策` | 作为核心边界定义原始指针、FFI、MMIO、volatile、SIMD、内存对齐及安全封装责任。来源：6、10、11。 | 每个 unsafe 原语有调用者义务和审计清单。 |
-| 5.8 | 线程安全能力 | `CORE/待决策` | `Send/Sync` 类标记、自动推导、显式否定和数据竞争定义。来源：5。 | 与并发语义和借用检查器一致。 |
+| 5.8 | 线程安全能力 | `CORE/待决策` | 1.0 将 `Send/Sync` 定义为编译器按字段结构推导的内建属性，不开放用户显式否定或自定义自动 Trait。来源：5。 | 与并发语义和借用检查器一致；跨作用域反例产生稳定诊断。 |
 | 5.9 | 可选 GC | `EXPERIMENTAL/待决策` | 解决原始文档“无 GC”与“可选 GC”冲突；研究隔离堆、FFI 和实时影响。来源：1、2、10。 | 独立 RFC 和原型；未通过前不得进入标准模式。 |
 | 5.10 | 异构与持久内存 | `EXPERIMENTAL/待决策` | GPU 统一内存、共享内存、mmap、PMEM 生命周期和一致性。来源：4、5、8。 | 每类内存有所有权、安全与平台降级模型。 |
 
@@ -242,7 +445,7 @@ type        = path_type | tuple_type | array_type | slice_type | reference_type 
 
 | 编号 | 主题 | 分级/状态 | 详细目录内容与大纲说明 | 输出与验收 |
 |---|---|---|---|---|
-| 6.1 | 线程与作用域线程 | `CORE/待决策` | spawn、join、作用域、所有权迁移和线程失败传播。来源：5。 | 生命周期与线程退出测试完备。 |
+| 6.1 | 线程与作用域线程 | `CORE/待决策` | `thread::scope`、`scope.spawn`、join 均为显式库 API；定义作用域、所有权迁移和线程失败传播，不新增 `spawn` 语法。来源：5。 | 生命周期与线程退出测试完备。 |
 | 6.2 | async/await | `EXTENDED/待决策` | Task、Future、挂起点、Pin 候选、取消和局部变量生命周期。来源：5、9、10。 | 脱糖语义和取消安全规则明确。 |
 | 6.3 | Channel 与结构化并发 | `CORE+EXTENDED/待决策` | 1.0 核心只冻结作用域线程的父子生命周期、显式 Channel API、协作取消和故障传播；CSP/Actor/async task 为扩展。来源：1、5。 | 默认无孤儿任务；替换 Executor 不改变完成、失败、取消和 Drop 语义。 |
 | 6.4 | Stream 与背压 | `EXTENDED/待决策` | 异步流、生成器、消费速率、取消和协议适配。来源：10。 | 不承诺自动控制所有外部系统；定义适配接口。 |
@@ -265,7 +468,7 @@ type        = path_type | tuple_type | array_type | slice_type | reference_type 
 |---|---|---|---|---|
 | 7.1 | Result 与错误链 | `CORE/待决策` | 错误类型、传播、转换、上下文、回溯和边界封装。来源：3、10。 | 库不得用 panic 表示常规可恢复错误。 |
 | 7.2 | panic 策略 | `CORE/待决策` | unwind、abort、跨线程传播、FFI 边界和 `no_exceptions` 候选。来源：10、12。 | 各构建策略的语义、体积和清理影响可测试。 |
-| 7.3 | 作用域清理 | `CORE/待决策` | RAII 为基础；评估是否提供 `defer` 及其与返回、panic 的顺序。 | 若引入语法，必须有脱糖和顺序规范。 |
+| 7.3 | 作用域清理 | `CORE/待决策` | 1.0 只采用词法作用域 + RAII/Drop；`defer` 仅为 1.0 后 EXTENDED 候选，不参与核心失败语义。 | return、`?`、panic、取消和部分移动的 Drop trace 固定。 |
 | 7.4 | 契约与示例 | `EXPERIMENTAL/待决策` | `#spec/#example`、前后置条件、不变量；自然语言仅作非规范描述。来源：3。 | 机器可执行契约与自然语言意图明确分离。 |
 | 7.5 | 测试语言接口 | `EXTENDED/待决策` | 单元、集成、属性、模糊、快照、Mock 和依赖注入。来源：9、10。 | 测试模式不改变生产语义；Mock 有显式边界。 |
 | 7.6 | 可观测语义 | `EXTENDED/待决策` | 日志、指标、Trace、上下文传播和 async span。来源：7、8、9。 | 默认开销和隐私边界可配置、可测量。 |
@@ -302,7 +505,7 @@ type        = path_type | tuple_type | array_type | slice_type | reference_type 
 | 8.1 | 模块与工作区 | `CORE/待决策` | 模块树、包、工作区、可见性、循环依赖和初始化顺序。来源：2。 | 名称解析与构建图规则一致。 |
 | 8.2 | `x.toml` | `CORE/待决策` | 包元数据、目标、依赖、特性、Profile、平台和构建配置。来源：2。 | 发布 JSON Schema；未知字段策略明确。 |
 | 8.3 | 版本与条件编译 | `CORE/待决策` | SemVer、版本约束、Feature 统一、`cfg` 和环境读取边界。来源：10、11。 | 解析确定、可复现；Feature 冲突可诊断。 |
-| 8.4 | C ABI | `EXTENDED/待决策` | `extern "C"`、布局、调用约定、头文件和错误桥接。来源：2、10、11。 | 通过 ABI 测试套件；仅承诺明确标注的稳定布局。 |
+| 8.4 | C ABI | `CORE+EXTENDED/待决策` | CORE 冻结最小 `extern "C"`、`@repr(C)`、固定宽度标量、opaque handle、panic/所有权边界；完整平台/类型矩阵为 EXTENDED。来源：2、10、11。 | 1.0 最小双向调用和负向边界通过；扩展 ABI 矩阵独立晋级。 |
 | 8.5 | 多语言绑定 | `EXPERIMENTAL/待决策` | C++、Python、Node.js 的生成绑定、对象生命周期和线程规则。来源：7、8、10、11。 | C++ 模板零拷贝不得预设为普遍可行。 |
 | 8.6 | 动态库与插件 | `EXTENDED/待决策` | 插件发现、版本协商、符号版本、隔离和卸载安全。来源：10。 | ABI 不匹配必须拒绝加载并提供诊断。 |
 | 8.7 | Schema 与序列化 | `EXTENDED/待决策` | JSON/CSV/Protobuf/Arrow 等格式与 Schema 演进。来源：9、12。 | 前后兼容规则及大数据流式边界明确。 |
@@ -401,7 +604,7 @@ type        = path_type | tuple_type | array_type | slice_type | reference_type 
 **章节目标**：把 Go、Rust、C、Python、Java、JavaScript 与 CSS 对标发现的缺口转化为可审查的派生规范，同时防止将互不相容的语言模型堆入核心。  
 **目标读者**：语言设计者、互操作/运行时/Web/GUI 开发者、兼容性与安全评审者。  
 **输入与依赖**：第三至十篇、平台规范，以及[《多语言对标与全栈能力补全大纲》](./X-Lang多语言对标与全栈能力补全大纲.md)中的 `XLC-*`。  
-**关键决策**：宏的展开阶段和沙箱；高级泛型复杂度预算；内存/并发模型；动态边界；浏览器宿主；样式 DSL 与核心语言的隔离。  
+**关键决策**：宏的展开阶段和沙箱；高级泛型复杂度预算；内存/并发模型；动态边界；浏览器宿主；XStyle IR、标准 CSS 互操作与核心语言的责任边界。
 **输出物**：规则 ID、RFC、正反例、形式模型、互操作资源图、Web 平台矩阵和样式降级规范。  
 **完成标准**：每项 `XLC-*` 有接受/否决结论、规范归属、目标项目和测试；任何派生需求均不得伪装成 12 份原始材料的要求。
 
@@ -415,7 +618,7 @@ type        = path_type | tuple_type | array_type | slice_type | reference_type 
 | 13.6 | Edition 与可观察行为 | `CORE/草案` | 作为治理规则，Edition 隔离解析/语义变化；定义顺序、布局、诊断、时间相关行为与实现自由；列明不支持原型链、元类和隐式 GC。对应 `XLC-CORE-018~020`。 | N-1/N-2 迁移项目和兼容评审清单。 |
 | 13.7 | 多语言互操作语义 | `EXTENDED/待决策` | 在对应阶段决策 C 数据模型；Python GIL/引用/异常/Buffer；JNI 引用/线程/类加载；JS Object/Promise/ESM；统一所有权、错误、线程和版本图。对应 `XLC-FFI-*`。 | 每种桥接均有资源生命周期图、双向调用、泄漏、异常和版本矩阵测试。 |
 | 13.8 | 浏览器宿主语义 | `EXTENDED/待决策` | 在 P5 决策 Event Loop、task/microtask、DOM/Web API、Worker、WASM/JS 桥、组件生命周期、SSR/Hydration、SourceMap 与 Web 安全默认。对应 `XLC-WEB-*`。 | Web Platform Tests 子集、浏览器 E2E、SSR/CSR 一致性和 OWASP 场景测试。 |
-| 13.9 | 样式语言责任边界 | `EXTENDED/待决策` | 在 P5 决策独立 `x-style` DSL/生态：Selector、Cascade、继承、变量、Flex/Grid、响应式、动画、隔离、SSR、A11y 和多后端降级；不得改变核心求值语义。对应 `XLC-STYLE-*`。 | CSS/WPT 对照、截图黄金、WCAG 自动+人工检查、平台降级诊断。 |
+| 13.9 | UI 与样式责任边界 | `EXTENDED/待决策` | P5 候选采用普通 XUI 类型/函数 + XStyle Token/CoreStyle IR + 标准 CSS/CSS Modules；浏览器负责 Selector/Cascade/Flex/Grid，不引入核心 UI 语法。对应 `XLC-STYLE-*`。 | 类型化 class、CSS/WPT、截图、WCAG 和显式平台降级诊断。 |
 | 13.10 | 服务器与平台契约 | `CORE+EXTENDED/草案` | HTTP/API Schema、韧性、流控、生命周期、配置/秘密、可观测、K8s；平台 Tier、最低版本、CPU 基线、SDK、签名、真机测试与 EOL。对应 `XLC-SERVER-*`、`XLC-PLATFORM-*`。 | 故障注入、集群回滚、干净机安装、真机/模拟器和生命周期演练。 |
 
 ## 第十四篇 原始价值回归规范队列
