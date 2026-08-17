@@ -256,7 +256,7 @@ x-lang/
 │  ├─ x-decimal/                    # decimal32/64/128 实验
 │  ├─ x-regex/                      # 正则及编译期 DFA 实验
 │  ├─ x-bitfield/                   # 位流/位域实验
-│  ├─ x-codec/                      # JSON/CSV/YAML/TOML/MessagePack
+│  ├─ x-codec/                      # JSON/CSV/YAML/TOML/MessagePack；JSON 契约见 RFC-0010
 │  ├─ x-schema/                     # Schema 演进与版本转换
 │  ├─ x-config/                     # default/file/env/CLI 配置层级
 │  ├─ x-cache/                      # 版本化 Key、TTL、并发填充和污染恢复

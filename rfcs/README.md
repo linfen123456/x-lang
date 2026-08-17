@@ -30,6 +30,8 @@ Accepted/Implemented/Stable → Superseded
 | [RFC-0006](0006-type-value-place-and-evaluation.md) | Proposed | 类型、Value/Place/Temporary 与确定求值 | `specs/language/types-and-evaluation.md` |
 | [RFC-0007](0007-ownership-borrow-move-and-drop.md) | Proposed | 所有权、借用、移动、初始化与 Drop | `specs/language/ownership-and-drop.md` |
 | [RFC-0008](0008-result-panic-termination-and-cleanup.md) | Proposed | Result、panic、终止类别与清理 | `specs/language/errors-and-termination.md` |
+| [RFC-0009](0009-owned-text-bytes-and-collections.md) | Proposed | 拥有型文本/字节与 HashMap/BTreeMap/OrderedMap | `specs/library/text-bytes-and-collections.md` |
+| [RFC-0010](0010-json-data-model-codec-and-canonical-output.md) | Proposed | JSON 模型、三类 Codec、资源上限与 Canonical Output | `specs/library/json.md` |
 
 ## 接受门禁
 

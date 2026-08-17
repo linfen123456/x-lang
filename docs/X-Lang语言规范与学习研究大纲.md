@@ -387,7 +387,7 @@ pub extern "C" fn add(left: I32, right: I32) -> I32 {
 | 8.4 | C ABI | `CORE+EXTENDED/待决策` | CORE 冻结最小 `extern "C"`、`@repr(C)`、固定宽度标量、opaque handle、panic/所有权边界；完整平台/类型矩阵为 EXTENDED。来源：2、10、11。 | 1.0 最小双向调用和负向边界通过；扩展 ABI 矩阵独立晋级。 |
 | 8.5 | 多语言绑定 | `EXPERIMENTAL/待决策` | C++、Python、Node.js 的生成绑定、对象生命周期和线程规则。来源：7、8、10、11。 | C++ 模板零拷贝不得预设为普遍可行。 |
 | 8.6 | 动态库与插件 | `EXTENDED/待决策` | 插件发现、版本协商、符号版本、隔离和卸载安全。来源：10。 | ABI 不匹配必须拒绝加载并提供诊断。 |
-| 8.7 | Schema 与序列化 | `EXTENDED/待决策` | JSON/CSV/Protobuf/Arrow 等格式与 Schema 演进。来源：9、12。 | 前后兼容规则及大数据流式边界明确。 |
+| 8.7 | Schema 与序列化 | `EXTENDED/待决策` | JSON 采用 [RFC-0010](../rfcs/0010-json-data-model-codec-and-canonical-output.md) 的官方 Codec 候选；CSV/Protobuf/Arrow 等格式与 Schema 演进分别评审。来源：9、12。 | 前后兼容、Owned/Borrowed/Streaming、Canonical Output 与大数据边界明确。 |
 | 8.8 | 供应链元数据 | `EXTENDED/草案` | SBOM、签名、哈希、来源、CVE 和可复现构建。来源：11。 | 构建产物可追溯；离线/在线审计策略明确。 |
 | 8.9 | 发布与迁移 | `CORE/草案` | 发布、废弃、破坏性变更检测、Edition 和 LTS。来源：11。 | 公开 API 差异工具有规范化输入输出。 |
 | 8.10 | 跨边界语义 | `CORE/待决策` | 作为核心边界定义所有权、异常、线程、字符串、回调和异步跨语言行为。 | 每种绑定提供资源与错误生命周期图。 |
@@ -402,8 +402,8 @@ pub extern "C" fn add(left: I32, right: I32) -> I32 {
 
 | 编号 | 模块域 | 分级/状态 | 详细目录内容与大纲说明 | 输出与验收 |
 |---|---|---|---|---|
-| 9.1 | Prelude 与集合 | `CORE/草案` | 基础 Trait、Option/Result、Vec/Map/Set、迭代器；控制默认导入规模。来源：1、2。 | API 最小稳定集、复杂度和分配行为明确。 |
-| 9.2 | 文本与国际化 | `CORE+EXTENDED/草案` | String、字节、Unicode、正则、编码、i18n/l10n。来源：9。 | Unicode 版本与索引语义明确。 |
+| 9.1 | Prelude 与集合 | `CORE/草案` | [RFC-0009](../rfcs/0009-owned-text-bytes-and-collections.md) 区分 Vec、HashMap、BTreeMap、OrderedMap 与借用 API；控制默认导入规模。来源：1、2。 | API、复杂度、分配、HashDoS 与顺序语义明确。 |
+| 9.2 | 文本与国际化 | `CORE+EXTENDED/草案` | RFC-0009 区分 `Str`/slice 借用视图与 `String/Bytes/Vec` 拥有值；Unicode、正则、编码、i18n/l10n 分层。来源：9。 | 返回借用不会逃逸；Unicode 版本与索引语义明确。 |
 | 9.3 | 数学与时间 | `CORE/草案` | 数学、随机、日期时间、时区、Duration；密码学随机独立。来源：9、10。 | 时钟类型和随机安全级别不可混用。 |
 | 9.4 | 文件与数据流 | `CORE+EXTENDED/草案` | 路径、文件、流、async I/O、mmap、Direct I/O、零拷贝。来源：5、12。 | 安全默认；平台特化通过能力查询。 |
 | 9.5 | 网络协议 | `CORE+EXTENDED/待决策` | TCP/UDP/TLS 为基础能力；HTTP、QUIC、gRPC、WebSocket 评估独立官方包。来源：4、9。 | 不把快速演进协议锁入核心稳定周期。 |
