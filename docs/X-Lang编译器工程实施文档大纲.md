@@ -189,10 +189,10 @@
 | 编号 | 工作包 | 分级/状态 | 实施内容 | 交付与验收 |
 |---|---|---|---|---|
 | 8.1 | 统一 CLI 架构 | `CORE/草案` | 命令路由、配置、退出码、JSON 输出、颜色、进度和 Shell 补全。来源：2、12。 | CLI 契约测试；非 TTY 和 CI 输出稳定。 |
-| 8.2 | 核心命令 | `CORE/草案` | `new/build/run/check/test/fmt/doc/repl` 的参数、输入输出和错误码。 | 每命令有帮助、示例、快照和端到端测试。 |
+| 8.2 | 核心命令 | `CORE/草案` | `init/build/run/check/test/fmt/doc` 的参数、输入输出和错误码；`new` 仅为兼容别名，REPL 延后。 | 每命令有帮助、示例、文本/JSON 快照和端到端测试。 |
 | 8.3 | XPM | `EXTENDED/待决策` | 在 P2/P3 决策注册表、解析器、锁文件、缓存、离线、签名、publish/yank。来源：2、11。 | 解析确定；供应链威胁模型和恢复流程通过评审。 |
 | 8.4 | 工作区与构建脚本 | `EXTENDED/待决策` | Workspace DAG、Feature、`build.x` 沙箱、环境探测和可复现性。来源：10。 | 构建脚本最小权限；输入均进入缓存键。 |
-| 8.5 | 格式化与文档 | `EXTENDED/草案` | xfmt 幂等、xdoc API/示例/搜索、文档测试和离线包。来源：2、10。 | 格式化 AST 不变；文档链接与示例在 CI 校验。 |
+| 8.5 | 格式化与文档 | `CORE+EXTENDED/草案` | `xfmt` 作为核心规范格式；xdoc 的 API/示例/搜索、文档测试和离线包作为扩展。来源：2、10。 | `parse-format-parse` 等价且格式化幂等；文档链接与示例在 CI 校验。 |
 | 8.6 | LSP | `EXTENDED/待决策` | 在 P3 决策增量文本、诊断、补全、跳转、引用、重命名、语义 Token。来源：2。 | LSP 协议测试；取消、并发和大项目性能基准。 |
 | 8.7 | IDE 集成 | `EXTENDED/待决策` | 在 P3 决策 VS Code 客户端和 IntelliJ LSP/PSI 策略，调试和任务入口。来源：2、3。 | 两插件共享服务逻辑；安装、升级和兼容测试。 |
 | 8.8 | 调试、Hot/Watch | `EXTENDED+EXPERIMENTAL/待决策` | Debug adapter、watch 重启、增量重载、状态迁移和安全限制。来源：11、12。 | Watch 可先实现；状态保持热重载需独立 RFC。 |
@@ -294,6 +294,8 @@
 | P0-T05 Lexer/Parser/AST 原型 | P0-T01 | 可解析最小语言并打印 AST | fuzz 冒烟无崩溃，错误定位可读。 |
 | P0-T06 最小端到端链路 | P0-T04/T05 | AST→简化 IR→LLVM→Hello World | 可复现命令、调试制品和 CI 证据齐全。 |
 | P0-T07 最小 ABI/布局探针 | P0-T02/T04 | 一个主机 target 的机器可读布局、黄金对象和 C 双向标量/结构体 Harness；对应 `GAP-COMP-01` | 固定 C/LLVM 版本结果一致；明确不构成 Stable ABI 承诺。 |
+| P0-T08 冻结 1.0 语言剖面 | P0-T01/T02/T03 | 设计宪法、关键字/语法预算、公开类型边界、1.0 非目标和逐项 RFC | 每个候选能力有接受/延期/拒绝结论；无宏、默认参数或高级泛型暗中成为前置。 |
+| P0-T09 冻结跨域语义矩阵 | P0-T02/T03/T07 | return/`?`/panic/abort/Drop/线程失败/取消/FFI 的结果和清理矩阵 | Rule ID、状态机、MIR trace 和正反测试设计一一对应。 |
 
 **P0 检查点**：架构风险已验证；规范、实现和测试追溯可演示；若 LLVM 集成或语法模型不可行，先调整 ADR，不进入 P1。
 
@@ -382,7 +384,7 @@
 
 | 工作包 | 主要项目 | 产品阶段 | 交付内容 | 最小验收 |
 |---|---|---|---|---|
-| WP-13.1 宏与高级泛型 | `x-macro-model`、`x-macro-expand`、`x-macro-host`、`x-traits` | P2；过程宏可延至 P3 | 展开阶段、卫生、沙箱、Const Generics/GAT/对象安全 | 规范符合性、展开映射、资源逃逸与求解器压力测试。 |
+| WP-13.1 宏与高级泛型 | `x-macro-model`、`x-macro-expand`、`x-macro-host`、`x-traits` | 1.0 后按独立 RFC；不预建空项目 | 宏、Const Generics、GAT、Trait Object 和 Specialization 逐项探针，不作为核心实现前置 | 每项独立通过规范符合性、展开映射、资源逃逸、求解器/代码体积预算和退出评审。 |
 | WP-13.2 语义执行与快速调试 | `x-mir-interpreter`、`x-codegen-fast`、`xrepl`、`x-kernel` | P1-P3 | MIR 执行、UB 检测、快速 Debug、REPL/Notebook 状态模型 | 与 LLVM 差分；失败恢复；冷/增量基准形成 ADR。 |
 | WP-13.3 生产诊断 | `x-ub-check`、`x-vet`、`x-race`、`x-coverage`、`x-profiler`、`x-instrumentation` | P3-P4 | 静态规则、竞态插桩、覆盖率、CPU/Heap/Task、Sanitizer/PGO 接口 | 已知缺陷语料、SourceMap、开销预算及跨平台能力矩阵。 |
 | WP-13.4 多语言 SDK | `x-ffi-c`、`x-bindgen`、`x-python`、`x-python-pack`、`x-jni`、`x-js`、`x-js-pack` | C 子集 P3-P4；其余 P5 | 对象、布局、所有权、异常、线程、异步和发布协议 | C/CPython/JVM/Node/Browser 版本矩阵与泄漏测试。 |
@@ -476,6 +478,8 @@ CI/Nightly 必须轮换覆盖：磁盘满、只读文件系统、OOM、句柄耗
 | LSP | x-lsp | 编辑器 | 遵循协议版本；实验扩展命名空间隔离。 |
 | `x.meta`/MCP | 编译器/语义层 | Agent 工具 | 实验 Schema，默认本地和只读。 |
 | SBOM/证明/签名 | CI/发布系统 | 用户、审计、安全团队 | 采用开放标准并保留验证工具。 |
+
+所有公开数据契约必须记录 `schema_version`、未知字段策略、兼容矩阵、迁移/回滚方式和黄金语料。稳定规则采用唯一且不可复用的 Rule ID；诊断错误码不得改作其他含义，文本与 JSON 同时做快照。名称解析 dump 必须在 OS、文件遍历顺序和缓存状态变化时保持确定。差分测试按四类 Oracle 验收：确定性结果（值、输出、诊断、Drop trace）、终止类别（正常、panic、abort、取消、OOM）、ABI（布局、符号、C harness）和并发允许 trace 集；不得只比较 stdout，也不得用“未定义”掩盖尚未定义的规则。
 
 ## 附录 C 任务卡模板
 

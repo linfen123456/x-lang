@@ -221,7 +221,7 @@
 | XLF-11-002 | LTS 与发布节奏 | release governance | CORE治理·重设计 | 由资源/SLA 决定，不预设固定年限 |
 | XLF-11-003 | `x rfc` 流程 | x-rfc、governance | EXTENDED·接受 | 模板、索引和审批状态机 |
 | XLF-11-004 | SBOM/CVE/可复现构建 | x-supply-chain | CORE治理·接受 | CycloneDX/SPDX、审计和双构建 |
-| XLF-11-005 | 管道、解构、命名/默认参数 | 语法 RFC、x-parser | CORE/EXTENDED·研究后接受 | 语法、求值顺序和兼容测试 |
+| XLF-11-005 | 管道、解构、命名/默认参数 | 语法 RFC、x-parser | SPLIT·解构为 CORE 候选，其余 1.0 后逐项研究 | 语法预算、求值顺序、格式化和兼容测试 |
 | XLF-11-006 | 时间旅行调试 | x-replay | RESEARCH·研究 | RR/Intel PT 能力矩阵 |
 | XLF-11-007 | Watch 与状态保持热重载 | x-watch、x-hot-reload | EXTENDED/EXPERIMENTAL·重设计 | Watch 先行；状态迁移独立 RFC |
 | XLF-11-008 | 多调用约定 | x-ffi | EXTENDED·接受 | 平台 ABI 测试 |
