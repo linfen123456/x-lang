@@ -42,7 +42,8 @@ x.toml
 - **Source ID**：Registry、Git、Workspace/Path 或 Vendor 的规范来源身份。
 - **Package ID**：`normalized-name + SourceId + exact-version-or-commit`；依赖 Alias 不参与真实身份。
 - **Dependency Key**：当前包源码中使用的包根名称，可以与 Package Name 不同。
-- **Resolution Domain**：Feature 和依赖选择互不污染的 `target-normal`、`host-build`、`dev-test` 等域。
+- **Resolution Domain**：Feature 和依赖选择互不污染的 `target-normal`、`host-tool`、`dev-test` 等域。
+- **Tool Dependency**：在 Host 上执行、为 Target 生成或检查输入的受控工具；它是锁图节点，不是任意命令字符串。
 - **Public Dependency**：类型出现在当前包公开 API 中的直接依赖。
 
 ## 4. `x.toml` 候选结构
@@ -79,7 +80,7 @@ ui = { git = "https://example.invalid/ui.git", rev = "<commit>" }
 http = { version = "^2.0", default-features = false }
 tls = { version = "^1.0", optional = true }
 
-[build-dependencies]
+[tool-dependencies]
 bindgen = { version = "^1.2", capabilities = ["read:include"] }
 
 [dev-dependencies]
@@ -100,7 +101,7 @@ unsafe-build-scripts = "deny"
 ## 5. 直接与传递依赖
 
 1. 源码只能导入 `[dependencies]` 中直接声明的 Dependency Key。
-2. `[dev-dependencies]` 只进入测试、示例和基准域；`[build-dependencies]` 只进入 Host Build 域。
+2. `[dev-dependencies]` 只进入测试、示例和基准域；`[tool-dependencies]` 只进入 Host Tool 域，并作为具有 Package ID、摘要和 Capability 的正式节点解析。1.0 不接受不透明命令式 `[build-dependencies]`。
 3. 传递依赖进入 `x.lock`、SBOM、漏洞和许可证图，但不进入名称解析。
 4. 依赖默认 Private。公开签名暴露第三方类型时必须声明 `public = true`，否则 API Lint 阻断。
 5. 推荐使用本地领域类型和 `lib.x` Facade 隔离第三方类型；Public Dependency 的 SemVer/来源变化传播为当前包兼容风险。
@@ -133,8 +134,8 @@ XPM 首个 Resolver 建议使用 PubGrub，但规范只承诺确定结果、版�
 ## 7. Feature Resolution Domain
 
 - Feature 只在同一 `PackageId + ResolutionDomain` 内单调合并；
-- 至少隔离 `target-normal`、`host-build` 和 `dev-test`；
-- Build Dependency 的 Feature 不污染 Target Dependency；
+- 至少隔离 `target-normal`、`host-tool` 和 `dev-test`；
+- Tool Dependency 的 Feature、Host Target 与传递边不污染 Target Dependency；
 - Feature 只能增加能力，不能删除 API、改变类型/所有权/错误语义或关闭安全检查；
 - 互斥后端使用显式配置枚举、Target 或不同包，不使用冲突 Boolean Feature；
 - 默认 Feature 最小；依赖 Feature 使用命名空间；
@@ -147,7 +148,7 @@ XPM 首个 Resolver 建议使用 PubGrub，但规范只承诺确定结果、版�
 - `key/feature` 只激活已声明的直接依赖 `key` 上公开的 `feature`；依赖未激活、key 未声明、Feature 未知或指向传递依赖时稳定报错；
 - 1.0 不提供 Weak Activation。若需要“仅当依赖已激活时再启用其 Feature”，必须由后续 RFC 引入独立语法，不把 `key/feature` 隐式解释为弱激活；
 - Feature 引用形成有向图；自环或多节点环即 Manifest 错误，不依赖固定点求值顺序；
-- Feature 激活不能跨 Resolution Domain。`target-normal` 不能激活 `host-build`/`dev-test` 的依赖或 Feature，反向同理；共享需求必须在各域显式声明；
+- Feature 激活不能跨 Resolution Domain。`target-normal` 不能激活 `host-tool`/`dev-test` 的依赖或 Feature，反向同理；共享需求必须在各域显式声明；
 - 同一 `PackageId + ResolutionDomain` 内重复激活取有序集合并集；未知 Feature、禁止组合或 Domain 穿越必须在生成 Lockfile 前失败。
 
 示例中的 `tls` Feature 同时激活 Optional Dependency `tls` 和直接依赖 `http` 的公开 `tls` Feature；它不能激活未声明的传递依赖。
@@ -176,6 +177,7 @@ json = {
 
 - Manifest 的 Branch/Tag 只是请求；Lockfile 必须固定 Commit 和规范源码树摘要；
 - Git URL 规范化但不得静默切换来源；更新只能通过显式 `x update`；
+- Git 是可选 Source 类型而非 GitHub 专用入口；Host 名称不享有语义特权，Registry/Path/Vendor/其他合规 Git Host 使用同一身份与校验规则；
 - Submodule/LFS 默认拒绝，启用时必须递归固定 Commit/Object Digest；
 - 不读取脏工作树、Hook 或未声明全局 Git 配置；凭据只用于 Fetch，不能进入 Lockfile、日志或 Build Script；
 - 稳定 Registry 发布原则上要求将 Git 依赖替换为 Registry 版本；Exact Commit 例外需要组织 Policy。
@@ -219,6 +221,16 @@ provenance = "slsa:..."
 yanked = false
 license = "MIT"
 
+[[package]]
+id = "bindgen@1.2.0#registry:official"
+name = "bindgen"
+version = "1.2.0"
+source = "registry:official"
+content-digest = "sha256:..."
+signature = "sigstore:..."
+provenance = "slsa:..."
+license = "Apache-2.0"
+
 [[resolution]]
 id = "target-normal:x86_64-pc-windows-msvc"
 domain = "target-normal"
@@ -244,6 +256,27 @@ kind = "normal"
 public = false
 cfg = "true"
 
+[[resolution]]
+id = "host-tool:x86_64-pc-windows-msvc"
+domain = "host-tool"
+host = "x86_64-pc-windows-msvc"
+target = "x86_64-pc-windows-msvc"
+root = "order-service@1.4.0#workspace"
+
+[[resolution.node]]
+package = "bindgen@1.2.0#registry:official"
+features = []
+cfg = "true"
+
+[[resolution.edge]]
+from = "order-service@1.4.0#workspace"
+dependency-key = "bindgen"
+to = "bindgen@1.2.0#registry:official"
+kind = "tool"
+capabilities = ["read:include"]
+public = false
+cfg = "true"
+
 [[git-source]]
 url = "https://github.com/example/x-json.git"
 commit = "6f1e8d..."
@@ -260,13 +293,26 @@ target = "jvm-21"
 abi = "jvm-module-path"
 ```
 
-`resolution.node` 是版本化图节点，记录每包在该 Domain 实际启用的 Feature 和规范化 Target/Cfg 条件；`resolution.edge` 记录来源节点、Dependency Key/Alias、目标 Package ID、`normal|build|dev` 边类型、Public 标记和激活条件。Host、Target 和 Domain 共同构成解析实例身份，同一 Package ID 可在不同 Domain 有不同 Feature 集。工具必须从边而非全局包列表实现 `tree/why/audit/SBOM`。
+`resolution.node` 是版本化图节点，记录每包在该 Domain 实际启用的 Feature 和规范化 Target/Cfg 条件；`resolution.edge` 记录来源节点、Dependency Key/Alias、目标 Package ID、`normal|tool|dev` 边类型、Public 标记、Capability 和激活条件。Host、Target 和 Domain 共同构成解析实例身份，同一 Package ID 可在不同 Domain 有不同 Feature 集。工具必须从边而非全局包列表实现 `tree/why/audit/SBOM`。
+
+每个可解析节点必须能离线还原以下固定投影，不能只依赖全局旁表或可变服务：
+
+```text
+Package ID and normalized Source ID
+exact registry version or Git commit
+source tree/content digest
+Resolution Domain and resolved Feature set
+host and target
+incoming dependency kind and activation condition
+signature/provenance verification status
+license and yank/advisory state
+```
 
 `foreign-resolution` 是 RFC-0004 所定义冻结外部图的引用；`x.lock` 至少内嵌可审计节点/边及制品摘要，`external-lock-digest` 只证明原生态 Lockfile，不能代替该图。Lockfile 必须稳定排序且不可手改，禁止记录凭据、用户绝对路径、下载时间或其他不稳定字段。
 
 ### 10.1 P0 最小图契约
 
-P0 即冻结 `PackageId`、Path/Workspace Source ID、`resolution.node/edge`、Host/Target 和 `normal|build|dev` 边类型；只需解析单包及 Workspace Path Dependency，不需要 SemVer、Git、Registry 或 PubGrub。P2 在同一版本化契约上增加完整来源和解析，不允许 XBuild 使用临时的第二套 `BuildInput`。
+P0 即冻结 `PackageId`、Path/Workspace Source ID、`resolution.node/edge`、Host/Target 和 `normal|tool|dev` 边类型；只需解析单包及 Workspace Path Dependency，不需要 SemVer、Git、Registry 或 PubGrub。P2 在同一版本化契约上增加完整来源和解析，不允许 XBuild 使用临时的第二套 `BuildInput`。
 
 ### 10.2 Lockfile 政策
 
@@ -275,19 +321,25 @@ P0 即冻结 `PackageId`、Path/Workspace Source ID、`resolution.node/edge`、H
 - `--locked` 禁止更改 Lockfile；`--offline` 禁网；`--frozen` 等于两者同时启用；
 - Lock Schema 有主版本、未知字段规则、迁移工具和 N-1/N-2 兼容测试。
 
+### 10.3 PR Lock Diff 与 Changed Audit
+
+`x lock diff` 必须从两个 Lock Graph 产生稳定的人类与 JSON 报告，至少分类：新增、删除、升级、降级、Source/Commit/Digest 变化、Feature/Domain 变化、Capability 变化、Tool Dependency 变化及验证状态变化。
+
+Changed Audit 只把发生变化的节点、边及受其公开/工具影响的反向闭包作为增量审查范围，但不能隐藏完整图策略失败。报告同时给出“本次变化风险”和“完整图阻断”；缓存键包含 Advisory/Policy Snapshot，不能因缓存跳过新撤回或安全策略。
+
 ## 11. 命令契约
 
 ```text
-x add/remove <package> [--dev|--build|--public]
+x add/remove <package> [--dev|--tool|--public]
 x resolve [--target <triple>]
 x update [package] [--precise <version>] [--breaking]
-x lock check|diff
+x lock check|diff [--format json]
 x tree [--duplicates|--domain|--invert]
 x why <package>
 x explain <conflict-id>
 x fetch --locked
 x vendor [--locked]
-x audit
+x audit [--changed <base-lock>]
 x publish --dry-run
 x yank/unyank
 ```
@@ -297,7 +349,7 @@ x yank/unyank
 ## 12. 安全和供应链
 
 - 新直接依赖记录用途、Owner、许可证、维护状态、替代项、Public 状态和执行权限；
-- Build Script、过程宏、插件和 Foreign Adapter 是高权限依赖，默认无网络、源码只读、声明输入输出和 Capability；
+- Tool Dependency、过程宏、插件和 Foreign Adapter 是高权限依赖，默认无网络、源码只读、声明输入输出和 Capability；
 - Registry 支持摘要、签名、透明日志、SBOM、Provenance、密钥轮换、Yank、撤回和离线恢复；
 - Source Allowlist 和同名异源检查先于版本解析；
 - Lockfile 和诊断不输出 Token、SSH Key、Authorization Header 或凭据路径。
@@ -312,6 +364,7 @@ x yank/unyank
 - 传递依赖 Import、Public Dependency 泄漏和过期多版本例外产生稳定错误；
 - Digest/签名篡改、Mirror 替换、撤回和离线恢复演练；
 - N-1/N-2 Lockfile 迁移与 `--locked/--offline/--frozen` 行为测试。
+- PR Lock Diff Golden 覆盖新增/删除/升级/降级、Source/Digest/Feature/Capability/Tool 变化；Changed Audit 与全图策略结果一致。
 
 ## 14. 未决问题
 

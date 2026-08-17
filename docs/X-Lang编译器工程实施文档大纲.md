@@ -190,8 +190,8 @@
 |---|---|---|---|---|
 | 8.1 | 统一 CLI 架构 | `CORE/草案` | 命令路由、配置、退出码、JSON 输出、颜色、进度和 Shell 补全。来源：2、12。 | CLI 契约测试；非 TTY 和 CI 输出稳定。 |
 | 8.2 | 核心命令 | `CORE/草案` | `init/build/run/check/test/fmt/doc` 的参数、输入输出和错误码；`new` 仅为兼容别名，REPL 延后。 | 每命令有帮助、示例、文本/JSON 快照和端到端测试。 |
-| 8.3 | XPM | `CORE+EXTENDED/待决策` | P0 按 [RFC-0003](../rfcs/0003-package-manifest-resolution-lockfile.md) 冻结最小 PackageId、Path Workspace 和版本化 ResolvedGraph Contract；P2/P3 增加完整 Resolver、Lockfile、Git/Registry、Vendor、离线、签名和 publish/yank。P0 可作为 `x` 内置模块，不要求提前拆独立项目。来源：2、11。 | P0 三包 Path 图可重放；后续 Lock 字节确定、冲突可解释、供应链篡改/撤回/恢复通过。 |
-| 8.4 | XBuild、Workspace 与构建脚本 | `CORE+EXTENDED/待决策` | P0 建最小 Action DAG，P2/P3 按 [RFC-0004](../rfcs/0004-build-artifact-and-foreign-dependencies.md) 决策源码优先制品缓存、沙箱、Foreign Adapter 和可复现性。 | XBuild 不重选版本；脚本最小权限；每个输入进入构建键。 |
+| 8.3 | XPM | `CORE+EXTENDED/待决策` | P0 按 [RFC-0003](../rfcs/0003-package-manifest-resolution-lockfile.md) 冻结最小 PackageId、Path Workspace 和版本化 ResolvedGraph；P2/P3 增加 Tool Dependency、完整 Resolver/Lockfile、PR Lock Diff、Changed Audit、Git/Registry、Vendor、离线、签名和 publish/yank。P0 可作为 `x` 内置模块。来源：2、11。 | P0 三包 Path 图可重放；后续 Lock 字节确定，Host Tool 不污染 Target，依赖变化和供应链风险可解释。 |
+| 8.4 | XBuild、Workspace 与生成 Action | `CORE+EXTENDED/待决策` | P0 建最小 Action DAG，P2/P3 按 [RFC-0004](../rfcs/0004-build-artifact-and-foreign-dependencies.md) 决策受限 Generation Action、源码优先制品缓存、沙箱、Foreign Adapter、多目标 Bundle 和可复现性。 | XBuild 不重选版本；生成工具来自锁图；每个输入进入构建键；Bundle 可验证。 |
 | 8.5 | 格式化与文档 | `CORE+EXTENDED/草案` | `xfmt` 作为核心规范格式；xdoc 的 API/示例/搜索、文档测试和离线包作为扩展。来源：2、10。 | `parse-format-parse` 等价且格式化幂等；文档链接与示例在 CI 校验。 |
 | 8.6 | LSP | `EXTENDED/待决策` | 在 P3 决策增量文本、诊断、补全、跳转、引用、重命名、语义 Token。来源：2。 | LSP 协议测试；取消、并发和大项目性能基准。 |
 | 8.7 | IDE 集成 | `EXTENDED/待决策` | 在 P3 决策 VS Code 客户端和 IntelliJ LSP/PSI 策略，调试和任务入口。来源：2、3。 | 两插件共享服务逻辑；安装、升级和兼容测试。 |
@@ -330,7 +330,7 @@
 
 | 任务 | 依赖 | 交付物 | 验收 |
 |---|---|---|---|
-| P3-T01 XPM、XBuild 与锁文件 | P2-T03 | 实施 RFC-0003/0004 的解析、Lock、缓存、离线、Registry、Artifact 和 Adapter | 确定解析、源码回退、缓存投毒和供应链测试。 |
+| P3-T01 XPM、XBuild 与锁文件 | P2-T03 | 实施 RFC-0003/0004 的解析、Host Tool Lock、Lock Diff/Audit、受限生成、缓存、离线、Registry、Artifact、Bundle 和 Adapter | 确定解析、源码回退、生成越权、缓存投毒、多目标选择和供应链测试。 |
 | P3-T02 LSP 与 VS Code | P2 | 诊断、补全、跳转、重命名 | 协议测试和大项目延迟预算。 |
 | P3-T03 IntelliJ 集成 | P3-T02 | LSP 客户端/必要 PSI | 与 VS Code 共享语义服务。 |
 | P3-T04 增量编译 | 稳定 IR/查询 ADR | 查询图、缓存、失效和统计 | 正确性优先，典型改动有可复现收益。 |

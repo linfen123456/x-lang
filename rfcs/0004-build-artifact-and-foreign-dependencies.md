@@ -99,11 +99,15 @@ SBOM/provenance/signature/content digest
 
 ## 7. Build Script 与生成代码
 
-1. 1.0 默认无通用 Build Script；必要外部生成任务通过登记制 Action/Adapter 执行。
-2. 后续 `build.x` 默认无网络、源码只读、输出限定、环境白名单、子进程 Capability、超时/内存/输出限制。
-3. 输入、工具和输出摘要进入构建键；生成物带 Generator Version 和 Provenance。
-4. Build Script 不得修改 Manifest/Lockfile、用户源码或依赖缓存。
-5. 同输入生成结果不一致时阻断共享缓存和发布。
+1. 1.0 无通用 Build Script；必要任务只能通过登记制 Generation Action/Adapter 执行。
+2. Generation Action 的工具必须是 RFC-0003 Host Tool Domain 中的锁图节点，不能是 PATH 上偶然找到的命令。
+3. 每个 Generation Action 显式声明：Tool Package/Artifact ID、参数、工作目录、输入、输出、环境白名单、Capability、Host/Target、超时、内存、进程和输出上限。
+4. 时间、随机、网络、未声明文件和未声明环境默认不可见；确需非确定输入时必须标为不可共享缓存且不得进入可复现发布。
+5. 工具、输入、参数、环境、Capability、Target 和输出摘要全部进入构建键；生成物记录 Generator Version、SourceMap、License 和 Provenance。
+6. Action 不得修改 Manifest/Lockfile、用户源码或依赖缓存；输出只能原子写入声明目录。
+7. 同输入生成结果不一致时隔离结果，阻断共享缓存和发布。
+
+后续若研究 `build.x`，必须通过新 RFC 扩大 Capability；它不能绕过上述 Action Contract。
 
 ## 8. Git、Vendor 与离线
 
@@ -197,6 +201,7 @@ x build/check/run/test [--locked|--offline|--frozen]
 x build --plan [--format json]
 x build --explain-rebuild <target>
 x artifact inspect|verify|provenance
+x bundle build|inspect|verify
 x cache status|verify|prune
 x vendor|vendor verify
 x foreign add jar|c|cxx
@@ -205,9 +210,30 @@ x bindgen --locked
 x repro pack
 ```
 
-命令输出提供人类文本和版本化 JSON；失败包含 Action ID、输入摘要、Sandbox/Cache 状态和安全回退结果。
+命令输出提供人类文本和版本化 JSON；失败包含 Action ID、输入摘要、Sandbox/Cache 状态和安全回退结果。`x bundle build` 只汇集已验证 Artifact，不重新编译或解析依赖。
 
-## 14. 工具复用策略
+## 14. 多目标分发 Bundle
+
+发布单元是版本化 Distribution Bundle，而不是未注明目标的散装二进制。Bundle Manifest 至少记录：
+
+```text
+bundle schema and package identity/version
+supported target triples and CPU baseline
+artifact kind/path/content digest/size
+compiler, stdlib, runtime and ABI requirements
+profile, panic strategy and enabled features
+dynamic libraries, SDK and platform minimum versions
+SBOM and license references
+build provenance and source/lock digests
+signature, signer identity and verification policy
+debug symbols and SourceMap references
+```
+
+一个 Bundle 可以包含多个 Target Artifact，但每个 Artifact 的 Host/Target、摘要和运行时契约独立验证。安装器只能选择精确兼容项；不允许把 `-march=native` 产物标为通用 CPU，也不承诺不同 Host 对 native 优化产生相同字节。
+
+Bundle 可以通过 Registry、OCI 或离线介质传输；传输位置不构成包身份，也不允许宣称单一网络或 IPFS 地址永久可用。
+
+## 15. 工具复用策略
 
 | 能力 | 首选借鉴/复用 | 边界 |
 |---|---|---|
@@ -221,7 +247,7 @@ x repro pack
 | Blob 分发 | OCI Distribution | XPM 管理版本、Yank 和索引 |
 | 供应链 | TUF、Sigstore、in-toto/SLSA、SPDX/CycloneDX | 不自创密码协议 |
 
-## 15. 验收
+## 16. 验收
 
 - 两个隔离环境构建结果可比较，差异有输入级解释；
 - 修改每类声明输入产生必要 Cache Miss，无关输入不重建；
@@ -230,10 +256,11 @@ x repro pack
 - Vendor 与 Registry 构建的语义、SBOM 和测试一致；
 - JAR 传递冲突、重复 Class、POM 篡改具有负向语料；
 - C/C++ ABI 不匹配、Allocator/Exception 跨边界和 Debug/Release Runtime 混用被拒绝；
-- Build Script 越权、超时、OOM 不污染 Cache；
+- Generation Action 越权、未声明输入、超时、OOM 和非确定输出不污染 Cache；
+- 多目标 Bundle 的 Target 选择、摘要、签名、运行时最低版本、SBOM 和 Provenance 具有正反语料；
 - 至少一个 100 包/10,000 文件 Workspace 验证全量、单包增量和远程 Cache 收益。
 
-## 16. 未决问题
+## 17. 未决问题
 
 | 问题 | Owner | 截止阶段 | 未达成一致时的失败回退 |
 |---|---|---|---|
