@@ -161,14 +161,14 @@ literal       = "true" | "false" | INTEGER | FLOAT | CHAR | STRING ;
 
 ## 6. 诊断
 
-`X-E1xxx` 专用于词法和语法。Rule ID 使用 `RULE-LEX-*`、`RULE-SYN-*`，不得把 Rule ID 当诊断码复用。
+`X-E1000`～`X-E1999` 专用于词法和语法。Rule ID 使用 `RULE-LEX-*`、`RULE-SYN-*`，不得把 Rule ID 当诊断码复用。首批符合性语料固定使用：`X-E1001` 非法 UTF-8、`X-E1010` 比较链、`X-E1011` 相等链、`X-E1012` 非尾部或重复 `..`、`X-E1020` 未登记或附着位置非法的属性；新增诊断必须登记具体四位编号，不能只引用范围占位符。
 
 ## 7. 验收语料
 
 - compile-pass：31 个关键字上下文、`pub(package)`、tuple `.0`、尾逗号和合法结构模式；
 - compile-fail：比较链、相等链、非尾部/重复 `..`、未知属性、嵌套导入和非法 UTF-8；
 - AST Snapshot：赋值左侧保留普通表达式树，属性和可见性节点唯一；
-- 诊断 Snapshot：每个 `X-E1xxx` 固定主 Span、标签和可选 Fix-it；
+- 诊断 Snapshot：上述具体 `X-E####` 固定主 Span、标签和可选 Fix-it；
 - `parse → format → parse` AST 等价，Formatter 二次执行零差异。
 
 ## 8. 非目标

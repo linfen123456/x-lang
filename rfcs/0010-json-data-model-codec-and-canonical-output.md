@@ -90,9 +90,11 @@ pub fn encode_canonical<T>(value: &T) -> Result<Bytes, JsonError>;
 
 - 错误包含稳定 Kind、字节 Span、JSON Pointer 路径和资源限制名称；不回显大段秘密输入；
 - compile-pass/fail：拥有型与借用型结果、借用逃逸和 Codec Trait 缺失；
+- AST/HIR Snapshot：`decode/decode_borrowed/stream/encode_canonical` 均保持普通路径与调用表达式，仅带类型参数的 API 记录泛型实参，不产生 JSON Literal 专用 AST；HIR 记录 Codec Trait 选择和输入生命周期来源；
+- 诊断 Snapshot：Codec Trait 缺失使用 `X-E3010`，Borrowed 结果逃逸复用 `X-E4004`，并固定类型、输入来源和建议的拥有型替代；
 - 解析语料：重复键、深度炸弹、超长字符串、巨大数字、非法 UTF-8/转义和截断输入；
 - Streaming：分块边界穷举、部分读取、取消和 Reader 错误；
 - Canonical Golden：键序、数字、Unicode、转义和跨平台确定字节；
 - Fuzz/差分：三条解码路径结果一致，外部实现差异必须分类；
+- 边界反例：重复键、深度炸弹、巨大数字、非规范 Unicode/转义、Borrowed 逃逸和 Canonical Bytes 差异必须分别命中确定策略；
 - 性能只记录环境、数据、吞吐、分配和尾延迟，不作无证据倍数声明。
-

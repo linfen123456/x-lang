@@ -54,10 +54,10 @@ use http::Client;
 
 ## 5. 导入与重导出
 
-规范语法保持：
+本 RFC 复用 RFC-0005 的 `visibility`，不维护第二套导入语法：
 
 ```ebnf
-use_decl = [ "pub" ], "use", path, [ "as", IDENT ], ";" ;
+use_decl = [ visibility ], "use", path, [ "as", IDENT ], ";" ;
 ```
 
 ### 5.1 精确导入

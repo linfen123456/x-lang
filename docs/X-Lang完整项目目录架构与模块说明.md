@@ -1,7 +1,7 @@
 # X-Lang 完整项目目录架构与模块说明
 
 > 总纲：[X-Lang 企业级完整文档体系总纲](./X-Lang企业级完整文档体系总纲.md)  
-> 大纲版本：1.1-outline｜状态：待决策｜顶层边界候选稳定、物理结构见 [ADR-0002](./decisions/ADR-0002-staged-modular-monolith.md)｜核心架构：阶段化模块化 Monorepo｜初始实现：Rust + LLVM
+> 大纲版本：1.1-outline｜状态：责任边界已冻结；物理结构 Proposed，见 [ADR-0002](./decisions/ADR-0002-staged-modular-monolith.md)｜核心架构候选：阶段化模块化 Monorepo｜初始实现：Rust + LLVM
 > 目的：区分当前真实目录、下一阶段物理结构和长期能力归属，为项目搭建、团队分工、测试与发布提供不超前的蓝图。
 
 ## 1. 架构原则
@@ -165,321 +165,31 @@ Web/原生特有属性通过显式扩展类型表达；不支持的属性必须�
 
 “未来可能复用”“功能矩阵有一个 `x-*` 名称”“目录更整齐”或“以后也许独立发布”都不足以拆分。内部模块无需复制 `OWNERS/CHANGELOG/docs/benches/fuzz/examples` 全套目录；只在存在独立发布、攻击面或性能门禁时创建真实需要的工件。
 
-## 2. 长期逻辑能力归属图
+## 2. 长期逻辑能力归属
 
-下列树保留完整能力和责任归属，但不是物理建仓命令，也不承诺叶子节点成为 crate、目录或独立版本。任何节点进入实际 Workspace 前必须回到 1.3–1.7 的阶段与拆分门禁。
+本节只维护责任域，不再展开数百个假想目录。物理结构以 1.2～1.5 和 [ADR-0002](./decisions/ADR-0002-staged-modular-monolith.md) 为准；第 6 节只维护能力组到责任域的架构映射，逐项 `XLF-*` 追溯仍以原始功能矩阵和未来 Traceability 工件为准。任何名称都不自动产生 crate、目录、仓库或稳定承诺。
 
-树中的 `ecosystem/*`、`ai/*`、`ml/*` 是历史逻辑别名：进入 P5 后分别映射到 `x-web/x-ui/x-server`、`x-ai-tools`、`x-ml` 联邦仓库的内部模块，禁止照字面在 Core Monorepo 建同名顶层目录。
+| 责任域 | 长期能力 | 稳定依赖边界 | 物理化条件 |
+|---|---|---|---|
+| Compiler Frontend | Source、Diagnostic、Token、Lexer、CST/AST、Resolve、Type、Trait、Borrow | 不依赖 LLVM、Runtime、IDE 或生态框架 | P0/P1 先为 `compiler` 内部模块；稳定查询和第二消费者出现后再拆 |
+| IR/Backend | HIR、MIR、Verifier、分析、LLVM、Target、Link | 只消费已类型化 IR 和 Target Contract，不反向修改前端语义 | 后端替换、独立构建收益或平台隔离有证据 |
+| Runtime | 启动、分配、panic、线程、任务、I/O、PAL、资源 | 不依赖编译器前端、包管理、Web 或 AI | ABI、平台和故障域需要独立测试/发布 |
+| Library | core、alloc、std、集合、文本、Codec、系统 API | `core → alloc → std` 单向；生态库不能进入 Prelude | API 和平台矩阵达到对应阶段门禁 |
+| Toolchain | `x`、XPM/XBuild、fmt/doc/test、LSP/DAP、诊断 | 通过 Driver/Query/Metadata 契约消费编译器，不读私有结构 | 两个消费者、独立发布或进程权限隔离 |
+| Distribution | Installer、Bundle、签名、SBOM、Provenance、Registry Client | 只消费已验证 Artifact 与 Lock Graph | P3 后供应链和回滚门禁通过 |
+| SDK/FFI | C、Python、JVM、Node、WASM 桥接 | 所有权、错误、线程、ABI 和版本显式，不进入核心类型 | 每个生态独立兼容矩阵和发布周期 |
+| Federated Ecosystem | Web、UI、Server、Data、ML、移动、Serverless | 只依赖稳定公开 API，不读取私有 AST/HIR/MIR | P5+ 独立 Owner、CI、版本和威胁模型 |
+| AI Tools | Context、Policy、Verify、Review、Eval、Provenance、Budget | 最小权限；不能绕过规范、CI、人工审批或供应链门禁 | 独立发布，默认不在编译关键路径 |
+| Labs | async/effect/comptime 扩展、ZKP、Replay、硬实时等研究 | 默认关闭；CORE 和 Stable 工件不得依赖 | Charter、预算、退出条件和实验报告完整 |
 
-```text
-x-lang/
-├─ Cargo.toml                       # Rust Workspace，仅纳入可构建成员
-├─ Cargo.lock                       # 工具链仓库锁文件
-├─ rust-toolchain.toml              # Rust 版本、组件、目标
-├─ x-workspace.toml                 # X 项目自身的工作区元数据
-├─ LICENSES/                        # 项目和第三方许可证
-├─ README.md
-├─ CONTRIBUTING.md
-├─ CODE_OF_CONDUCT.md
-├─ SECURITY.md
-├─ GOVERNANCE.md
-├─ CHANGELOG.md
-├─ AGENTS.md                        # Agent 工作边界和项目约定
-│
-├─ compiler/                        # 编译器：不得依赖 runtime/tools/editors
-│  ├─ x-source/                     # SourceId、FileId、Span、SourceMap、虚拟文件
-│  ├─ x-diagnostics/                # 错误码、标签、Fix-it、文本/JSON 渲染
-│  ├─ x-token/                      # TokenKind、Trivia、字面量载荷
-│  ├─ x-lexer/                      # 词法分析与词法错误恢复
-│  ├─ x-syntax/                     # CST、Parser、Pratt、增量语法接口
-│  ├─ x-ast/                        # 类型化 AST、Visitor、Folder、pretty print
-│  ├─ x-macro-model/                # Token Tree、宏输入输出、Span 和资源预算
-│  ├─ x-macro-expand/               # 卫生声明宏展开；不得执行不可信过程宏
-│  ├─ x-resolve/                    # DefId、作用域、模块、导入和可见性
-│  ├─ x-types/                      # TypeId、interning、统一、推断和布局抽象
-│  ├─ x-traits/                     # Trait 求解、一致性、关联项
-│  ├─ x-consteval/                  # 受限编译期解释、资源预算、确定性
-│  ├─ x-effects/                    # pure/effect 实验接口，默认 feature-off
-│  ├─ x-contracts/                  # 前后条件、不变量、example 降级和检查策略
-│  ├─ x-borrow/                     # Move、Borrow、Lifetime、Drop 检查
-│  ├─ x-hir/                        # 类型化 HIR 与验证器
-│  ├─ x-mir/                        # CFG、Place、显式 Drop、验证器
-│  ├─ x-mir-interpreter/            # MIR 参考执行、测试/REPL 和 UB 探针
-│  ├─ x-analysis/                   # 数据流、支配、活跃性、污点扩展点
-│  ├─ x-instrumentation/            # Coverage/Race/Sanitizer/PGO 插桩公共层
-│  ├─ x-optimizer/                  # Pass 管线、基础优化、TCO/提示实验
-│  ├─ x-target-spec/                # Target Triple、ABI、数据布局、能力
-│  ├─ x-codegen-api/                # 后端稳定内部接口
-│  ├─ x-codegen-llvm/               # LLVM IR、对象文件、调试信息
-│  ├─ x-linker/                     # 链接器选择、参数、sysroot、产物
-│  ├─ x-metadata/                   # 包、符号、类型和增量元数据格式
-│  ├─ x-query/                      # 查询图、缓存、并行和失效
-│  ├─ x-session/                    # 一次编译的配置、生命周期和工件
-│  ├─ x-driver/                     # check/build 的编译编排 API
-│  └─ x-compiler/                   # `xc` 兼容入口，仅参数适配
-│
-├─ backends/                        # 非首要/实验目标，不被前端反向依赖
-│  ├─ x-codegen-fast/               # 快速 Debug 后端候选，须与 LLVM 差分
-│  ├─ x-codegen-wasm/               # WASM/WASI
-│  ├─ x-codegen-gpu/                # CUDA/ROCm/Metal 实验
-│  ├─ x-codegen-ebpf/               # eBPF + verifier 接口
-│  ├─ x-codegen-zk/                 # 受限 ZKP 电路后端
-│  └─ x-codegen-baremetal/          # no_std、RISC-V、x86 裸机
-│
-├─ runtime/                         # XRT：最小运行时与平台适配
-│  ├─ xrt-core/                     # 启动、退出、TLS、运行时 ABI
-│  ├─ xrt-alloc/                    # 全局/自定义分配器、Arena 接口
-│  ├─ xrt-panic/                    # panic hook、unwind/abort
-│  ├─ xrt-thread/                   # OS 线程、亲和性、NUMA
-│  ├─ xrt-task/                     # Task、Waker、取消状态
-│  ├─ xrt-scheduler/                # M:N、工作窃取、阻塞池
-│  ├─ xrt-time/                     # Timer、时钟和延迟预算实验
-│  ├─ xrt-realtime/                 # Deadline/Budget、软实时和能力查询
-│  ├─ xrt-io/                       # Reactor/Proactor 公共接口
-│  ├─ xrt-io-linux/                 # epoll/io_uring
-│  ├─ xrt-io-windows/               # IOCP
-│  ├─ xrt-io-apple/                 # kqueue
-│  ├─ xrt-process/                  # 进程、信号、子进程生命周期
-│  ├─ xrt-resource/                 # 内存/句柄/线程/连接配额和 Load Shed
-│  ├─ xrt-unwind/                   # 回溯、Coredump 元数据
-│  ├─ xrt-observe/                  # 最小日志/Trace 钩子
-│  └─ xrt-pal/                      # OS 能力和安全封装
-│
-├─ library/                         # 官方库；核心稳定周期和生态周期分离
-│  ├─ x-core/                       # no_std 类型、Trait、Option、Result
-│  ├─ x-alloc/                      # Vec、String、Box、Rc、Arc、Weak
-│  ├─ x-std/                        # fs/net/thread/process/time/env
-│  ├─ x-std-atomic/                 # 原子、Fence、SpinLock、实验无锁类型
-│  ├─ x-std-cell/                   # Cell、RefCell、内部可变性
-│  ├─ x-dynamic/                    # 显式边界动态值；不改变核心静态语义
-│  ├─ x-simd/                       # SIMD、对齐、cache padding
-│  ├─ x-decimal/                    # decimal32/64/128 实验
-│  ├─ x-regex/                      # 正则及编译期 DFA 实验
-│  ├─ x-bitfield/                   # 位流/位域实验
-│  ├─ x-codec/                      # JSON/CSV/YAML/TOML/MessagePack；JSON 契约见 RFC-0010
-│  ├─ x-schema/                     # Schema 演进与版本转换
-│  ├─ x-config/                     # default/file/env/CLI 配置层级
-│  ├─ x-cache/                      # 版本化 Key、TTL、并发填充和污染恢复
-│  ├─ x-terminal/                   # TTY、颜色、进度条
-│  ├─ x-i18n/                       # Unicode、CLDR、消息提取
-│  ├─ x-crypto/                     # 成熟密码接口
-│  ├─ x-crypto-pqc/                 # PQC 实验包
-│  ├─ x-observability/              # log/metrics/trace/OTLP
-│  ├─ x-message-bus/                # Pub/Sub、IPC、持久重放实验
-│  ├─ x-job-scheduler/              # Timer/Cron/Leader Election
-│  ├─ x-energy/                     # 功耗观测、预算和显式策略 API
-│  ├─ x-distributed-time/           # HLC 和因果时间显式传播
-│  └─ x-pmem/                       # 显式持久内存事务、布局和恢复
-│
-├─ tools/                           # 面向用户/开发者的独立二进制
-│  ├─ x-cli/                        # `x` 命令路由、配置、退出码
-│  ├─ x-doctor/                     # 工具链、SDK、代理、证书、路径和权限诊断
-│  ├─ x-workspace-guard/            # 脏工作区、变更归属和重叠修改保护
-│  ├─ x-repro/                      # 最小复现、环境指纹、随机种子和工件包
-│  ├─ x-build/                      # 工作区 DAG、Profile、build.x 沙箱
-│  ├─ xpm-core/                     # Package/Version/Dependency 模型
-│  ├─ xpm-resolver/                 # PubGrub、Feature 统一、冲突解释
-│  ├─ xpm-client/                   # Registry/缓存/离线/签名
-│  ├─ xfmt/                         # AST/CST 格式化与幂等检查
-│  ├─ xdoc/                         # API 站点、依赖图、调用热图、doc-test
-│  ├─ xrepl/                        # Readline、高亮、历史、增量执行
-│  ├─ x-kernel/                     # Jupyter Kernel、富媒体和会话隔离
-│  ├─ x-macro-host/                 # 过程宏独立进程、权限、超时与缓存
-│  ├─ x-lsp/                        # LSP Server 与增量语义查询
-│  ├─ x-debug/                      # DAP、调试器桥接、符号查看
-│  ├─ x-profiler/                   # CPU/内存/任务/高级硬件观测
-│  ├─ x-ub-check/                   # MIR 未定义行为检查
-│  ├─ x-vet/                        # API 误用、资源和并发静态规则
-│  ├─ x-race/                       # 竞态运行时与报告
-│  ├─ x-coverage/                   # 覆盖采集、合并、LCOV/JSON 输出
-│  ├─ x-search/                     # 符号、正则和语义搜索
-│  ├─ x-bindgen/                    # C/Python/Node/C++ shim 生成
-│  ├─ x-api-diff/                   # 公开 API 兼容性分析
-│  ├─ x-migrate/                    # Edition/API 自动迁移和可复核 Fix-it
-│  ├─ x-codegen-manifest/           # 生成输入/工具/哈希/许可证和漂移检测
-│  ├─ xpm-audit/                    # 依赖维护度、许可证、漏洞和替代评估
-│  ├─ x-fault-injection/            # 磁盘/网络/时钟/资源故障适配
-│  ├─ x-chaos/                      # 可重复故障场景和安全边界
-│  ├─ x-test-isolation/             # 端口、时钟、环境、数据库和全局状态隔离
-│  ├─ x-release-control/            # Feature Flag、Canary、Kill Switch、回滚
-│  ├─ x-test-runner/                # 测试发现、执行、报告、隔离
-│  ├─ x-fuzz/                       # fuzz 编排、语料和最小化
-│  ├─ x-bench/                      # 统一基准协议和统计输出
-│  ├─ x-watch/                      # 文件监听、增量重建、进程重启
-│  ├─ x-replay/                     # 受限输入记录、调度日志、重放与快照编排
-│  ├─ x-autotune/                   # PGO/参数搜索和候选 Profile，不改业务逻辑
-│  ├─ x-compliance-analysis/        # 可审计污点/合规规则、Source/Sink
-│  ├─ x-symbolic-check/             # 有界符号执行、反例和资源预算
-│  ├─ x-dev-shadow/                 # 脱敏、只读回放、审批和隔离影子环境
-│  ├─ x-installer/                  # Toolchain 安装、升级、回滚
-│  ├─ x-rfc/                        # RFC 初始化、校验和索引
-│  └─ x-spec-lint/                  # 规范缺项、冲突、链接和追溯检查
-│
-├─ editors/
-│  ├─ vscode-x/                     # TypeScript LSP/DAP 客户端、TextMate
-│  ├─ intellij-x/                   # Kotlin LSP 客户端、必要 PSI/Run Config
-│  ├─ vim-x/                        # 轻量语法/LSP 配置
-│  └─ emacs-x/                      # 轻量模式/LSP 配置
-│
-├─ services/                        # 可独立部署的服务，不进入本地编译关键路径
-│  ├─ x-registry/                   # 包、制品、索引、透明日志
-│  ├─ x-docs-portal/                # 版本化官方文档与错误解释
-│  ├─ x-release-metadata/           # 通道、目标、校验和、撤回信息
-│  ├─ x-vulnerability-db/           # CVE/公告缓存与签名更新
-│  └─ x-template-registry/          # 审核和签名模板
-│
-├─ ecosystem/                       # 官方但独立发布的领域库/框架
-│  ├─ x-net/                        # TCP/UDP/TLS 高级封装
-│  ├─ x-http/                       # HTTP/1.1、2、3
-│  ├─ x-web-server/                 # Router、Middleware、流式 Body
-│  ├─ x-api-schema/                 # OpenAPI/Protobuf/错误 Schema
-│  ├─ x-validation/                 # 不可信输入验证与结构化错误
-│  ├─ x-resilience/                 # Timeout/Retry/Circuit Breaker/Bulkhead
-│  ├─ x-traffic-control/            # Rate Limit/Load Shed/Backpressure
-│  ├─ x-server-runtime/             # Health/Ready/Drain/优雅关闭
-│  ├─ x-cloud-runtime/              # Discovery、动态配置、Secrets 轮换
-│  ├─ x-quic/                       # QUIC
-│  ├─ x-grpc/                       # gRPC/Protobuf
-│  ├─ x-db/                         # Driver、Pool、Migration、SQL 检查
-│  ├─ x-auth/                       # JWT/RBAC/Session
-│  ├─ x-data/                       # Arrow/Parquet/DataFrame/Streaming Codec
-│  ├─ x-media/                      # 2D/音视频成熟库适配
-│  ├─ x-serverless/                 # FaaS 适配、事件绑定、快照实验
-│  ├─ x-ui/                         # XUI 普通类型/函数、View Tree 和 Renderer 契约
-│  ├─ x-ui-style/                   # Token、Theme、类型化值与受限 CoreStyle IR
-│  ├─ x-ui-native/                  # Desktop/Mobile Renderer 适配；按证据再拆平台
-│  ├─ x-web-runtime/                # 浏览器 Event Loop 与 Future/Promise 调度
-│  ├─ x-dom/                        # DOM/Event 生命周期安全绑定
-│  ├─ x-web-api/                    # Fetch/Streams/Storage 等浏览器 API
-│  ├─ x-web-worker/                 # Web/Service Worker 与消息隔离
-│  ├─ x-web-graphics/               # Canvas/WebGL/WebGPU 资源与设备生命周期
-│  ├─ x-web-ui/                     # XUI→DOM、CSS Modules、SSR/Hydration 与 A11y
-│  ├─ x-web-framework/              # Router、Form、Context、Error Boundary
-│  ├─ x-web-tooling/                # Bundler、dev server、HMR、CLI 与 SourceMap
-│  ├─ x-web-security/               # CSP/Trusted Types/CSRF/SRI 默认策略
-│  ├─ x-reactivity/                 # Signal/Computed/Effect 和循环检测
-│  ├─ x-a11y/                       # WCAG、焦点、对比度和平台语义
-│  ├─ x-miniapp/                    # 小程序实验
-│  └─ x-templates/                  # CLI/Web/服务/库/嵌入式模板
-│
-├─ ai/                              # AI 工具与编译器核心隔离
-│  ├─ x-semantic/                   # x.meta、索引、检索、上下文构建
-│  ├─ x-context-pack/               # 精选上下文、信任级别、预算和过期淘汰
-│  ├─ x-mcp/                        # MCP Resources/Tools 与权限
-│  ├─ x-agent/                      # init/implement/explain/fix 编排
-│  ├─ x-ai-policy/                  # 权威顺序、范围、权限和提示注入防护
-│  ├─ x-agent-verify/               # 路径/API/依赖/版本存在性验证
-│  ├─ x-ai-review/                  # 正确性、架构、安全、性能和测试审查
-│  ├─ x-provenance/                 # 生成来源、许可证、提示摘要和 SBOM 关联
-│  ├─ x-ai-eval/                    # 任务集、模型/Prompt 漂移和质量门禁
-│  ├─ x-agent-coordinator/          # 任务 DAG、文件租约、消息和冲突检测
-│  ├─ x-agent-budget/               # Token、时间、工具调用和成本限制
-│  ├─ x-tool-gateway/               # 工具输出 Schema、信任、大小和二次验证
-│  ├─ x-ai-privacy/                 # 上下文脱敏、驻留、删除和供应商策略
-│  ├─ x-project-rules/              # .x.tutor 的结构化替代
-│  └─ x-project-memory/             # .xbrain 研究实现
-│
-├─ ml/                              # AI/数据计算框架，不进入语言核心
-│  ├─ x-tensor/                     # Tensor、Shape、Device
-│  ├─ x-autograd/                   # 自动微分
-│  ├─ x-ml-compiler/                # 计算图和设备降级
-│  ├─ x-ml-train/                   # Optimizer、LoRA/QLoRA、量化
-│  ├─ x-ml-distributed/             # 集合通信与容错
-│  ├─ x-data-loader/                # 批处理、双缓冲、预取
-│  └─ x-ml-serve/                   # 模型格式、动态批处理、服务 API
-│
-├─ labs/                            # RESEARCH；默认不进 Workspace default-members
-│  ├─ x-replay-research/            # 通用确定性重放和完整时间旅行研究
-│  ├─ x-energy-research/            # 跨中心自治调度研究
-│  ├─ x-pmem-research/              # 隐式持久对象和新型硬件研究
-│  ├─ x-spatial/                    # 空间锚点、光线追踪
-│  ├─ x-hmi/                        # 触觉/神经设备研究
-│  ├─ x-autotune-research/          # 业务逻辑搜索研究，不自动合并代码
-│  ├─ x-self-healing/               # 混沌和自修复建议；不得自动改生产
-│  ├─ x-compliance-research/        # 复杂跨系统合规证明研究
-│  ├─ x-symbolic-research/          # 通用程序合成和证明研究
-│  ├─ x-protocol-types/             # 协议状态机类型
-│  ├─ x-realtime-research/          # 特定 RTOS/硬件硬实时认证研究
-│  ├─ x-dev-shadow-research/        # 受控写流量和跨环境一致性研究
-│  └─ proposals/                    # 每个实验的 charter/exit-report
-│
-├─ specs/                           # 规范的唯一权威来源
-│  ├─ requirements/                 # 需求、非目标、验收、变更和取消条件
-│  ├─ governance/                   # 权威顺序、冲突升级和完成定义
-│  ├─ language/                     # 词法、语法、类型、求值
-│  ├─ memory-model/                 # 所有权、unsafe、原子
-│  ├─ concurrency/                  # Task、Channel、取消
-│  ├─ abi/                          # C ABI、布局、调用约定
-│  ├─ ffi/                          # C/Python/JNI/JS 所有权与错误契约
-│  ├─ web/                          # Event Loop、DOM/Worker、SSR 和 Web 安全
-│  ├─ style/                        # XStyle IR、标准 CSS 互操作和显式平台降级
-│  ├─ packages/                     # x.toml、lockfile、registry
-│  ├─ diagnostics/                  # X-E#### 目录
-│  ├─ standard-library/             # API 规范
-│  └─ generated/                    # 自动生成速查，不手改
-│
-├─ docs/
-│  ├─ requirements/                 # Problem/Goal/Non-goal、验收和变更历史
-│  ├─ book/                         # 学习教程
-│  ├─ reference/                    # 参考手册
-│  ├─ compiler/                     # 编译器开发指南
-│  ├─ runtime/                      # 运行时开发指南
-│  ├─ tools/                        # 工具用户指南
-│  ├─ operations/                   # 发布、值班、灾备 Runbook
-│  ├─ playbooks/                    # 开发、迁移、调试、AI 协作操作手册
-│  ├─ incidents/                    # 事件时间线、复盘、行动项和回归证据
-│  ├─ security/                     # 威胁模型、响应、审计
-│  ├─ decisions/                    # ADR-0001...
-│  ├─ design-notes/                 # 非规范研究记录
-│  └─ traceability/                 # XLF→Spec→Code→Test 生成报告
-│
-├─ tests/
-│  ├─ conformance/                  # 语言符合性：pass/fail/run
-│  ├─ diagnostics/                  # 错误码与 Fix-it 黄金文件
-│  ├─ ui/                           # 编译器终端输出快照
-│  ├─ ir/                           # HIR/MIR/LLVM 快照和验证
-│  ├─ codegen/                      # 汇编、ABI、链接、调试信息
-│  ├─ runtime/                      # 内存、并发、I/O、故障注入
-│  ├─ failure-injection/            # ENOSPC/OOM/网络/时钟/凭据故障
-│  ├─ test-isolation/               # 顺序、并行和共享状态污染
-│  ├─ migration/                    # Schema/API/Edition 滚动升级与回滚
-│  ├─ upgrade/                      # 依赖、工具链和平台升级
-│  ├─ std/                          # 标准库契约和平台测试
-│  ├─ packages/                     # resolver/registry/lockfile
-│  ├─ tools/                        # CLI/LSP/DAP/editors E2E
-│  ├─ interoperability/             # C/WASM/协议互操作
-│  ├─ web-platform/                 # WPT 子集、Browser/Node 和 SSR E2E
-│  ├─ accessibility/                # WCAG 自动规则和人工检查记录
-│  ├─ ai-evals/                     # 幻觉、注入、越权、漂移和多 Agent 冲突
-│  ├─ security/                     # 恶意输入、沙箱、供应链
-│  ├─ reproducibility/              # 双环境制品比较
-│  └─ fixtures/                     # 最小、版本化、无秘密测试数据
-│
-├─ fuzz/                            # fuzz targets、corpora、dictionaries
-├─ benchmarks/                      # compiler/runtime/std/ecosystem 基准
-├─ examples/                        # 版本化示例和端到端样板
-├─ templates/                       # `x init` 项目模板；`x new` 为兼容别名
-├─ sdk/                             # 跨语言 SDK；各自独立版本和平台矩阵
-│  ├─ x-ffi-c/                      # C 数据模型、ABI 探针和导出运行时
-│  ├─ x-python/                     # CPython/GIL/Buffer/async 桥
-│  ├─ x-python-pack/                # Wheel、abi3 评估和 PyPI 发布
-│  ├─ x-jni/                        # JVM/JNI 引用、线程和异常桥
-│  ├─ x-js/                         # JS 值、TypedArray、Promise 桥
-│  └─ x-js-pack/                    # ESM/CJS、类型定义和 npm 发布
-├─ distribution/                    # 安装器、包定义、签名元数据
-├─ infra/                           # 注册表/文档站/监控 IaC
-├─ release/                         # 通道策略、清单、回滚和公告模板
-├─ security/                        # 签名策略、漏洞流程、审计脚本配置
-│  └─ data-governance/              # 数据分类、保留、删除、驻留和审计
-├─ governance/                      # 债务、所有权、Bus Factor、DoD和值班
-├─ rfcs/                            # 活跃 RFC 工作区及索引
-└─ .github/
-   ├─ workflows/                    # PR、nightly、release、安全扫描
-   ├─ ISSUE_TEMPLATE/
-   ├─ PULL_REQUEST_TEMPLATE.md
-   ├─ CODEOWNERS
-   └─ dependabot.yml
-```
+### 2.1 名称到责任域的规则
+
+- 历史 `x-*` 名称首先视为逻辑目标，映射到现有责任域；
+- 宏、Effect、async、UI、AI、ML 等未到阶段的能力只保留需求/RFC，不预建项目；
+- Web 采用标准 CSS + CSS Modules，XStyle 仅承载 Token、主题和受限 CoreStyle IR；
+- JSON 位于官方 Codec，Map 位于 alloc/std，二者不增加核心语法；
+- XPM 解析锁图，XBuild 消费锁图生成 Action DAG；Compiler 不回调 Resolver；
+- 需要新增物理项目时，必须通过 1.7 的拆分门禁并更新 ADR，而不是恢复长期目录树。
 
 ## 3. 稳定主线子项目契约
 
@@ -676,7 +386,6 @@ my-x-project/
 ├─ x.lock                       # 解析后的不可手改依赖图
 ├─ README.md
 ├─ LICENSE
-├─ build.x                      # 可选；声明输入/输出并在沙箱运行
 ├─ src/
 │  ├─ main.x                    # 二进制入口
 │  ├─ lib.x                     # 库入口
@@ -722,7 +431,7 @@ my-x-project/
 
 ## 10. 目录架构验收清单
 
-- [ ] 每个 `XLF-*` 功能映射到上述一个主项目，跨项目依赖明确。
+- [ ] 原始功能矩阵中的每个 `XLF-*` 都进入 Traceability 工件，并映射到一个主责任域；跨域依赖明确。
 - [ ] 每个叶子项目有 README、Owner、契约、测试和成熟度。
 - [ ] Core 不依赖 Ecosystem/Labs，Compiler Frontend 不依赖 LLVM/Runtime/UI。
 - [ ] 所有内部工件带版本和验证器，所有外部输入在边界验证。

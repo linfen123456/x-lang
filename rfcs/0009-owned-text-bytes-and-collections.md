@@ -88,9 +88,10 @@ let headers = map {
 ## 7. 验收
 
 - compile-pass/fail：`get/get_mut/remove` 的借用、移动和 Iterator 失效规则；
+- AST/HIR Snapshot：集合调用保持普通路径/方法调用 AST，HIR 中返回类型分别固定为 `Option<&V>`、`Option<&mut V>` 和 `Option<V>`；
 - run-pass：缺键、替换旧值、删除/重插顺序、Drop Trace；
 - 属性测试：Hash/Eq 一致性、BTree 全序、OrderedMap 顺序；
 - 安全测试：对抗键、容量溢出、大小上限和 OOM；
 - 确定性负例：禁止把 HashMap 顺序用于签名、Canonical JSON 或构建键；
-- API/诊断 Snapshot：借用逃逸必须指明来源拥有者和失效位置。
-
+- API/诊断 Snapshot：借用逃逸使用 `X-E4004` 并指明来源拥有者和失效位置；缺少 `Hash/Eq` 约束使用 `X-E3011`，缺少 `Ord` 约束使用 `X-E3012`，不得使用范围占位符；
+- 边界反例：缺键不 panic、借用存活期间结构修改必须拒绝、HashDoS 可观测、HashMap 顺序不得进入稳定输出。

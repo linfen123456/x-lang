@@ -42,11 +42,13 @@
 
 ## 5. 诊断和验收
 
-`X-E4xxx` 用于移动、借用和 Drop；Rule ID 使用 `RULE-OWN-*`、`RULE-DROP-*`。
+首批符合性语料固定使用：`X-E4001` move 后使用、`X-E4002` 二次 move、`X-E4003` 冲突借用、`X-E4004` 借用局部值逃逸、`X-E4005` 具有用户 Drop 的类型被部分移动。Rule ID 使用 `RULE-OWN-*`、`RULE-DROP-*`；新增诊断必须登记具体四位编号。
 
 - compile-pass：移动、共享/独占借用、重借用、无冲突字段借用和合法返回借用；
 - compile-fail：use-after-move、二次移动、冲突借用、局部引用逃逸、Drop 类型部分移动；
+- AST/HIR Snapshot：AST 只保存 `&`、`&mut` 和闭包 `move` 表层形式，HIR/MIR 记录 move/borrow、来源和投影；
+- 诊断 Snapshot：`X-E4001`～`X-E4005` 固定移动点、借用来源、冲突使用点和对应 Rule ID；
+- 边界反例：用户 Drop 类型的字段移动、覆盖赋值中途失败、panic 清理和返回局部借用都必须具有拒绝或精确 Drop Trace；
 - MIR Snapshot：字段级 init/move/drop flags；
 - run-pass：正常、提前返回、`?` 和 unwind 的精确 Drop Trace；
 - 属性测试：任意控制流下每个已初始化资源至多析构一次。
-

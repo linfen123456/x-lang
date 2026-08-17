@@ -41,11 +41,13 @@ Parser 不维护第二份受限 Place 文法。`left = right;` 先生成 Assignm
 
 ## 5. 诊断和验收
 
-`X-E3xxx` 用于类型错误，非法 Place 使用 `X-E3008`。Rule ID 使用 `RULE-TYPE-*`、`RULE-EVAL-*`。
+首批符合性语料固定使用：`X-E3001` 公开边界缺少显式类型、`X-E3002` 非白名单转换、`X-E3003` 推断存在多个候选、`X-E3008` 非法或不可写 Place。Rule ID 使用 `RULE-TYPE-*`、`RULE-EVAL-*`；新增诊断必须登记具体四位编号。
 
 - compile-pass：所有 Place 根/投影、显式转换和局部推断；
 - compile-fail：向 Temporary、只读借用或调用结果赋值，链式隐式转换，公开类型省略；
+- AST/HIR Snapshot：Assignment 左侧保留普通 Expression AST，HIR 单独记录 Place 分类和转换种类；
+- 诊断 Snapshot：`X-E3001/3002/3003/3008` 固定主 Span、实际/期望类型、Rule ID 和安全 Fix-it；
+- 边界反例：带副作用的 Receiver/索引不得重复求值，窄化、位重解释和跨模块推断不得借 `as` 绕过；
 - run-pass：带副作用 Receiver、索引和复合赋值证明只求值一次；
 - MIR/解释器 Snapshot：左到右事件与 Drop Trace 固定；
 - 跨优化级别和后端差分不得改变可观察结果。
-

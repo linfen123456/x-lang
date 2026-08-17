@@ -2,7 +2,7 @@
 
 > 总纲：[X-Lang 企业级完整文档体系总纲](./X-Lang企业级完整文档体系总纲.md)  
 > 文档性质：规范与教程体系母版，不是已经批准的最终语言规范。  
-> 大纲版本：1.0-outline｜状态：已冻结结构  
+> 大纲版本：1.0-outline｜状态：需求范围已冻结；语言规则均以对应 RFC 状态为准
 > 初始基线：2026-08-14｜价值回归复审：2026-08-15  
 > 适用读者：语言设计者、学习者、研究人员、标准库作者、编译器开发者。  
 
@@ -159,7 +159,7 @@
 | 预定义构造器 | `Some None Ok Err` | 标准库 `Option/Result` 构造器，不是关键字，可以通过限定路径消除冲突。 |
 | 明确排除 | `async await catch class comptime default defer dyn effect extends implicit interface macro null operator override proc pure static throw try virtual yield` | 1.0 Lexer 不保留这些词；未来采用时必须由 Edition/RFC 处理兼容。 |
 
-候选共 31 个硬关键字，不为未来特性预留关键字；数量只是当前审查结果，不是无 RFC 可修改的永久上限。文件路径确定模块，包名来自 `x.toml`，因此没有 `mod/module/package` 关键字；导入只允许 `use path::item [as alias];`，1.0 不含 glob 或嵌套导入。标识符区分大小写，源码统一 UTF-8；正式 RFC 必须冻结 Unicode 标识符配置、正规化、混淆字符诊断和原始标识符策略。注释候选为 `//`、`/* ... */` 和 `///` 文档注释；是否允许块注释嵌套由词法 RFC 单独决定。
+候选共 31 个硬关键字，不为未来特性预留关键字；数量只是当前审查结果，不是无 RFC 可修改的永久上限。文件路径确定模块，包名来自 `x.toml`，因此没有 `mod/module/package` 关键字；导入只允许 `[pub | pub(package)] use path::item [as alias];`，其中可见性前缀可省略，1.0 不含 glob 或嵌套导入。标识符区分大小写，源码统一 UTF-8；正式 RFC 必须冻结 Unicode 标识符配置、正规化、混淆字符诊断和原始标识符策略。注释候选为 `//`、`/* ... */` 和 `///` 文档注释；是否允许块注释嵌套由词法 RFC 单独决定。
 
 | 优先级（高→低） | 运算/符号 | 结合性与限制 |
 |---:|---|---|
