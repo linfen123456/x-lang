@@ -12,6 +12,9 @@
 - 禁止建立无边界的 `utils/common/shared`；跨域能力必须命名为明确契约，如 `x-source-map`、`x-target-spec`。
 - 所有公共接口采用输入/输出类型、结构化错误、版本和边界校验；LLVM 类型不得出现在前端公共接口。
 - 所有目录必须有 `README.md`，记录职责、非职责、所有者、依赖、命令、公开接口、测试和成熟度。
+- 本文目录树是长期能力归属图，不代表每个命名节点都必须成为独立 crate、独立版本或立即创建的目录。
+- P0/P1 采用模块化单体：只有存在独立发布、安全/进程隔离、两个以上稳定消费者、可测编译收益或长期独立所有者时才拆分叶子项目。
+- 不创建空目录、空 crate 或只为未来设想存在的接口；未到阶段的节点保留在大纲中，不进入实际 Workspace。
 
 ## 2. 完整 Monorepo 目录树
 
@@ -290,7 +293,6 @@ x-lang/
 │  ├─ incidents/                    # 事件时间线、复盘、行动项和回归证据
 │  ├─ security/                     # 威胁模型、响应、审计
 │  ├─ decisions/                    # ADR-0001...
-│  ├─ rfcs/                         # RFC-0001...
 │  ├─ design-notes/                 # 非规范研究记录
 │  └─ traceability/                 # XLF→Spec→Code→Test 生成报告
 │
@@ -334,7 +336,6 @@ x-lang/
 │  └─ data-governance/              # 数据分类、保留、删除、驻留和审计
 ├─ governance/                      # 债务、所有权、Bus Factor、DoD和值班
 ├─ rfcs/                            # 活跃 RFC 工作区及索引
-├─ decisions/                       # 顶层架构 ADR 索引/镜像
 └─ .github/
    ├─ workflows/                    # PR、nightly、release、安全扫描
    ├─ ISSUE_TEMPLATE/
@@ -561,7 +562,8 @@ my-x-project/
 | 生命周期 | 权威目录 | 必须内容 |
 |---|---|---|
 | 规范 | `specs/` | 规则 ID、示例、兼容政策、生成语法 |
-| 决策 | `docs/decisions/`、`rfcs/` | Context、Decision、Alternatives、Consequences |
+| 提案 | `rfcs/` | Motivation、Design、Alternatives、Compatibility、Rollout |
+| 决策 | `docs/decisions/` | Context、Decision、Alternatives、Consequences |
 | 开发 | 各项目 `src/tests/docs` | 契约优先、回归测试、项目 README |
 | 符合性 | `tests/conformance` | compile-pass/fail/run、平台期望 |
 | 安全 | `security/`、`tests/security` | 威胁模型、沙箱、供应链、响应 |
@@ -572,12 +574,12 @@ my-x-project/
 
 ## 9. 建仓顺序
 
-1. 建立根治理、`specs/`、`docs/decisions/`、`tests/conformance/` 和 CI 骨架。
-2. 建立 `x-source/x-diagnostics/x-token/x-lexer/x-syntax/x-ast`，完成可恢复解析。
-3. 建立 `x-resolve/x-types/x-hir/x-mir` 和验证器，形成可检查前端。
-4. 建立 `x-target-spec/x-codegen-api/x-codegen-llvm/x-linker/x-driver/x-compiler`，完成端到端原生编译。
-5. 建立 `xrt-core/xrt-alloc/xrt-panic` 与 `x-core/x-alloc/x-std` 最小集。
-6. 建立 `x-cli/x-build/x-test-runner/xfmt`，形成 MVP 开发闭环。
+1. 建立根治理、`specs/`、`docs/decisions/`、`tests/conformance/` 和最小 CI；没有首份内容时不建空目录。
+2. 建立模块化 `x-compiler`，以内部分层完成 Source、诊断、Token、Lexer、可恢复 Parser、AST、Resolve、Type、HIR/MIR 和验证器。
+3. 建立 `x-codegen-llvm` 适配、最小链接与 Driver，完成 Hello World 端到端原生编译。
+4. 建立最小 `x-runtime`、`x-core/x-alloc/x-std`，明确 Runtime ABI、分配、panic 和平台边界。
+5. 建立 `x-cli` 与 conformance/spec-check，形成 `check/build/run/test/fmt` MVP 闭环。
+6. 只有内部模块出现稳定消费者、隔离或编译收益后，才按本目录图拆出 source/syntax/semantic/IR 等独立 crate。
 7. 核心稳定后依次建立 XPM、LSP、IDE、增量编译、调试和发布服务。
 8. `ecosystem/ai/ml/labs` 只能在稳定接口出现后并行立项；不得提前让核心依赖实验项目。
 

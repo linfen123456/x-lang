@@ -87,121 +87,22 @@
 
 初始实现路线保持：Rust 编写初始编译器，自定义 HIR/MIR，LLVM 为首个稳定原生后端；自举在核心稳定后单独推进。
 
-## 5. 详细企业文档目录
+## 5. 文档责任域与最小保留集
 
-本大纲冻结后，后续应在目标仓库逐步生成以下正式文档。目录名称是责任域，不要求第一次提交同时创建所有空文件。
+当前仓库只保留根 README、文档索引、八份大纲/矩阵和 `docs/原始文档/1.txt` 至 `12.txt`。专题正文只在进入实际 RFC、实现或发布阶段时按需创建；禁止预建空目录、空文件或重复“完整版”。
 
-```text
-docs/
-├─ 00-governance/
-│  ├─ project-charter.md
-│  ├─ goals-and-non-goals.md
-│  ├─ roadmap.md
-│  ├─ rfc-process.md
-│  ├─ adr-process.md
-│  ├─ compatibility-policy.md
-│  ├─ lts-and-eol-policy.md
-│  └─ terminology.md
-├─ 01-language/
-│  ├─ lexical-grammar.md
-│  ├─ syntax.md
-│  ├─ type-system.md
-│  ├─ evaluation-order.md
-│  ├─ ownership-and-lifetimes.md
-│  ├─ memory-model.md
-│  ├─ concurrency-model.md
-│  ├─ errors-and-panic.md
-│  ├─ modules-and-packages.md
-│  ├─ unsafe-and-ffi.md
-│  ├─ macros-and-consteval.md
-│  └─ editions-and-evolution.md
-├─ 02-learning/
-│  ├─ book.md
-│  ├─ quick-start.md
-│  ├─ examples.md
-│  ├─ exercises.md
-│  ├─ migration-guides.md
-│  └─ language-reference.md
-├─ 03-standard-library/
-│  ├─ core.md
-│  ├─ alloc.md
-│  ├─ std.md
-│  ├─ platform-matrix.md
-│  ├─ api-stability.md
-│  └─ complexity-and-failure.md
-├─ 04-compiler/
-│  ├─ architecture.md
-│  ├─ frontend.md
-│  ├─ hir.md
-│  ├─ mir.md
-│  ├─ type-checker.md
-│  ├─ borrow-checker.md
-│  ├─ optimizer.md
-│  ├─ codegen-llvm.md
-│  ├─ diagnostics.md
-│  ├─ incremental-compilation.md
-│  └─ bootstrap.md
-├─ 05-runtime/
-│  ├─ runtime-abi.md
-│  ├─ allocation.md
-│  ├─ panic-unwind.md
-│  ├─ scheduler.md
-│  ├─ async-io.md
-│  ├─ resource-governance.md
-│  └─ platform-abstraction.md
-├─ 06-tools-and-sdk/
-│  ├─ cli.md
-│  ├─ package-manager.md
-│  ├─ build-system.md
-│  ├─ formatter.md
-│  ├─ documentation-tool.md
-│  ├─ lsp-and-ide.md
-│  ├─ debugger-profiler.md
-│  ├─ c-python-jni-js-sdk.md
-│  └─ ai-agent-tools.md
-├─ 07-platform-and-ecosystem/
-│  ├─ native-platforms.md
-│  ├─ wasm-and-web.md
-│  ├─ server-and-cloud.md
-│  ├─ desktop-and-mobile.md
-│  ├─ embedded-and-ebpf.md
-│  ├─ ui-and-style.md
-│  ├─ data-and-database.md
-│  └─ ml-and-gpu.md
-├─ 08-quality/
-│  ├─ test-strategy.md
-│  ├─ conformance-suite.md
-│  ├─ fuzzing.md
-│  ├─ failure-injection.md
-│  ├─ compatibility-testing.md
-│  ├─ performance-benchmarking.md
-│  └─ ai-evaluation.md
-├─ 09-security/
-│  ├─ threat-model.md
-│  ├─ unsafe-security.md
-│  ├─ build-and-plugin-sandbox.md
-│  ├─ supply-chain.md
-│  ├─ data-and-ai-privacy.md
-│  ├─ vulnerability-response.md
-│  └─ audit-evidence.md
-├─ 10-release-and-operations/
-│  ├─ ci-cd.md
-│  ├─ release-channels.md
-│  ├─ packaging-and-signing.md
-│  ├─ rollout-and-rollback.md
-│  ├─ observability.md
-│  ├─ incident-response.md
-│  └─ disaster-recovery.md
-├─ decisions/
-├─ rfcs/
-├─ incidents/
-├─ playbooks/
-└─ traceability/
-```
+| 责任域 | 当前权威入口 | 何时创建详细文档 |
+|---|---|---|
+| 治理、范围与路线 | 本总纲 | 形成真实章程、版本或发布承诺时 |
+| 语言、学习与标准库 | 语言规范与学习研究大纲 | 规则经 RFC 接受并进入根 `specs/` 时 |
+| 编译器、运行时与工具 | 编译器工程实施大纲 | 实现任务具有接口、Owner 和验收时 |
+| 物理目录与依赖 | 完整项目目录架构 | 项目真正创建或拆分时通过 ADR 更新 |
+| 原始需求 | 原始功能追溯矩阵 | 只更新 ID、来源、处置与证据链 |
+| 偏离与回归 | 未纳入与偏离复审路线 | 复审状态或回归门槛变化时 |
+| 多语言与技术借鉴 | 多语言对标补全大纲 | 新增经核验的缺口或候选技术时 |
+| 工程与 AI 风险 | 日常开发与 AI 协作风险大纲 | 出现新的可复现失效模式时 |
 
-### 5.1 专题文档生成状态
-
-专题正文已按项目整理要求移除，当前仓库只保留 8 份目录大纲和 `docs/原始文档/1.txt` 至 `12.txt`。上面的目录仍作为后续正式文档的责任域蓝图；重新展开时必须以本总纲、七份专项大纲和原始需求为输入，按需创建专题，不预建空文件，也不恢复已经删除的重复内容。
+正式开发阶段的 canonical path 为：根 `specs/` 保存规范，根 `rfcs/` 保存提案，`docs/decisions/` 保存 ADR。教程、操作手册、事故和追溯等非规范内容只在产生首份真实内容后建立对应目录；目录名称由项目架构统一维护，不在本总纲复制完整物理树。
 
 ## 6. 每份正式章节的统一内容模板
 

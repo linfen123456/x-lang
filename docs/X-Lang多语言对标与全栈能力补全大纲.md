@@ -7,7 +7,7 @@
 
 ## 1. 定位与取舍
 
-X-Lang 的可实现定位是：以所有权和静态类型提供 Rust 级安全方向，以 LLVM/AOT 提供 C 级原生性能，以结构化并发提供 Go 级服务端体验，以统一工具链和稳定生态吸收 Java 的工程优势，以受限动态边界和高质量 REPL/Notebook 吸收 Python 的开发效率，通过 WASM、JS/DOM 互操作和独立样式系统覆盖 Web。目标不是复制 JVM、Python 元类、JavaScript 原型链或 CSS 全部历史行为。
+X-Lang 的待验证设计假设是：借鉴 Rust 的所有权安全、C/LLVM 的原生代码生成、Go 的服务端工作流、Java 的工程治理和 Python 的交互式开发体验，并通过 WASM 与 JS/DOM 互操作研究 Web 能力。这里的对标只表示研究来源，不表示已经达到相同安全性、性能、体验或生态；每项结论必须给出对照版本、平台、工作负载、指标、阈值和失败条件。目标不是复制 JVM、Python 元类、JavaScript 原型链或 CSS 全部历史行为。
 
 ### 1.1 采用、改造和拒绝原则
 
@@ -28,12 +28,12 @@ X-Lang 的可实现定位是：以所有权和静态类型提供 Rust 级安全�
 | ID 范围 | 默认成熟度/状态 | 例外与进入稳定条件 |
 |---|---|---|
 | `XLC-CORE-001~020` | `CORE/待决策` | `009 Specialization` 为 `EXPERIMENTAL/待决策`；未通过 RFC、形式规则和符合性设计不得实现为稳定语义。 |
-| `XLC-EXEC-001~012` | `EXTENDED/待阶段实施` | MIR 参考执行可作为 CORE 验证基础；快速后端须经 ADR，所有工具须有统一 SourceMap。 |
-| `XLC-FFI-001~012` | `EXTENDED/待阶段实施` | C ABI 稳定子集可先行；Python/JNI/JS 分别版本化，不共享“全兼容”承诺。 |
-| `XLC-WEB-001~015` | `EXTENDED/待阶段实施` | WASM 可先于框架；浏览器宿主、SSR 和工具链通过 G4 后才能标记稳定。 |
-| `XLC-STYLE-001~015` | `EXTENDED/待阶段实施` | 始终属于独立 DSL/生态；不因实现成熟而转入核心语法。 |
-| `XLC-SERVER-001~010` | `EXTENDED/待阶段实施` | 标准库只保留底层 I/O；框架和云适配独立发布。 |
-| `XLC-PLATFORM-001~010` | `CORE治理/草案` | Tier 1 的最低版本、签名和支持期必须在 1.0 前转为已决策并有 CI 证据。 |
+| `XLC-EXEC-001~012` | `EXTENDED/待决策` | MIR 参考执行可作为 CORE 验证基础；快速后端须经 ADR，所有工具须有统一 SourceMap。 |
+| `XLC-FFI-001~012` | `EXTENDED/待决策` | C ABI 稳定子集可先行；Python/JNI/JS 分别版本化，不共享“全兼容”承诺。 |
+| `XLC-WEB-001~015` | `EXTENDED/待决策` | WASM 可先于框架；浏览器宿主、SSR 和工具链通过 G4 后才能标记稳定。 |
+| `XLC-STYLE-001~015` | `EXTENDED/待决策` | 始终属于独立 DSL/生态；不因实现成熟而转入核心语法。 |
+| `XLC-SERVER-001~010` | `EXTENDED/待决策` | 标准库只保留底层 I/O；框架和云适配独立发布。 |
+| `XLC-PLATFORM-001~010` | `CORE/草案` | 作为治理能力，Tier 1 的最低版本、签名和支持期必须在 1.0 前转为已决策并有 CI 证据。 |
 
 每个 ID 的关闭证据固定为：章节目标、目标读者、规范/接口内容、关键决策、输入依赖、输出物、测试/审计验收、目标项目、RFC/ADR 和状态变更记录。表格中的“能力、关键内容、目标项目、验收”是该模板的压缩索引，详细任务由工程大纲任务卡承载。
 
@@ -215,3 +215,77 @@ X-Lang 的可实现定位是：以所有权和静态类型提供 Rust 级安全�
 - [ ] 服务器覆盖 API、韧性、流量、生命周期、可观测和部署闭环。
 - [ ] 所有平台有 Tier、最低版本、打包、签名、真机/模拟器和 EOL 政策。
 - [ ] 不以功能数量或未复现指标宣称“最强语言”；正式声明只引用通过测试和审计的能力。
+
+## 12. 2026 设计缺口与可借鉴技术
+
+### 12.1 当前最关键的缺口
+
+| 优先级 | 缺口 | 为什么阻断“最强” | 关闭条件 |
+|---:|---|---|---|
+| P0 | 身份与取舍尚未冻结 | 系统语言、全栈语言、AI 语言同时优先会导致核心膨胀 | 明确系统/服务端/CLI 首要场景及非目标，批准排序规则 |
+| P0 | 正式语义缺失 | 语法、类型、求值、Drop、错误、内存和并发仍多为待决 | 核心 RFC 批准并生成规则 ID、正反例和符合性测试 |
+| P0 | Safe X 边界未闭合 | 没有完整 UB、Provenance、别名、生命周期和 Happens-before 模型 | 内存/并发模型、unsafe 义务、litmus/model-check 和差分测试通过 |
+| P0 | MVP 范围过大 | 长期目录被误当成首期 crate 清单，维护成本先于用户价值 | 模块化单体完成端到端编译，P0/P1 只保留 6～10 个成员 |
+| P1 | 没有参考执行与实现证据 | 文档无法证明语义可实现、优化保持等价 | MIR 解释器、LLVM E2E、verifier、reducer 和差分套件闭环 |
+| P1 | 简洁性没有用户证据 | 功能数量不能证明易学、易读或诊断有效 | 代表性任务对照、新手实验、语法预算和诊断根因命中率 |
+| P1 | 性能没有可复现基线 | LLVM 不自动等于编译快、运行快或尾延迟稳定 | 固定 reference、环境、数据、P50/P95/P99 与回归阈值 |
+| P2 | 兼容与包治理未落地 | 没有稳定升级能力就无法形成长期生态 | Edition、SemVer、API diff、lockfile、签名、撤回和迁移演练 |
+| P2 | 生态仍是能力地图 | 官方目录和功能清单不等于真实采用 | 可安装工具链、真实 CLI/服务、第三方用户和连续发布证据 |
+
+### 12.2 借鉴原则
+
+- 借鉴已经被生产验证的机制和工程经验，不复制其他语言的全部表面语法。
+- 每个借鉴项必须回答：解决哪个 X-Lang 问题、引入何种复杂度、是否属于语言/库/工具、如何退出。
+- 核心只吸收能形成正交语义的能力；编辑器、Web、GPU、AI 和供应链能力优先通过协议、库或独立工具接入。
+- 对仍快速变化的技术只做隔离探针，不将其版本或实现细节写进语言可观察语义。
+
+### 12.3 推荐借鉴矩阵
+
+| 来源/技术 | 值得借鉴 | X-Lang 边界 |
+|---|---|---|
+| Rust | 所有权/借用、Trait、一致性、Edition、Cargo 工作流、错误诊断 | 不照搬全部生命周期语法、宏复杂度和慢编译路径；先证明更小核心 |
+| Go | 小语法、快速构建、统一工具链、交叉编译和部署闭环 | 不引入隐式 GC 作为核心；错误、泛型和资源语义保持更强表达力 |
+| ML/OCaml 系 | ADT、模式穷尽、局部类型推断和表达式组合 | 公开边界保持显式；不引入难以解释的全程序推断 |
+| Swift | 严格并发、值语义、不可复制类型、渐进迁移和优秀诊断 | 只吸收经 RFC 验证的所有权/并发思想，不复制复杂 ABI 历史 |
+| Zig | 显式分配器、交叉编译、C 互操作和受控 comptime | 1.0 只保留最小 const-eval；通用 comptime 必须沙箱、确定且有预算 |
+| Kotlin/现代协程 | Null Safety、结构化并发、取消和开发体验 | 运行时调度不是语言语义；避免隐藏线程、锁和阻塞 |
+| LLVM 22.1.x | 成熟原生优化、对象格式、调试信息和目标覆盖 | 只位于后端适配层；LLVM 类型不得泄漏到前端规范 |
+| Cranelift | 快速 Debug/开发构建候选 | 通过 MIR/LLVM 差分和真实编译收益后才加入，不阻塞 P1 |
+| MLIR | Tensor/GPU/领域 IR 研究 | 仅用于 P5+ ML/GPU，不反向改变核心 HIR/MIR |
+| WebAssembly Component Model + WASI 0.3 | 组件接口、能力边界、可移植插件和异步组件 | 用于后期插件/服务互操作，不进入 1.0 核心或默认 Runtime |
+| Tree-sitter | 编辑器增量解析和多编辑器复用 | 作为工具层解析候选，不替代规范 Parser 和符合性语法 |
+| LSP 3.18 + DAP | 标准 IDE 与调试协议 | 扩展使用命名空间和能力协商，不发明编辑器专属核心协议 |
+| SLSA 1.2 + SPDX 3.0.1 | 来源证明、构建等级、SBOM 和供应链审计 | 属于构建/发布门禁，不污染语言语法 |
+| 属性测试、Fuzz、模型检查 | 解析器鲁棒性、内存/并发反例和优化等价 | 与规则 ID 绑定；测试不能替代正式语义，但必须能证伪实现 |
+
+### 12.4 2026 核验入口
+
+下列版本仅作为 2026-08-17 的工程调研基线，不属于语言兼容承诺：Rust 1.97.1、LLVM 22.1.8、Unicode 17.0、WASI v0.3.1、LSP 3.18、SLSA 1.2、SPDX 3.0.1。采用前仍需锁定版本、校验和和升级 ADR。
+
+- Rust：<https://static.rust-lang.org/dist/2026-07-16/channel-rust-1.97.1.toml>
+- LLVM：<https://github.com/llvm/llvm-project/releases/tag/llvmorg-22.1.8>
+- Unicode：<https://www.unicode.org/versions/Unicode17.0.0/>
+- WASI：<https://github.com/WebAssembly/WASI/releases/tag/v0.3.1>
+- WebAssembly Component Model：<https://component-model.bytecodealliance.org/>
+- Cranelift：<https://cranelift.dev/>
+- MLIR：<https://mlir.llvm.org/>
+- Tree-sitter：<https://tree-sitter.github.io/tree-sitter/>
+- LSP 3.18：<https://microsoft.github.io/language-server-protocol/specifications/lsp/3.18/specification/>
+- DAP：<https://microsoft.github.io/debug-adapter-protocol/specification>
+- SLSA 1.2：<https://slsa.dev/spec/v1.2/>
+- SPDX 3.0.1：<https://spdx.github.io/spdx-spec/v3.0.1/>
+
+### 12.5 不可变调研锚点与升级规则
+
+| 对象 | 核验时间 | 2026-08-17 调研锚点 |
+|---|---|---|
+| Rust 1.97.1 manifest | 2026-07-16 | SHA-256 `03569b1886ceb5c05276b50c8431ab111de944cd6140fe1fa7d821dd8e0f29cf` |
+| LLVM 22.1.8 | 2026-06-16 | Git tag `llvmorg-22.1.8` |
+| Unicode 17.0 | 2025-09 | Versioned URL `Unicode17.0.0` |
+| WASI 0.3.1 | 2026-08-11 | Release tag `v0.3.1` |
+| LSP 3.18 | 2026-08-17 | Versioned path `/lsp/3.18/` |
+| DAP snapshot | 2026-08-09 | Commit [`bf8a5d27e8040044b84b863f90916e08925ee811`](https://github.com/microsoft/debug-adapter-protocol/commit/bf8a5d27e8040044b84b863f90916e08925ee811) |
+| SLSA 1.2 / SPDX 3.0.1 | 2026-08-17 | Versioned paths `/spec/v1.2/`、`/spdx-spec/v3.0.1/` |
+| Reproducible Builds definition | 2026-08-12 | Retrieved HTML SHA-256 `67c75382073160d9cb1253b6991c361eab77309b29f7d2e9f1a6bb91e253eff0` |
+
+以上只是可重放的调研证据，不自动成为构建依赖。正式采用时必须在 RFC/ADR 中锁定 release tag、commit 或下载 SHA-256，并记录核验日期、升级验证和回滚方案；移动频道、`latest`、RC、beta 和 nightly 不能作为稳定基线的唯一证据。Rust/LLVM 升级必须重跑 Bootstrap、IR/ABI、调试信息、正确性与性能验证；Unicode、协议和供应链标准升级必须评估源码兼容、能力协商和旧制品验证。

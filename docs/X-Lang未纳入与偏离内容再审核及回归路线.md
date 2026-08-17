@@ -22,7 +22,7 @@
 
 | ID | 能力 | 复审结论 | 回归阶段与实施边界 |
 |---|---|---|---|
-| XLF-01-005 | WASM 与交叉编译 | `RETURN` | P3 建 WASI Preview 2/Component Model 后端和交叉编译；P5 浏览器宿主，不等待移动端。 |
+| XLF-01-005 | WASM 与交叉编译 | `RETURN` | P3 仅做 WASI/Component Model 后端探针和通用交叉编译闭环；P5 再稳定 WASM 平台、浏览器宿主与 Web 工具链，不等待移动端。 |
 | XLF-01-007 | 无 GC 核心模式 | `RETURN` | P0-P2 正式冻结所有权+RAII+无隐式 GC；该目标不再只是“冲突处理”。 |
 | XLF-01-008 | Comptime 与零成本抽象 | `RETURN` | P2 实施受限常量解释、资源预算、缓存和诊断；“零成本”改为可验证降级。 |
 | XLF-01-012 | 声明式跨平台 UI | `CONDITIONAL` | P3 定义 UI Tree/状态/事件契约，P5 实现 Web/桌面/移动适配；不进入核心关键字。 |
