@@ -21,6 +21,7 @@
 | XLE-GOV-006 | 技术债失控 | 债务类型、利息、所有者、偿还版本和阻断阈值 | governance/debt | 发布复审包含债务预算。 |
 | XLE-GOV-007 | 所有权不清 | CODEOWNERS、Bus Factor、值班、交接和备用负责人 | governance/ownership | 核心模块至少两个可维护角色。 |
 | XLE-GOV-008 | 完成定义含糊 | 代码、测试、文档、安全、性能、兼容、回滚和追溯统一 DoD | governance/dod | 未满足项不能标记完成。 |
+| XLE-GOV-009 | 项目级法律与社区治理缺失 | 代码/文档许可证、第三方声明、CLA/DCO、商标、治理章程和争议处理 | governance/legal-and-community | 法律评审完成；使用、分发、贡献和品牌边界可明确判断。 |
 
 ## 3. `XLE-DEV`：日常开发环境与代码变更
 
