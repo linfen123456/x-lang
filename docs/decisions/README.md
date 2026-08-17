@@ -5,5 +5,6 @@
 | ADR | 状态 | 决策 |
 |---|---|---|
 | [ADR-0001](ADR-0001-xpm-xbuild-layered-toolchain.md) | Proposed | XPM/XBuild 分层并复用成熟解析、执行和供应链标准 |
+| [ADR-0002](ADR-0002-staged-modular-monolith.md) | Proposed | D0 保持文档最小集，P0/P1 使用 4～6 成员模块化单体，后续按证据拆分 |
 
 状态采用 `Proposed → Accepted → Superseded/Deprecated`。未接受 ADR 不得被写成已冻结工程事实。

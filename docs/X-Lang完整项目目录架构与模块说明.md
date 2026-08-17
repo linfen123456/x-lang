@@ -1,7 +1,7 @@
 # X-Lang 完整项目目录架构与模块说明
 
 > 总纲：[X-Lang 企业级完整文档体系总纲](./X-Lang企业级完整文档体系总纲.md)  
-> 大纲版本：1.1-outline｜状态：待决策｜顶层边界候选稳定、物理结构待 ADR｜核心架构：阶段化模块化 Monorepo｜初始实现：Rust + LLVM
+> 大纲版本：1.1-outline｜状态：待决策｜顶层边界候选稳定、物理结构见 [ADR-0002](./decisions/ADR-0002-staged-modular-monolith.md)｜核心架构：阶段化模块化 Monorepo｜初始实现：Rust + LLVM
 > 目的：区分当前真实目录、下一阶段物理结构和长期能力归属，为项目搭建、团队分工、测试与发布提供不超前的蓝图。
 
 ## 1. 架构原则
@@ -34,10 +34,10 @@
 ```text
 x/
 ├─ README.md
-├─ rfcs/                              # 4 份 Proposed 规范提案及索引
+├─ rfcs/                              # Proposed 规范提案及索引；数量以索引为准
 └─ docs/
    ├─ README.md
-   ├─ decisions/                     # Proposed 工具链 ADR 及索引
+   ├─ decisions/                     # Proposed/Accepted 架构决策及索引
    ├─ X-Lang企业级完整文档体系总纲.md
    ├─ X-Lang语言规范与学习研究大纲.md
    ├─ X-Lang编译器工程实施文档大纲.md
