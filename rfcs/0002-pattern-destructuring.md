@@ -3,7 +3,7 @@
 > 状态：Proposed
 > 日期：2026-08-17
 > 目标版本：X-Lang 1.0 候选
-> 依赖：RFC-0001 的名称和可见性规则
+> 依赖：RFC-0001 的名称/可见性、RFC-0005 的模式语法、RFC-0007 的所有权/Drop
 > 正式产物：接受后生成 `specs/language/patterns.md`。
 
 ## 1. 摘要
@@ -48,7 +48,7 @@ let Point { x, y } = point;
 以下非法：
 
 ```x
-let { x, y } = point; // E-PAT-MISSING-TYPE
+let { x, y } = point; // X-E2101
 ```
 
 ## 4. 字段简写
@@ -121,7 +121,7 @@ let &mut User { id, name } = user_mut_ref;
 - 发生部分移动后不得整体读取、移动或显式 Drop 原值，但仍可访问尚未移动且可见的字段；
 - 具有用户自定义 Drop 的类型在 1.0 禁止部分移动，调用者必须按引用解构或使用类型提供的 `into_parts()`；
 - 编译器必须在 MIR 中跟踪字段级初始化状态，确保只析构仍初始化的字段且恰好一次。
-- 上述规则递归应用到嵌套字段：每个叶子 Place 独立记录 move/borrow/init 状态；未来 Ownership/Drop RFC 可以形式化状态机，但不得改变这些可观察结果。
+- 上述规则递归应用到嵌套字段：每个叶子 Place 按 RFC-0007 独立记录 move/borrow/init 状态。
 
 ## 6. 穷尽字段与 `..`
 
@@ -148,7 +148,7 @@ let User {
 
 ```x
 let Point { x, y } = point;          // 合法
-let Some(value) = option;            // E-PAT-REFUTABLE-BINDING
+let Some(value) = option;            // X-E2107
 match (option) { Some(value) => value, None => fallback() }
 ```
 
@@ -180,22 +180,24 @@ let Rectangle {
 } = rectangle;
 ```
 
-第 5 节的 binding mode、部分移动和 Drop 规则递归应用到嵌套模式。Parser 只建立模式树；类型检查器给每个叶子 Place 标注按值、共享借用或独占借用，MIR 跟踪字段级状态。未来所有权/Drop RFC 负责形式化和验证该状态机，不得改变本 RFC 已冻结的可观察结果。
+第 5 节的 binding mode、部分移动和 Drop 规则递归应用到嵌套模式。Parser 只建立模式树；类型检查器按 RFC-0007 给每个叶子 Place 标注按值、共享借用或独占借用，MIR 跟踪字段级状态。
 
 ## 9. 诊断
 
 | 诊断 | 含义 |
 |---|---|
-| `E-PAT-MISSING-TYPE` | 使用裸结构模式 |
-| `E-PAT-UNKNOWN-FIELD` | 字段不存在 |
-| `E-PAT-DUPLICATE-FIELD` | 字段重复 |
-| `E-PAT-MISSING-FIELDS` | 未列全且没有 `..` |
-| `E-PAT-REST-POSITION` | `..` 重复或不在最后 |
-| `E-PAT-PRIVATE-FIELD` | 访问不可见字段 |
-| `E-PAT-REFUTABLE-BINDING` | 不可失败位置使用可失败模式 |
-| `E-PAT-PARTIAL-MOVE` | 解构后非法使用部分移动值 |
-| `E-PAT-WRONG-KIND` | 单名/路径解析到不能用于模式的 Item，且不得回退成绑定 |
-| `E-PAT-BORROW-MODE` | 引用模式、输入引用权限或字段借用发生冲突 |
+| `X-E2101` | 使用裸结构模式 |
+| `X-E2102` | 字段不存在 |
+| `X-E2103` | 字段重复 |
+| `X-E2104` | 未列全且没有 `..` |
+| `X-E2105` | `..` 重复或不在最后 |
+| `X-E2106` | 访问不可见字段 |
+| `X-E2107` | 不可失败位置使用可失败模式 |
+| `X-E2108` | 解构后非法使用部分移动值 |
+| `X-E2109` | 单名/路径解析到不能用于模式的 Item，且不得回退成绑定 |
+| `X-E2110` | 引用模式、输入引用权限或字段借用发生冲突 |
+
+规则追溯使用 `RULE-PAT-*`，不得把诊断码当成规范规则 ID。
 
 诊断必须指出类型、字段、绑定位置和可用修复，例如插入 `..` 或转为 `match`。
 

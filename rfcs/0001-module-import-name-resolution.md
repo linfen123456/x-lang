@@ -3,7 +3,7 @@
 > 状态：Proposed
 > 日期：2026-08-17
 > 目标版本：X-Lang 1.0 候选
-> 依赖：[语言规范候选语法](../docs/X-Lang语言规范与学习研究大纲.md#311-10-候选表层语法)
+> 依赖：RFC-0005 的语法、RFC-0006 的 Place/求值和 RFC-0007 的 Receiver 所有权
 > 相关缺口：`GAP-LANG-07`、`XLC-CORE-010`
 > 正式产物：接受后生成 `specs/language/modules.md`，本 RFC 保留决策历史。
 
@@ -100,19 +100,19 @@ pub use order_service::domain::model::OrderId as PublicOrderId;
 
 ## 6. 名称空间
 
-1. 1.0 采用单一 Item Namespace：模块、类型、Trait、函数和常量在同一 Item 作用域不能重名。枚举变体位于所属枚举的关联名称空间，统一通过 `Enum::Variant` 访问。
+1. 1.0 采用单一 Item Namespace：模块、类型、Trait、函数和常量在同一 Item 作用域不能重名。枚举变体位于所属枚举的关联名称空间；默认通过 `Enum::Variant` 访问，只有显式导入或版本化 Prelude Alias 才能产生裸名称。
 2. 局部值使用 Local Value Namespace，但不得遮蔽 Import 或公开 Item。
 3. 标签、宏和生命周期不进入 1.0，因此不建立对应名称空间。
 4. 每个解析结果绑定唯一 DefId；不得将一个 Import 解析成随上下文变化的一组候选。
 
 ```x
 struct Parser {}
-fn Parser() -> Unit {} // E-MOD-DUPLICATE-NAME
+fn Parser() -> Unit {} // X-E2004
 ```
 
 ## 7. 可见性与 Facade
 
-当前候选语法仍采用“默认私有 / `pub` 公开”两级可见性。本节提出的三层模型是待评审替代案，不是已经同步到语言大纲的规则；只有本 RFC 接受该选项并同时更新主 EBNF、关键字说明、Formatter 和语料后才能生效。替代案中的 `package` 仅为紧随 `pub (` 后的上下文词，不加入全局硬关键字：
+1.0 候选采用 module/package/public 三层可见性。`package` 仅为紧随 `pub (` 后的上下文词，不加入全局硬关键字：
 
 ```x
 struct ParserState {}                 // 当前模块
@@ -129,9 +129,9 @@ pub struct Compiler {}                // 包外
 - 公开签名不能泄漏比自身可见性更低的类型；
 - 不提供 `protected`、friend 列表、`pub(super)` 或任意祖先范围。
 
-若接受，唯一新增产生式为 `visibility = "pub", [ "(", "package", ")" ]`，并统一用于 Item、字段、`use` 与允许显式可见性的 impl item。Formatter 必须写作 `pub(package)`；其他位置的 `package` 仍是普通标识符。若原型证明两级可见性足够，则在接受前删除本替代案，并保留当前大纲规则；两种方案都必须给出大型多模块包证据。
+产生式为 `visibility = "pub", [ "(", "package", ")" ]`，并统一用于 Item、字段、`use` 与允许显式可见性的 impl item。Formatter 必须写作 `pub(package)`；其他位置的 `package` 仍是普通标识符。
 
-在三层替代案中，`pub(package) use current_pkg::a::Item;` 创建仅同一 Package 可见的重导出绑定：包内其他模块必须通过包含该声明的绝对模块路径访问它，它不进入 `lib.x` 包外 Facade、公开 API Diff 或下游名称解析。普通 `use` 仍只影响当前模块，`pub use` 仍是包外 Facade 边；禁止对依赖包来源或不可访问 Item 扩大可见性。
+`pub(package) use current_pkg::a::Item;` 创建仅同一 Package 可见的重导出绑定：包内其他模块必须通过包含该声明的绝对模块路径访问它，它不进入 `lib.x` 包外 Facade、公开 API Diff 或下游名称解析。普通 `use` 仍只影响当前模块，`pub use` 仍是包外 Facade 边；禁止对依赖包来源或不可访问 Item 扩大可见性。
 
 ## 8. `::`、`.` 与调用
 
@@ -183,7 +183,7 @@ Trait 必须显式导入才参与方法候选，Prelude Trait 除外。隐式借
 ## 12. Prelude
 
 - Prelude 是按 Edition 固定、版本化且可显式关闭的精确名单。
-- 1.0 只考虑 `Bool`、固定数值类型、`Unit/Never`、`Option/Result` 及其构造器等最小核心。
+- 1.0 只考虑 `Bool`、固定数值类型、`Unit/Never`、`Option/Result` 和明确登记的 `Some/None/Ok/Err` Alias；这四个裸名称解析到关联变体的同一 DefId，不是隐式注入全部枚举变体。
 - Prelude 不包含 I/O、网络、常见工具函数或会大规模改变方法候选的扩展 Trait。
 - 已发布 Edition 不得静默向 Prelude 加入产生名称或方法冲突的 Item。
 - `no_std`、编译器和符合性测试必须支持关闭 Prelude。
@@ -194,15 +194,17 @@ Trait 必须显式导入才参与方法候选，Prelude Trait 除外。隐式借
 
 | 诊断 | 含义 |
 |---|---|
-| `E-MOD-PATH-COLLISION` | 文件路径规范化后冲突 |
-| `E-MOD-UNKNOWN-ROOT` | 路径第一段不是当前包或直接依赖 |
-| `E-MOD-TRANSITIVE-IMPORT` | 尝试导入未直接声明的依赖 |
-| `E-MOD-DUPLICATE-NAME` | Item Namespace 重名 |
-| `E-MOD-IMPORT-CONFLICT` | Import/Alias 冲突 |
-| `E-MOD-REEXPORT-CYCLE` | `pub use` 环 |
-| `E-MOD-PRIVATE` | 可见性不足或绕过 Facade |
-| `E-METHOD-AMBIGUOUS` | 多个方法候选 |
-| `E-METHOD-FIELD-CONFLICT` | 字段和方法冲突 |
+| `X-E2001` | 文件路径规范化后冲突 |
+| `X-E2002` | 路径第一段不是当前包或直接依赖 |
+| `X-E2003` | 尝试导入未直接声明的依赖 |
+| `X-E2004` | Item Namespace 重名 |
+| `X-E2005` | Import/Alias 冲突 |
+| `X-E2006` | `pub use` 环 |
+| `X-E2007` | 可见性不足或绕过 Facade |
+| `X-E2008` | 多个方法候选 |
+| `X-E2009` | 字段和方法冲突 |
+
+规则追溯使用 `RULE-MOD-*` 与 `RULE-METHOD-*`，不得复用诊断码表达规范身份。
 
 ## 14. 验收
 
@@ -217,7 +219,6 @@ Trait 必须显式导入才参与方法候选，Prelude Trait 除外。隐式借
 
 | 问题 | Owner | 截止阶段 | 未达成一致时的失败回退 |
 |---|---|---|---|
-| `pub(package)` 是否进入 1.0 | Language WG | P0 Parser 语法冻结前 | 保留当前“默认私有 / `pub` 公开”两级模型 |
 | Prelude 的最终精确名单 | Language + Std WG | P1 名称解析冻结前 | 只保留基础类型与 `Option/Result`，Trait 全部显式导入 |
 | 类型引用环与布局计算边界 | Type-system WG | P1 类型布局实现前 | 拒绝跨模块类型引用环 |
 | `lib.x` 与多二进制 Target 的共享可达性 | Module WG | P1 多 Target 支持前 | 每个 Target 只经自身 Facade 根计算可达性 |

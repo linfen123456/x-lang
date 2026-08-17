@@ -142,140 +142,16 @@
 
 ### 3.11 1.0 候选表层语法
 
-候选采用 UTF-8、花括号块、显式分号和表达式块；不采用自动分号插入。`if`、`match` 和块可以产生值，所有分支必须类型一致；赋值是语句而非表达式。下面给出可供 RFC、Parser 原型和语料评审的完整候选骨架；字符串插值、用户自定义属性、宏、异步和 DSL 均不在 1.0 语法内。
+1.0 候选采用 UTF-8、花括号块、显式分号和表达式块；不采用自动分号插入。详细 Token、31 个硬关键字、优先级、产生式、属性位置与语法语料只在 [RFC-0005](../rfcs/0005-core-lexical-and-surface-grammar.md) 维护，本大纲不保留第二份完整 EBNF。
 
-```x
-pub fn find_user(id: UserId) -> Result<User, LookupError> {
-    let user = repository.find(id)?;
-    Ok(user)
-}
+核心边界为：控制流头统一使用圆括号；赋值是语句；比较和相等操作不能链式书写；结构体模式的 `..` 最多一次且必须位于最后；`pub(package)` 中的 `package` 是上下文词；用户宏、自定义运算符、通用 comptime、async/effect 和 Map/JSON 字面量均不进入 1.0 表层语法。
 
-struct User {
-    id: UserId,
-    name: String,
-}
-
-match (maybe_user) {
-    Some(user) => use_user(user),
-    None => fallback(),
-}
-```
-
-```ebnf
-program       = { use_decl | item } ;
-use_decl      = [ "pub" ], "use", path, [ "as", IDENT ], ";" ;
-item          = { attribute }, [ "pub" ], ( function | export_function | struct_decl |
-                    enum_decl | trait_decl | impl_decl | type_alias | const_item | extern_block ) ;
-attribute     = "@", IDENT, [ "(", [ arguments ], ")" ] ;
-
-function      = [ "unsafe" ], "fn", IDENT, [ generic_params ],
-                "(", [ parameters ], ")", [ "->", type ], [ where_clause ], block ;
-parameters    = parameter, { ",", parameter }, [ "," ] ;
-parameter     = ( pattern | "self" ), ":", type ;
-generic_params = "<", type_param, { ",", type_param }, [ "," ], ">" ;
-type_param    = IDENT, [ ":", trait_bounds ] ;
-trait_bounds  = path, { "+", path } ;
-where_clause  = "where", bound, { ",", bound }, [ "," ] ;
-bound         = IDENT, ":", trait_bounds ;
-
-struct_decl   = "struct", IDENT, [ generic_params ], "{",
-                [ field, { ",", field }, [ "," ] ], "}" ;
-field         = [ "pub" ], IDENT, ":", type ;
-enum_decl     = "enum", IDENT, [ generic_params ], "{",
-                [ variant, { ",", variant }, [ "," ] ], "}" ;
-variant       = IDENT, [ "(", [ type_list ], ")" | "{",
-                [ field, { ",", field }, [ "," ] ], "}" ] ;
-trait_decl    = "trait", IDENT, [ generic_params ], "{", { method_signature }, "}" ;
-method_signature = "fn", IDENT, "(", [ parameters ], ")", [ "->", type ], ";" ;
-impl_decl     = "impl", [ generic_params ], type, [ "for", type ],
-                [ where_clause ], "{", { impl_item }, "}" ;
-impl_item     = [ "pub" ], function ;
-type_alias    = "type", IDENT, [ generic_params ], "=", type, ";" ;
-const_item    = "const", IDENT, ":", type, "=", expression, ";" ;
-extern_block  = "extern", STRING, "{", { extern_function }, "}" ;
-extern_function = "unsafe", "fn", IDENT, "(", [ parameters ], ")", [ "->", type ], ";" ;
-export_function = [ "unsafe" ], "extern", STRING, "fn", IDENT,
-                  "(", [ parameters ], ")", [ "->", type ], block ;
-
-block         = "{", { statement }, [ expression ], "}" ;
-statement     = binding | assignment | return_stmt | break_stmt | continue_stmt |
-                while_stmt | for_stmt | expression, ";" ;
-binding       = ( "let" | "var" ), pattern, [ ":", type ], "=", expression, ";" ;
-assignment    = place, assign_op, expression, ";" ;
-assign_op     = "=" | "+=" | "-=" | "*=" | "/=" | "%=" ;
-return_stmt   = "return", [ expression ], ";" ;
-break_stmt    = "break", [ expression ], ";" ;
-continue_stmt = "continue", ";" ;
-while_stmt    = "while", "(", expression, ")", block ;
-for_stmt      = "for", "(", pattern, "in", expression, ")", block ;
-
-expression    = if_expr | match_expr | loop_expr | unsafe_expr | closure | logic_or ;
-if_expr       = "if", "(", expression, ")", block, [ "else", ( block | if_expr ) ] ;
-match_expr    = "match", "(", expression, ")", "{",
-                [ match_arm, { ",", match_arm }, [ "," ] ], "}" ;
-match_arm     = pattern, "=>", expression ;
-loop_expr     = "loop", block ;
-unsafe_expr   = "unsafe", block ;
-closure       = [ "move" ], "fn", "(", [ parameters ], ")", [ "->", type ],
-                ( block | "=>", expression ) ;
-logic_or      = logic_and, { "||", logic_and } ;
-logic_and     = bit_or, { "&&", bit_or } ;
-bit_or        = bit_xor, { "|", bit_xor } ;
-bit_xor       = bit_and, { "^", bit_and } ;
-bit_and       = equality, { "&", equality } ;
-equality      = comparison, { ( "==" | "!=" ), comparison } ;
-comparison    = shift, { ( "<" | "<=" | ">" | ">=" ), shift } ;
-shift         = additive, { ( "<<" | ">>" ), additive } ;
-additive      = multiplicative, { ( "+" | "-" ), multiplicative } ;
-multiplicative = cast, { ( "*" | "/" | "%" ), cast } ;
-cast          = unary, { "as", type } ;
-unary         = ( "!" | "-" | "~" | ( "&", "mut" ) | "&" | "*" ), unary | postfix ;
-postfix       = primary, { call | member | index | "?" } ;
-call          = "(", [ arguments ], ")" ;
-member        = ".", IDENT ;
-index         = "[", expression, "]" ;
-primary       = literal | value_path | tuple_expr | array_expr | struct_expr | block |
-                "(", expression, ")" ;
-tuple_expr    = "(", expression, ",", [ arguments ], ")" ;
-array_expr    = "[", [ arguments ], "]" ;
-struct_expr   = type_path, "{", [ field_init, { ",", field_init }, [ "," ] ], "}" ;
-field_init    = IDENT, ":", expression ;
-
-pattern       = "_" | literal | name_pattern | tuple_pattern | struct_pattern | reference_pattern ;
-name_pattern  = path, [ "(", [ pattern_list ], ")" ] ;
-tuple_pattern = "(", pattern, ",", [ pattern_list ], ")" ;
-struct_pattern = path, "{", [ struct_pattern_member,
-                 { ",", struct_pattern_member }, [ "," ] ], "}" ;
-struct_pattern_member = field_pattern | rest_pattern ;
-field_pattern = IDENT, [ ":", pattern ] ;
-rest_pattern  = ".." ;
-reference_pattern = "&", [ "mut" ], pattern ;
-pattern_list  = pattern, { ",", pattern }, [ "," ] ;
-type          = path_type | tuple_type | array_type | slice_type | reference_type |
-                pointer_type | function_type ;
-path_type     = type_path, [ "<", type_list, [ "," ], ">" ] ;
-tuple_type    = "(", ")" | "(", type, ",", [ type_list ], ")" ;
-array_type    = "[", type, ";", ( INTEGER | IDENT ), "]" ;
-slice_type    = "[", type, "]" ;
-reference_type = "&", [ "mut" ], type ;
-pointer_type  = "*", ( "const" | "mut" ), type ;
-function_type = "fn", "(", [ type_list ], ")", "->", type ;
-path          = IDENT, { "::", IDENT } ;
-value_path    = ( IDENT | "self" ), { "::", IDENT } ;
-type_path     = ( IDENT | "Self" ), { "::", IDENT } ;
-type_list     = type, { ",", type } ;
-arguments     = expression, { ",", expression }, [ "," ] ;
-place         = value_path, { member | index } ;
-literal       = "true" | "false" | INTEGER | FLOAT | CHAR | STRING ;
-```
-
-EBNF 中未展开的小写节点必须在正式语法中各有唯一产生式；当前不把它们解释为 Parser 自由裁量。最小模式只包含通配、绑定、字面量、构造器、元组和结构体模式；结构体模式候选支持 `Point { x, y, .. }`，其中字段简写、借用传播、单名构造器/绑定判定和 `..` 的规则由 [RFC-0002](../rfcs/0002-pattern-destructuring.md) 评审。尤其 `None` 必须解析为唯一可见的无载荷构造器，wrong-kind 不得回退为新绑定；这些在 RFC 接受前仍是候选而非正式语义。OR-pattern、范围模式、模式守卫和运行时类型测试延期。泛型采用 `<T>` 与 `where T: Trait` 的单一写法；1.0 仅支持类型参数、简单 Trait bound、单态化和静态分派，不含 Const Generics、GAT、HRTB、Specialization 或 Trait Object。`?` 是唯一内建传播后缀，`as` 是唯一通用显式转换入口；二者都必须由类型规则限制。
-
+类型、Place 与求值由 [RFC-0006](../rfcs/0006-type-value-place-and-evaluation.md) 定义，所有权与 Drop 由 [RFC-0007](../rfcs/0007-ownership-borrow-move-and-drop.md) 定义，Result 与终止清理由 [RFC-0008](../rfcs/0008-result-panic-termination-and-cleanup.md) 定义。Parser、Formatter、高亮器和符合性语料不得从本大纲推导额外规则。
 ### 3.12 候选关键字、字面量与符号全集
 
 | 分类 | 候选集合 | 规则 |
 |---|---|---|
-| 声明/模块 | `const enum extern fn impl pub struct trait type unsafe use` | 当前候选中 `pub` 只有公开/私有两级；RFC-0001 正在评审 `pub(package)` 替代案，接受前不属于本 EBNF。外部函数声明必须标为 `unsafe`。 |
+| 声明/模块 | `const enum extern fn impl pub struct trait type unsafe use` | RFC-0001/0005 的候选采用 module/package/public 三层；`package` 只在 `pub(package)` 中是上下文词。外部函数声明必须标为 `unsafe`。 |
 | 绑定/所有权 | `let move mut var` | `let` 不可变、`var` 可变；`mut` 只修饰独占借用；`move` 只显式改变闭包捕获。 |
 | 控制流/匹配 | `break continue else for if in loop match return while` | 条件必须为 `Bool`；不提供 truthy/falsy、异常控制流或自动 fallthrough。 |
 | 类型与转换 | `as where` | `as` 只做规则允许的显式转换；`where` 仅表达简单 Trait bound。 |
@@ -299,7 +175,7 @@ EBNF 中未展开的小写节点必须在正式语法中各有唯一产生式；
 | 12–13 | `&&`、`||` | 左结合、从左到右短路。 |
 | 14 | `= += -= *= /= %=` | 仅作为语句；右侧先求值，不产生值。 |
 
-分隔符固定为 `() [] {} , ; : :: . .. @ -> =>`。`..` 只作为结构体模式的剩余字段标记，不是范围表达式或范围模式。属性只允许编译器登记的 `@repr(...)`、`@export(...)` 等受限内建项，未知属性稳定报错，不开放用户宏。1.0 不提供 `++/--`、`?:`、`??`、`?.`、`**`、`|>`、范围运算符或用户自定义运算符；范围、空值组合、幂和集合流水线使用具名 API，以降低优先级和重载歧义。
+分隔符固定为 `() [] {} , ; : :: . .. @ -> =>`。`..` 只作为结构体模式的尾部剩余字段标记，不是范围表达式或范围模式。属性只允许 RFC-0005 登记的受限内建项，未知属性稳定报错，不开放用户宏。1.0 不提供 `++/--`、`?:`、`??`、`?.`、`**`、`|>`、范围运算符或用户自定义运算符；范围、空值组合、幂和集合流水线使用具名 API，以降低优先级和重载歧义。
 
 ### 3.13 候选语法的规范写法
 
@@ -385,16 +261,16 @@ pub extern "C" fn add(left: I32, right: I32) -> I32 {
 | 范围 | 1.0 候选限制 |
 |---|---|
 | 模块 | 文件路径唯一决定模块；包根路径是绝对解析起点。禁止 glob、嵌套导入、循环值初始化和隐式重导出；名称冲突必须用 `as` 消除。包根、Facade、可见性和 Trait 方法查找进入 [RFC-0001](../rfcs/0001-module-import-name-resolution.md)。 |
-| 公开边界 | `pub fn`、Trait 方法、extern 导入和 export 函数的参数、返回（包括 `Unit`）及泛型约束全部显式；公开常量、字段和枚举载荷也不得省略类型。EBNF 的可选返回只为允许推断的私有函数/闭包保留。 |
+| 公开边界 | `pub fn`、Trait 方法、extern 导入和 export 函数的参数、返回（包括 `Unit`）及泛型约束全部显式；公开常量、字段和枚举载荷也不得省略类型。私有局部推断边界由 RFC-0006 定义。 |
 | 绑定与模式 | `let/var`、函数/闭包参数和 `for` 模式只接受不可失败模式；只有 `match` 分支可使用可失败模式并必须穷尽。`Point { x, y }` 是 `x: x, y: y` 的简写；没有 `..` 必须列全字段，`..` 显式忽略未列字段。按值匹配默认移动非 `Copy` 字段，`&`/`&mut` 模式显式借用且不存在自动解引用；部分移动、Drop 和私有字段规则以 [RFC-0002](../rfcs/0002-pattern-destructuring.md) 为候选。 |
 | 转换 | `as` 只接受 RFC 白名单内的无损或表示保持转换；窄化使用 `T::try_from`，环绕使用 `T::wrapping_from`，指针/位重解释只允许受审计的 unsafe API。 |
-| 错误传播 | `Result<T,E>` 的 `?` 只向返回 `Result<_,E>` 的函数传播同一 `E`；`Option<T>` 只向 `Option<_>` 传播。禁止二者桥接和隐藏的 `From` 式转换。 |
-| 求值 | 实参、操作数和 place 从左到右且各求值一次；`&&/||` 短路。整数溢出和除零采用单一、跨 Profile 规则，另一行为只能通过具名 checked/wrapping API 请求。 |
+| 错误传播 | RFC-0008 规定 `Result<T,E>` 是唯一可恢复错误模型；`?` 只传播同一 `E`，`Option<T>` 只向 `Option<_>` 传播。禁止二者桥接、隐藏转换和独立 `raises/throw` 系统。 |
+| 求值 | RFC-0006 规定实参、操作数、Receiver、索引和 Place 从左到右且各求值一次；`&&/||` 短路。整数溢出和除零采用单一、跨 Profile 规则，另一行为只能通过具名 checked/wrapping API 请求。 |
 | 控制头 | `if/match/while/for` 的头部统一使用圆括号，消除 `path { ... }` 与结构体构造歧义；不提供第二套省略括号写法。 |
 | 闭包/并发 | 闭包只有 `fn(...) {}` 与 `move fn(...) {}`；`thread::scope`、`scope.spawn`、Channel 和取消均为库 API，不是关键字。作用域退出强制 join。 |
 | Trait | 1.0 只允许普通方法、`Self`、简单 bound、静态分派和唯一 impl；`Send/Sync` 是编译器内建结构属性，不开放用户负实现。 |
 | FFI | 仅允许 RFC 列出的固定/目标宽度标量、`@repr(C)` 聚合和 opaque handle；外部调用必须位于 `unsafe {}`，该块只开启证明义务并保留尾表达式类型。排除 varargs、C++ ABI、跨边界 unwind、自动 String/拥有资源聚合。 |
-| 工具生成 | 关键字、Token、EBNF、优先级和 Rule ID 必须由一个规范数据源生成 Parser 表、formatter、Tree-sitter/高亮和速查表，禁止多份手写真相。 |
+| 工具生成 | RFC-0005 是接受前的唯一详细语法候选；接受后迁移到单一机器可读规范源并生成 Parser 表、formatter、Tree-sitter/高亮和速查表，禁止多份手写真相。 |
 
 ## 第四篇 类型系统与程序语义
 

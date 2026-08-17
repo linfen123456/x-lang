@@ -26,6 +26,10 @@ Accepted/Implemented/Stable → Superseded
 | [RFC-0002](0002-pattern-destructuring.md) | Proposed | 模式解构、字段简写和剩余字段 | `specs/language/patterns.md` |
 | [RFC-0003](0003-package-manifest-resolution-lockfile.md) | Proposed | 包身份、Manifest、解析、Feature 与 Lockfile | `specs/packages/` |
 | [RFC-0004](0004-build-artifact-and-foreign-dependencies.md) | Proposed | 构建图、源码/制品缓存、Git 与外部生态依赖 | `specs/build/` |
+| [RFC-0005](0005-core-lexical-and-surface-grammar.md) | Proposed | 核心词法、31 个关键字与唯一表层语法 | `specs/language/lexical.md`、`grammar.ebnf` |
+| [RFC-0006](0006-type-value-place-and-evaluation.md) | Proposed | 类型、Value/Place/Temporary 与确定求值 | `specs/language/types-and-evaluation.md` |
+| [RFC-0007](0007-ownership-borrow-move-and-drop.md) | Proposed | 所有权、借用、移动、初始化与 Drop | `specs/language/ownership-and-drop.md` |
+| [RFC-0008](0008-result-panic-termination-and-cleanup.md) | Proposed | Result、panic、终止类别与清理 | `specs/language/errors-and-termination.md` |
 
 ## 接受门禁
 
