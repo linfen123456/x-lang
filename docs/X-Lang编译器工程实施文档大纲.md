@@ -190,8 +190,8 @@
 |---|---|---|---|---|
 | 8.1 | 统一 CLI 架构 | `CORE/草案` | 命令路由、配置、退出码、JSON 输出、颜色、进度和 Shell 补全。来源：2、12。 | CLI 契约测试；非 TTY 和 CI 输出稳定。 |
 | 8.2 | 核心命令 | `CORE/草案` | `init/build/run/check/test/fmt/doc` 的参数、输入输出和错误码；`new` 仅为兼容别名，REPL 延后。 | 每命令有帮助、示例、文本/JSON 快照和端到端测试。 |
-| 8.3 | XPM | `EXTENDED/待决策` | 在 P2/P3 决策注册表、解析器、锁文件、缓存、离线、签名、publish/yank。来源：2、11。 | 解析确定；供应链威胁模型和恢复流程通过评审。 |
-| 8.4 | 工作区与构建脚本 | `EXTENDED/待决策` | Workspace DAG、Feature、`build.x` 沙箱、环境探测和可复现性。来源：10。 | 构建脚本最小权限；输入均进入缓存键。 |
+| 8.3 | XPM | `CORE+EXTENDED/待决策` | P0 按 [RFC-0003](../rfcs/0003-package-manifest-resolution-lockfile.md) 冻结最小 PackageId、Path Workspace 和版本化 ResolvedGraph Contract；P2/P3 增加完整 Resolver、Lockfile、Git/Registry、Vendor、离线、签名和 publish/yank。P0 可作为 `x` 内置模块，不要求提前拆独立项目。来源：2、11。 | P0 三包 Path 图可重放；后续 Lock 字节确定、冲突可解释、供应链篡改/撤回/恢复通过。 |
+| 8.4 | XBuild、Workspace 与构建脚本 | `CORE+EXTENDED/待决策` | P0 建最小 Action DAG，P2/P3 按 [RFC-0004](../rfcs/0004-build-artifact-and-foreign-dependencies.md) 决策源码优先制品缓存、沙箱、Foreign Adapter 和可复现性。 | XBuild 不重选版本；脚本最小权限；每个输入进入构建键。 |
 | 8.5 | 格式化与文档 | `CORE+EXTENDED/草案` | `xfmt` 作为核心规范格式；xdoc 的 API/示例/搜索、文档测试和离线包作为扩展。来源：2、10。 | `parse-format-parse` 等价且格式化幂等；文档链接与示例在 CI 校验。 |
 | 8.6 | LSP | `EXTENDED/待决策` | 在 P3 决策增量文本、诊断、补全、跳转、引用、重命名、语义 Token。来源：2。 | LSP 协议测试；取消、并发和大项目性能基准。 |
 | 8.7 | IDE 集成 | `EXTENDED/待决策` | 在 P3 决策 VS Code 客户端和 IntelliJ LSP/PSI 策略，调试和任务入口。来源：2、3。 | 两插件共享服务逻辑；安装、升级和兼容测试。 |
@@ -296,8 +296,9 @@
 | P0-T07 最小 ABI/布局探针 | P0-T02/T04 | 一个主机 target 的机器可读布局、黄金对象和 C 双向标量/结构体 Harness；对应 `GAP-COMP-01` | 固定 C/LLVM 版本结果一致；明确不构成 Stable ABI 承诺。 |
 | P0-T08 冻结 1.0 语言剖面 | P0-T01/T02/T03 | 设计宪法、关键字/语法预算、公开类型边界、1.0 非目标和逐项 RFC | 每个候选能力有接受/延期/拒绝结论；无宏、默认参数或高级泛型暗中成为前置。 |
 | P0-T09 冻结跨域语义矩阵 | P0-T02/T03/T07 | return/`?`/panic/abort/Drop/线程失败/取消/FFI 的结果和清理矩阵 | Rule ID、状态机、MIR trace 和正反测试设计一一对应。 |
+| P0-T10 冻结最小包图契约 | P0-T01/T06、RFC-0003/0004 | 三包 Path Workspace、PackageId、Host/Target、类型化边和版本化 ResolvedGraph | `x` 内置 XPM 模块生成稳定图；XBuild 消费同一图完成 Action DAG→LLVM；随机目录顺序下结果字节一致。 |
 
-**P0 检查点**：架构风险已验证；规范、实现和测试追溯可演示；若 LLVM 集成或语法模型不可行，先调整 ADR，不进入 P1。
+**P0 检查点**：架构风险已验证；规范、实现和测试追溯可演示；至少三包 Path Workspace 经版本化 ResolvedGraph 进入 Action DAG 并完成 LLVM 链接；若 LLVM 集成、语法模型或 XPM/XBuild 契约不可行，先调整 ADR，不进入 P1。
 
 ### 12.2 P1 可运行 MVP
 
@@ -318,7 +319,7 @@
 |---|---|---|---|
 | P2-T01 泛型/Trait 基础 | P1 | 约束求解、单态化最小集 | 一致性、歧义和代码生成测试。 |
 | P2-T02 所有权与借用检查 | P1/P2-T01 | move、borrow、lifetime、Drop | 规范用例通过，诊断含原因与建议。 |
-| P2-T03 模块、包与 `x.toml` | P1 | 工作区和本地依赖 | 确定构建图、循环诊断和 Schema。 |
+| P2-T03 模块、包与 `x.toml` | P0-T10/P1 | 扩展 RFC-0001/0003 的包根、Manifest Schema、SemVer、Git/Registry 与完整 Resolver，继续使用 P0 ResolvedGraph Contract | 确定名称/构建图、循环与冲突诊断、Schema、直接依赖和 Lockfile 检查。 |
 | P2-T04 核心标准库 | P2-T02 | core/alloc/std 基础、集合、字符串、时间、文件 | API 文档、复杂度和跨平台测试。 |
 | P2-T05 核心 CLI | P2-T03/T04 | build/check/run/test/fmt | 命令契约和端到端项目测试。 |
 | P2-T06 基线优化与基准 | P1-T03 | 正确性优先的基础 Pass 和 benchmark | `-O0` 差分一致，回归阈值生效。 |
@@ -329,7 +330,7 @@
 
 | 任务 | 依赖 | 交付物 | 验收 |
 |---|---|---|---|
-| P3-T01 XPM 与锁文件 | P2-T03 | 解析、缓存、离线、本地/注册表依赖 | 确定解析和供应链测试。 |
+| P3-T01 XPM、XBuild 与锁文件 | P2-T03 | 实施 RFC-0003/0004 的解析、Lock、缓存、离线、Registry、Artifact 和 Adapter | 确定解析、源码回退、缓存投毒和供应链测试。 |
 | P3-T02 LSP 与 VS Code | P2 | 诊断、补全、跳转、重命名 | 协议测试和大项目延迟预算。 |
 | P3-T03 IntelliJ 集成 | P3-T02 | LSP 客户端/必要 PSI | 与 VS Code 共享语义服务。 |
 | P3-T04 增量编译 | 稳定 IR/查询 ADR | 查询图、缓存、失效和统计 | 正确性优先，典型改动有可复现收益。 |

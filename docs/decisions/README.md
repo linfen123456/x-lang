@@ -1,0 +1,9 @@
+# X-Lang 架构决策索引
+
+本目录保存会显著影响工程结构、公共接口、依赖、安全或可替换性的 ADR。ADR 记录为什么选择某个方向；正式语言规则仍由已接受 RFC 和 `specs/` 负责。
+
+| ADR | 状态 | 决策 |
+|---|---|---|
+| [ADR-0001](ADR-0001-xpm-xbuild-layered-toolchain.md) | Proposed | XPM/XBuild 分层并复用成熟解析、执行和供应链标准 |
+
+状态采用 `Proposed → Accepted → Superseded/Deprecated`。未接受 ADR 不得被写成已冻结工程事实。

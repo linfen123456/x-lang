@@ -22,7 +22,7 @@
 
 | 阶段 | 物理策略 | 可以冻结 | 禁止事项 |
 |---|---|---|---|
-| D0 文档阶段 | 只保留当前文档和历史材料 | 权威顺序、目标/非目标、候选规则、依赖方向 | 空 `specs/rfcs/decisions`、空代码项目、把候选写成实现 |
+| D0 文档阶段 | 保留当前文档、历史材料和真实 RFC/ADR | 权威顺序、目标/非目标、候选规则、依赖方向 | 空 `specs`、空代码项目、把 Proposed 候选写成实现 |
 | P0/P1 可运行核心 | 4–6 个 Workspace 成员的模块化单体 | 单一纵向编译链、Runtime/CLI/测试边界 | 宏/Effect/async/UI/AI/ML 项目和无消费者接口 |
 | P2–P4 1.0 工程化 | 依据消费者、隔离和测量结果拆分 | core/alloc/std、核心工具、平台与发布契约 | 为目录整齐或未来复用预拆 crate |
 | P5+ 生态 | 独立版本的联邦仓库 | Web/UI/Server/SDK/AI/ML 公共接口 | 依赖编译器私有 AST/HIR/MIR 或成为核心必需依赖 |
@@ -34,8 +34,10 @@
 ```text
 x/
 ├─ README.md
+├─ rfcs/                              # 4 份 Proposed 规范提案及索引
 └─ docs/
    ├─ README.md
+   ├─ decisions/                     # Proposed 工具链 ADR 及索引
    ├─ X-Lang企业级完整文档体系总纲.md
    ├─ X-Lang语言规范与学习研究大纲.md
    ├─ X-Lang编译器工程实施文档大纲.md
@@ -47,7 +49,7 @@ x/
    └─ 原始文档/                       # 12 份只读历史输入
 ```
 
-只有产生首份真实内容时才创建根 `specs/`、`rfcs/` 或 `docs/decisions/`；`specs/` 只接收已批准规则，候选设计继续留在大纲/RFC，不以目录名伪装成熟度。
+根 `rfcs/` 和 `docs/decisions/` 已因真实提案创建；`specs/` 仍只接收已批准规则，当前 Proposed 设计继续留在 RFC/ADR，不以目录名伪装成熟度。
 
 ### 1.3 P0/P1：推荐模块化单体
 

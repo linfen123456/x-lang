@@ -244,8 +244,11 @@ field_init    = IDENT, ":", expression ;
 pattern       = "_" | literal | name_pattern | tuple_pattern | struct_pattern | reference_pattern ;
 name_pattern  = path, [ "(", [ pattern_list ], ")" ] ;
 tuple_pattern = "(", pattern, ",", [ pattern_list ], ")" ;
-struct_pattern = path, "{", [ field_pattern, { ",", field_pattern }, [ "," ] ], "}" ;
-field_pattern = IDENT, ":", pattern ;
+struct_pattern = path, "{", [ struct_pattern_member,
+                 { ",", struct_pattern_member }, [ "," ] ], "}" ;
+struct_pattern_member = field_pattern | rest_pattern ;
+field_pattern = IDENT, [ ":", pattern ] ;
+rest_pattern  = ".." ;
 reference_pattern = "&", [ "mut" ], pattern ;
 pattern_list  = pattern, { ",", pattern }, [ "," ] ;
 type          = path_type | tuple_type | array_type | slice_type | reference_type |
@@ -266,13 +269,13 @@ place         = value_path, { member | index } ;
 literal       = "true" | "false" | INTEGER | FLOAT | CHAR | STRING ;
 ```
 
-EBNF 中未展开的小写节点必须在正式语法中各有唯一产生式；当前不把它们解释为 Parser 自由裁量。最小模式只包含通配、绑定、字面量、构造器、元组和结构体模式；OR-pattern、范围模式、模式守卫和运行时类型测试延期。泛型采用 `<T>` 与 `where T: Trait` 的单一写法；1.0 仅支持类型参数、简单 Trait bound、单态化和静态分派，不含 Const Generics、GAT、HRTB、Specialization 或 Trait Object。`?` 是唯一内建传播后缀，`as` 是唯一通用显式转换入口；二者都必须由类型规则限制。
+EBNF 中未展开的小写节点必须在正式语法中各有唯一产生式；当前不把它们解释为 Parser 自由裁量。最小模式只包含通配、绑定、字面量、构造器、元组和结构体模式；结构体模式候选支持 `Point { x, y, .. }`，其中字段简写、借用传播、单名构造器/绑定判定和 `..` 的规则由 [RFC-0002](../rfcs/0002-pattern-destructuring.md) 评审。尤其 `None` 必须解析为唯一可见的无载荷构造器，wrong-kind 不得回退为新绑定；这些在 RFC 接受前仍是候选而非正式语义。OR-pattern、范围模式、模式守卫和运行时类型测试延期。泛型采用 `<T>` 与 `where T: Trait` 的单一写法；1.0 仅支持类型参数、简单 Trait bound、单态化和静态分派，不含 Const Generics、GAT、HRTB、Specialization 或 Trait Object。`?` 是唯一内建传播后缀，`as` 是唯一通用显式转换入口；二者都必须由类型规则限制。
 
 ### 3.12 候选关键字、字面量与符号全集
 
 | 分类 | 候选集合 | 规则 |
 |---|---|---|
-| 声明/模块 | `const enum extern fn impl pub struct trait type unsafe use` | `pub` 只有公开/私有两级；外部函数声明必须标为 `unsafe`。 |
+| 声明/模块 | `const enum extern fn impl pub struct trait type unsafe use` | 当前候选中 `pub` 只有公开/私有两级；RFC-0001 正在评审 `pub(package)` 替代案，接受前不属于本 EBNF。外部函数声明必须标为 `unsafe`。 |
 | 绑定/所有权 | `let move mut var` | `let` 不可变、`var` 可变；`mut` 只修饰独占借用；`move` 只显式改变闭包捕获。 |
 | 控制流/匹配 | `break continue else for if in loop match return while` | 条件必须为 `Bool`；不提供 truthy/falsy、异常控制流或自动 fallthrough。 |
 | 类型与转换 | `as where` | `as` 只做规则允许的显式转换；`where` 仅表达简单 Trait bound。 |
@@ -296,7 +299,7 @@ EBNF 中未展开的小写节点必须在正式语法中各有唯一产生式；
 | 12–13 | `&&`、`||` | 左结合、从左到右短路。 |
 | 14 | `= += -= *= /= %=` | 仅作为语句；右侧先求值，不产生值。 |
 
-分隔符固定为 `() [] {} , ; : :: . @ -> =>`。属性只允许编译器登记的 `@repr(...)`、`@export(...)` 等受限内建项，未知属性稳定报错，不开放用户宏。1.0 不提供 `++/--`、`?:`、`??`、`?.`、`**`、`|>`、范围运算符或用户自定义运算符；范围、空值组合、幂和集合流水线使用具名 API，以降低优先级和重载歧义。
+分隔符固定为 `() [] {} , ; : :: . .. @ -> =>`。`..` 只作为结构体模式的剩余字段标记，不是范围表达式或范围模式。属性只允许编译器登记的 `@repr(...)`、`@export(...)` 等受限内建项，未知属性稳定报错，不开放用户宏。1.0 不提供 `++/--`、`?:`、`??`、`?.`、`**`、`|>`、范围运算符或用户自定义运算符；范围、空值组合、幂和集合流水线使用具名 API，以降低优先级和重载歧义。
 
 ### 3.13 候选语法的规范写法
 
@@ -381,9 +384,9 @@ pub extern "C" fn add(left: I32, right: I32) -> I32 {
 
 | 范围 | 1.0 候选限制 |
 |---|---|
-| 模块 | 文件路径唯一决定模块；包根路径是绝对解析起点。禁止 glob、嵌套导入、循环值初始化和隐式重导出；名称冲突必须用 `as` 消除。 |
+| 模块 | 文件路径唯一决定模块；包根路径是绝对解析起点。禁止 glob、嵌套导入、循环值初始化和隐式重导出；名称冲突必须用 `as` 消除。包根、Facade、可见性和 Trait 方法查找进入 [RFC-0001](../rfcs/0001-module-import-name-resolution.md)。 |
 | 公开边界 | `pub fn`、Trait 方法、extern 导入和 export 函数的参数、返回（包括 `Unit`）及泛型约束全部显式；公开常量、字段和枚举载荷也不得省略类型。EBNF 的可选返回只为允许推断的私有函数/闭包保留。 |
-| 绑定与模式 | `let/var`、函数/闭包参数和 `for` 模式只接受不可失败模式；只有 `match` 分支可使用可失败模式并必须穷尽。名称解析区分单名绑定与无载荷枚举变体；按值匹配默认移动非 `Copy` 字段，`&`/`&mut` 模式显式借用且不存在自动解引用。 |
+| 绑定与模式 | `let/var`、函数/闭包参数和 `for` 模式只接受不可失败模式；只有 `match` 分支可使用可失败模式并必须穷尽。`Point { x, y }` 是 `x: x, y: y` 的简写；没有 `..` 必须列全字段，`..` 显式忽略未列字段。按值匹配默认移动非 `Copy` 字段，`&`/`&mut` 模式显式借用且不存在自动解引用；部分移动、Drop 和私有字段规则以 [RFC-0002](../rfcs/0002-pattern-destructuring.md) 为候选。 |
 | 转换 | `as` 只接受 RFC 白名单内的无损或表示保持转换；窄化使用 `T::try_from`，环绕使用 `T::wrapping_from`，指针/位重解释只允许受审计的 unsafe API。 |
 | 错误传播 | `Result<T,E>` 的 `?` 只向返回 `Result<_,E>` 的函数传播同一 `E`；`Option<T>` 只向 `Option<_>` 传播。禁止二者桥接和隐藏的 `From` 式转换。 |
 | 求值 | 实参、操作数和 place 从左到右且各求值一次；`&&/||` 短路。整数溢出和除零采用单一、跨 Profile 规则，另一行为只能通过具名 checked/wrapping API 请求。 |
@@ -479,7 +482,7 @@ pub extern "C" fn add(left: I32, right: I32) -> I32 {
 
 ### 7.11 1.0 候选失败、清理与并发边界
 
-以下矩阵是 `RFC-0002/0003` 必须批准或明确替代的最小合同；不得让 LLVM、运行时或某个 Executor 反向决定语义。
+以下矩阵是后续内存、并发与失败模型 RFC 必须批准或明确替代的最小合同；不得让 LLVM、运行时或某个 Executor 反向决定语义。正式编号只在 RFC 文件创建时分配，避免候选占位编号与真实提案冲突。
 
 | 事件 | 值/错误结果 | `Drop` 与终止候选规则 |
 |---|---|---|
@@ -503,8 +506,8 @@ pub extern "C" fn add(left: I32, right: I32) -> I32 {
 | 编号 | 主题 | 分级/状态 | 详细目录内容与大纲说明 | 输出与验收 |
 |---|---|---|---|---|
 | 8.1 | 模块与工作区 | `CORE/待决策` | 模块树、包、工作区、可见性、循环依赖和初始化顺序。来源：2。 | 名称解析与构建图规则一致。 |
-| 8.2 | `x.toml` | `CORE/待决策` | 包元数据、目标、依赖、特性、Profile、平台和构建配置。来源：2。 | 发布 JSON Schema；未知字段策略明确。 |
-| 8.3 | 版本与条件编译 | `CORE/待决策` | SemVer、版本约束、Feature 统一、`cfg` 和环境读取边界。来源：10、11。 | 解析确定、可复现；Feature 冲突可诊断。 |
+| 8.2 | `x.toml` | `CORE/待决策` | 包元数据、Target、直接/Public 依赖、Workspace 和 Policy；Schema 候选见 [RFC-0003](../rfcs/0003-package-manifest-resolution-lockfile.md)。来源：2。 | 发布 JSON Schema；未知字段、迁移和 Lockfile 消费策略明确。 |
+| 8.3 | 版本与条件编译 | `CORE/待决策` | SemVer、受控多主版本、Feature Resolution Domain、`cfg` 和环境边界；不得照搬无边界 Feature Union。见 [RFC-0003](../rfcs/0003-package-manifest-resolution-lockfile.md)。来源：10、11。 | 解析确定、可复现；冲突可解释，Host/Build/Target 不互相污染。 |
 | 8.4 | C ABI | `CORE+EXTENDED/待决策` | CORE 冻结最小 `extern "C"`、`@repr(C)`、固定宽度标量、opaque handle、panic/所有权边界；完整平台/类型矩阵为 EXTENDED。来源：2、10、11。 | 1.0 最小双向调用和负向边界通过；扩展 ABI 矩阵独立晋级。 |
 | 8.5 | 多语言绑定 | `EXPERIMENTAL/待决策` | C++、Python、Node.js 的生成绑定、对象生命周期和线程规则。来源：7、8、10、11。 | C++ 模板零拷贝不得预设为普遍可行。 |
 | 8.6 | 动态库与插件 | `EXTENDED/待决策` | 插件发现、版本协商、符号版本、隔离和卸载安全。来源：10。 | ABI 不匹配必须拒绝加载并提供诊断。 |
@@ -664,18 +667,20 @@ pub extern "C" fn add(left: I32, right: I32) -> I32 {
 
 原始来源只在[《X-Lang 原始功能全量追溯矩阵》](./X-Lang原始功能全量追溯矩阵.md)维护，本文不复制文件级映射。写作或评审本规范时，按 `XLF-*` 查询来源、处置、目标项目和验收；非直接接受项再查[价值回归复审](./X-Lang未纳入与偏离内容再审核及回归路线.md)。
 
-## 附录 B 原始材料问题与待决 RFC 清单
+## 附录 B 原始材料问题与待决提案主题
 
-| RFC 候选 | 冲突/问题 | 当前处理 | 通过前禁止事项 |
+下列 `CAND-*` 是待立项主题，不是 RFC 编号；创建真实文件时才从 RFC 索引分配唯一编号。
+
+| 候选主题 | 冲突/问题 | 当前处理 | 通过前禁止事项 |
 |---|---|---|---|
-| RFC-0001 内存管理模式 | 无 GC 与可选 GC 冲突 | 所有权 + RAII 为核心；GC 为实验 | 不得宣称 GC 是标准模式。 |
-| RFC-0002 并发安全边界 | 静态拒绝与自动插锁冲突 | 核心规则静态判定；锁必须显式或经明确语法生成 | 编译器不得悄然改变同步语义。 |
-| RFC-0003 失败模型 | Result、panic、unwind、abort、no-exceptions 混杂 | 分层定义可恢复错误与进程级失败 | 不得跨 FFI 隐式传播异常。 |
-| RFC-0004 后端优先级 | 原生/WASM/GPU/eBPF/移动同时铺开 | 原生优先，WASM 扩展，其余实验 | 实验后端不得阻塞 1.0。 |
-| RFC-0005 能力归属 | AI、Tensor、协议、GUI 被称为“一等公民” | 先做语言/库/运行时/框架归属评审 | 未评审不得新增核心关键字。 |
-| RFC-0006 ABI 稳定策略 | 跨编译器版本和 C++ 零拷贝承诺风险高 | 先稳定 C ABI 子集 | 不得承诺通用 C++ ABI 兼容。 |
-| RFC-0007 性能声明 | 多处绝对数值缺少环境 | 统一进入基准目标登记表 | 未复现实验不得写“保证/达到”。 |
-| RFC-0008 AI 自动修改 | 自动实现/修复/热补丁的权限和正确性风险 | 默认建议 + diff + 测试 + 人工确认 | 禁止默认生产自动热补丁。 |
+| `CAND-MEMORY` 内存管理模式 | 无 GC 与可选 GC 冲突 | 所有权 + RAII 为核心；GC 为实验 | 不得宣称 GC 是标准模式。 |
+| `CAND-CONCURRENCY` 并发安全边界 | 静态拒绝与自动插锁冲突 | 核心规则静态判定；锁必须显式或经明确语法生成 | 编译器不得悄然改变同步语义。 |
+| `CAND-FAILURE` 失败模型 | Result、panic、unwind、abort、no-exceptions 混杂 | 分层定义可恢复错误与进程级失败 | 不得跨 FFI 隐式传播异常。 |
+| `CAND-BACKEND` 后端优先级 | 原生/WASM/GPU/eBPF/移动同时铺开 | 原生优先，WASM 扩展，其余实验 | 实验后端不得阻塞 1.0。 |
+| `CAND-OWNERSHIP` 能力归属 | AI、Tensor、协议、GUI 被称为“一等公民” | 先做语言/库/运行时/框架归属评审 | 未评审不得新增核心关键字。 |
+| `CAND-ABI` ABI 稳定策略 | 跨编译器版本和 C++ 零拷贝承诺风险高 | 先稳定 C ABI 子集 | 不得承诺通用 C++ ABI 兼容。 |
+| `CAND-PERFORMANCE` 性能声明 | 多处绝对数值缺少环境 | 统一进入基准目标登记表 | 未复现实验不得写“保证/达到”。 |
+| `CAND-AI-WRITE` AI 自动修改 | 自动实现/修复/热补丁的权限和正确性风险 | 默认建议 + diff + 测试 + 人工确认 | 禁止默认生产自动热补丁。 |
 
 ## 附录 C 后续章节任务卡模板
 
