@@ -1,0 +1,668 @@
+# X-Lang 诊断码注册表（唯一来源）。新增码只能追加，不得复用已删除码。
+# 受限 YAML：扁平记录列表；字段：code/title/phase/spec/rule；生成物：registry.md
+
+- code: X-E0001
+  title: "内部编译器错误（ICE），附复现包路径"
+  phase: P0
+  spec: docs/design/compiler.md
+  rule: RULE-DRV-ICE
+
+- code: X-E0002
+  title: "无法读取源文件或目录"
+  phase: P0
+  spec: docs/design/compiler.md
+  rule: RULE-DRV-IO
+
+- code: X-E0003
+  title: "命令行参数无效"
+  phase: P0
+  spec: docs/design/compiler.md
+  rule: RULE-DRV-CLI
+
+- code: X-E0004
+  title: "链接失败（附链接器原始输出）"
+  phase: P0
+  spec: docs/design/compiler.md
+  rule: RULE-DRV-LINK
+
+- code: X-E0005
+  title: "目标三元组不受支持或 LLVM 目标初始化失败"
+  phase: P0
+  spec: docs/platforms.md
+  rule: RULE-DRV-TARGET
+
+- code: X-E1001
+  title: "源码不是合法 UTF-8"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-LEX-UTF8
+
+- code: X-E1002
+  title: "块注释未闭合"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-LEX-COMMENT
+
+- code: X-E1003
+  title: "字符串字面量未闭合"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-LEX-STRING
+
+- code: X-E1004
+  title: "非法转义序列"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-LEX-ESCAPE
+
+- code: X-E1005
+  title: "数字字面量格式或后缀非法"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-LEX-NUMBER
+
+- code: X-E1006
+  title: "非法字符"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-LEX-CHAR
+
+- code: X-E1007
+  title: "标识符含非 ASCII 字符"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-LEX-IDENT
+
+- code: X-E1008
+  title: "字符字面量非法（空、多字符或未闭合）"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-LEX-CHARLIT
+
+- code: X-E1010
+  title: "比较运算链（a < b < c）"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-SYN-CMPCHAIN
+
+- code: X-E1011
+  title: "相等运算链（a == b == c）"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-SYN-EQCHAIN
+
+- code: X-E1012
+  title: "结构模式中 .. 非尾部或重复"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-REST
+
+- code: X-E1013
+  title: "语法错误：期望的 Token 缺失"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-SYN-EXPECT
+
+- code: X-E1014
+  title: "if/while/match/for 头部缺少括号"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-SYN-PAREN
+
+- code: X-E1015
+  title: "保留字用作标识符"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-LEX-RESERVED
+
+- code: X-E1016
+  title: "赋值用作表达式"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-SYN-ASSIGNSTMT
+
+- code: X-E1020
+  title: "属性未登记或附着位置非法"
+  phase: P0
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-ATTR-REG
+
+- code: X-E1021
+  title: "属性参数非法或重复"
+  phase: P1
+  spec: specs/language/01-lexical-syntax.md
+  rule: RULE-ATTR-ARGS
+
+- code: X-E1030
+  title: "生命周期标注不属于 1.0"
+  phase: P1
+  spec: specs/language/04-ownership-borrowing.md
+  rule: RULE-OWN-NOLIFETIME
+
+- code: X-E2001
+  title: "文件路径规范化后冲突"
+  phase: P1
+  spec: specs/language/06-modules.md
+  rule: RULE-MOD-PATH
+
+- code: X-E2002
+  title: "路径第一段不是当前包或直接依赖"
+  phase: P1
+  spec: specs/language/06-modules.md
+  rule: RULE-MOD-ROOT
+
+- code: X-E2003
+  title: "导入未直接声明的依赖"
+  phase: P1
+  spec: specs/language/06-modules.md
+  rule: RULE-MOD-DIRECT
+
+- code: X-E2004
+  title: "Item 名称空间重名"
+  phase: P0
+  spec: specs/language/06-modules.md
+  rule: RULE-MOD-NS
+
+- code: X-E2005
+  title: "导入/别名冲突"
+  phase: P1
+  spec: specs/language/06-modules.md
+  rule: RULE-MOD-ALIAS
+
+- code: X-E2006
+  title: "pub use 重导出环"
+  phase: P1
+  spec: specs/language/06-modules.md
+  rule: RULE-MOD-REEXPORT
+
+- code: X-E2007
+  title: "可见性不足或绕过 Facade"
+  phase: P1
+  spec: specs/language/06-modules.md
+  rule: RULE-MOD-VIS
+
+- code: X-E2008
+  title: "方法调用存在多个候选"
+  phase: P1
+  spec: specs/language/06-modules.md
+  rule: RULE-METHOD-AMBIG
+
+- code: X-E2009
+  title: "字段与固有方法同名"
+  phase: P1
+  spec: specs/language/06-modules.md
+  rule: RULE-METHOD-FIELD
+
+- code: X-E2010
+  title: "名称未解析"
+  phase: P0
+  spec: specs/language/06-modules.md
+  rule: RULE-MOD-UNRESOLVED
+
+- code: X-E2011
+  title: "模块或 static 初始化存在环"
+  phase: P2
+  spec: specs/language/06-modules.md
+  rule: RULE-MOD-INITCYCLE
+
+- code: X-E2101
+  title: "使用裸结构模式 { x, y }"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-NOMINAL
+
+- code: X-E2102
+  title: "模式字段不存在"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-FIELD
+
+- code: X-E2103
+  title: "模式字段重复"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-DUP
+
+- code: X-E2104
+  title: "未列全字段且无 .."
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-EXHAUSTFIELDS
+
+- code: X-E2105
+  title: ".. 重复或不在最后（语义层）"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-REST
+
+- code: X-E2106
+  title: "模式访问不可见字段"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-VIS
+
+- code: X-E2107
+  title: "不可失败位置使用可失败模式"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-IRREFUTABLE
+
+- code: X-E2108
+  title: "解构后非法使用部分移动值"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-PARTIAL
+
+- code: X-E2109
+  title: "路径解析到不能用于模式的 Item"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-KIND
+
+- code: X-E2110
+  title: "引用模式与输入权限冲突"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-REF
+
+- code: X-E2111
+  title: "match 未穷尽（附缺失模式示例）"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-PAT-EXHAUSTIVE
+
+- code: X-E3001
+  title: "公开边界缺少显式类型"
+  phase: P0
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-BOUNDARY
+
+- code: X-E3002
+  title: "非白名单 as 转换"
+  phase: P0
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-EVAL-CAST
+
+- code: X-E3003
+  title: "类型无法推断或存在多个候选"
+  phase: P1
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-INFER
+
+- code: X-E3004
+  title: "类型不匹配"
+  phase: P0
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-MISMATCH
+
+- code: X-E3005
+  title: "实参个数与形参不符"
+  phase: P0
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-ARITY
+
+- code: X-E3006
+  title: "调用的值不是函数"
+  phase: P0
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-CALLABLE
+
+- code: X-E3007
+  title: "字段不存在"
+  phase: P0
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-FIELD
+
+- code: X-E3008
+  title: "赋值目标不是可写 Place"
+  phase: P0
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-EVAL-PLACE
+
+- code: X-E3009
+  title: "字面量超出目标类型范围"
+  phase: P0
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-LITRANGE
+
+- code: X-E3010
+  title: "运算符不适用于该类型"
+  phase: P0
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-EVAL-OPERATOR
+
+- code: X-E3011
+  title: "Trait 约束不满足（含 Hash/Eq/Fn 系列）"
+  phase: P1
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TRAIT-BOUND
+
+- code: X-E3012
+  title: "比较运算要求 Ord 实现"
+  phase: P1
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TRAIT-ORD
+
+- code: X-E3013
+  title: "impl 缺少 Trait 必需项"
+  phase: P1
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TRAIT-MISSING
+
+- code: X-E3014
+  title: "违反孤儿规则"
+  phase: P1
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TRAIT-ORPHAN
+
+- code: X-E3015
+  title: "impl 重叠"
+  phase: P1
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TRAIT-OVERLAP
+
+- code: X-E3016
+  title: "关联类型缺失或不匹配"
+  phase: P1
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TRAIT-ASSOC
+
+- code: X-E3017
+  title: "泛型实参个数不符"
+  phase: P1
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-GENERICARITY
+
+- code: X-E3018
+  title: "@derive 目标的字段未实现所需 Trait"
+  phase: P2
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TRAIT-DERIVE
+
+- code: X-E3019
+  title: "递归类型大小无限（需 Box）"
+  phase: P1
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-RECURSIVE
+
+- code: X-E3020
+  title: "@tailcall 函数存在无法保证的自尾调用"
+  phase: P2
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-EVAL-TAILCALL
+
+- code: X-E3021
+  title: "常量求值失败或超出预算"
+  phase: P2
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-EVAL-CONST
+
+- code: X-E3022
+  title: "static 类型非 Sync 或初始化器非常量"
+  phase: P2
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-STATIC
+
+- code: X-E3023
+  title: "单态化实例数超出预算"
+  phase: P2
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TYPE-MONOBUDGET
+
+- code: X-E4001
+  title: "移动后使用"
+  phase: P0
+  spec: specs/language/04-ownership-borrowing.md
+  rule: RULE-OWN-USEMOVED
+
+- code: X-E4002
+  title: "重复移动"
+  phase: P1
+  spec: specs/language/04-ownership-borrowing.md
+  rule: RULE-OWN-DOUBLEMOVE
+
+- code: X-E4003
+  title: "借用冲突"
+  phase: P1
+  spec: specs/language/04-ownership-borrowing.md
+  rule: RULE-OWN-CONFLICT
+
+- code: X-E4004
+  title: "借用逃逸出来源"
+  phase: P1
+  spec: specs/language/04-ownership-borrowing.md
+  rule: RULE-OWN-ESCAPE
+
+- code: X-E4005
+  title: "实现 Drop 的类型被部分移动"
+  phase: P1
+  spec: specs/language/04-ownership-borrowing.md
+  rule: RULE-DROP-PARTIAL
+
+- code: X-E4006
+  title: "从借用中移出值"
+  phase: P1
+  spec: specs/language/04-ownership-borrowing.md
+  rule: RULE-OWN-MOVEOUT
+
+- code: X-E4007
+  title: "经共享借用修改"
+  phase: P1
+  spec: specs/language/04-ownership-borrowing.md
+  rule: RULE-OWN-SHAREDMUT
+
+- code: X-E4008
+  title: "对 let 绑定重新赋值"
+  phase: P0
+  spec: specs/language/04-ownership-borrowing.md
+  rule: RULE-OWN-LETASSIGN
+
+- code: X-E4009
+  title: "闭包捕获与外部使用冲突"
+  phase: P2
+  spec: specs/language/03-expressions-patterns.md
+  rule: RULE-OWN-CAPTURE
+
+- code: X-E4010
+  title: "返回借用无法确定唯一来源"
+  phase: P1
+  spec: specs/language/04-ownership-borrowing.md
+  rule: RULE-OWN-ELISION
+
+- code: X-E4011
+  title: "Copy 类型含非 Copy 字段或同时实现 Drop"
+  phase: P1
+  spec: specs/language/02-types-traits.md
+  rule: RULE-TRAIT-COPY
+
+- code: X-E5001
+  title: "? 的错误类型与返回类型不一致"
+  phase: P1
+  spec: specs/language/05-errors-panics.md
+  rule: RULE-ERR-SAMEE
+
+- code: X-E5002
+  title: "Result/Option 传播上下文混用"
+  phase: P1
+  spec: specs/language/05-errors-panics.md
+  rule: RULE-ERR-MIX
+
+- code: X-E5003
+  title: "unwind 可能跨越外部 ABI（预留：1.0 后 unwind RFC）"
+  phase: P5
+  spec: specs/language/05-errors-panics.md
+  rule: RULE-TERM-FFIUNWIND
+
+- code: X-E5004
+  title: "main 返回类型非法"
+  phase: P1
+  spec: specs/language/05-errors-panics.md
+  rule: RULE-TERM-MAIN
+
+- code: X-E5005
+  title: "? 用于非 Result/Option 值"
+  phase: P1
+  spec: specs/language/05-errors-panics.md
+  rule: RULE-ERR-QTYPE
+
+- code: X-E6001
+  title: "unsafe 操作位于 unsafe 块之外"
+  phase: P1
+  spec: specs/language/07-unsafe-ffi.md
+  rule: RULE-UNSAFE-CONTEXT
+
+- code: X-E6002
+  title: "extern 签名含非 FFI 安全类型"
+  phase: P1
+  spec: specs/language/07-unsafe-ffi.md
+  rule: RULE-FFI-TYPE
+
+- code: X-E6003
+  title: "@export 用于非 extern \"C\" 函数或符号重复"
+  phase: P1
+  spec: specs/language/07-unsafe-ffi.md
+  rule: RULE-FFI-EXPORT
+
+- code: X-E6004
+  title: "@repr 用法非法"
+  phase: P1
+  spec: specs/language/07-unsafe-ffi.md
+  rule: RULE-FFI-REPR
+
+- code: X-E6005
+  title: "手动实现 Send/Sync 缺少 unsafe impl"
+  phase: P2
+  spec: specs/language/08-concurrency.md
+  rule: RULE-CONC-UNSAFEIMPL
+
+- code: X-E7001
+  title: "跨线程传递非 Send 值"
+  phase: P2
+  spec: specs/language/08-concurrency.md
+  rule: RULE-CONC-SEND
+
+- code: X-E7002
+  title: "thread::spawn 闭包捕获借用"
+  phase: P2
+  spec: specs/language/08-concurrency.md
+  rule: RULE-CONC-DETACHED
+
+- code: X-E7003
+  title: "跨线程共享非 Sync 类型"
+  phase: P2
+  spec: specs/language/08-concurrency.md
+  rule: RULE-CONC-SYNC
+
+- code: X-E8001
+  title: "x.toml 解析失败"
+  phase: P1
+  spec: specs/packages/manifest-lock-build.md
+  rule: RULE-PKG-PARSE
+
+- code: X-E8002
+  title: "x.toml 含未知字段"
+  phase: P1
+  spec: specs/packages/manifest-lock-build.md
+  rule: RULE-PKG-UNKNOWN
+
+- code: X-E8003
+  title: "包名非法"
+  phase: P1
+  spec: specs/packages/manifest-lock-build.md
+  rule: RULE-PKG-NAME
+
+- code: X-E8004
+  title: "包名映射到相同导入根"
+  phase: P1
+  spec: specs/packages/manifest-lock-build.md
+  rule: RULE-PKG-IMPORTROOT
+
+- code: X-E8005
+  title: "包依赖成环"
+  phase: P1
+  spec: specs/packages/manifest-lock-build.md
+  rule: RULE-PKG-CYCLE
+
+- code: X-E8006
+  title: "Path 依赖越出 Workspace 根"
+  phase: P1
+  spec: specs/packages/manifest-lock-build.md
+  rule: RULE-PKG-PATHESCAPE
+
+- code: X-E8007
+  title: "--locked 下 x.lock 需要更新"
+  phase: P1
+  spec: specs/packages/manifest-lock-build.md
+  rule: RULE-PKG-LOCKED
+
+- code: X-E8008
+  title: "Feature 未知或跨解析域"
+  phase: P2
+  spec: specs/packages/manifest-lock-build.md
+  rule: RULE-PKG-FEATURE
+
+- code: X-E8009
+  title: "版本约束冲突（附最小冲突链）"
+  phase: P2
+  spec: specs/packages/manifest-lock-build.md
+  rule: RULE-PKG-CONFLICT
+
+- code: X-E8010
+  title: "内容摘要或签名校验失败"
+  phase: P2
+  spec: specs/packages/manifest-lock-build.md
+  rule: RULE-PKG-DIGEST
+
+- code: X-E9001
+  title: "当前阶段尚未实现的语法或特性"
+  phase: P0
+  spec: docs/roadmap.md
+  rule: RULE-STAGE-UNIMPL
+
+- code: X-E9002
+  title: "1.0 已排除的特性（defer/async/宏等）"
+  phase: P0
+  spec: docs/decisions/ADR-0003-scope-1.0-and-wedge.md
+  rule: RULE-STAGE-EXCLUDED
+
+- code: X-W0001
+  title: "未使用的变量"
+  phase: P1
+  spec: specs/language/04-ownership-borrowing.md
+  rule: LINT-UNUSED-VAR
+
+- code: X-W0002
+  title: "未使用的导入"
+  phase: P1
+  spec: specs/language/06-modules.md
+  rule: LINT-UNUSED-IMPORT
+
+- code: X-W0003
+  title: "不可达代码"
+  phase: P1
+  spec: specs/language/03-expressions-patterns.md
+  rule: LINT-UNREACHABLE
+
+- code: X-W0004
+  title: "不必要的 unsafe 块"
+  phase: P1
+  spec: specs/language/07-unsafe-ffi.md
+  rule: LINT-UNUSED-UNSAFE
+
+- code: X-W0005
+  title: "使用了 @deprecated 项"
+  phase: P2
+  spec: specs/language/01-lexical-syntax.md
+  rule: LINT-DEPRECATED
+
+- code: X-W0006
+  title: "忽略了 @must_use 值（含 Result）"
+  phase: P1
+  spec: specs/language/05-errors-panics.md
+  rule: LINT-MUST-USE
+
+- code: X-W0007
+  title: "显式导入遮蔽 Prelude 名称"
+  phase: P1
+  spec: specs/language/06-modules.md
+  rule: LINT-PRELUDE-SHADOW

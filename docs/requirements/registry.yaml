@@ -1,0 +1,1684 @@
+# X-Lang 原始需求登记册（唯一来源）
+# 受限 YAML：扁平记录列表；字段：id/title/source/track/phase/done/disposition/landing/note
+# track: core|toolchain|eco|labs；phase/done: M0|P0|P1|P2|P3|P4|P5|R
+# disposition: adopt 原样落地 | adapt 修正后落地 | replace 以替代方式满足 | research 研究赛道
+
+- id: XLF-01-001
+  title: "可插拔三段式编译器"
+  source: "1.txt"
+  track: core
+  phase: P0
+  done: P1
+  disposition: adopt
+  landing: "编译器分层管线：前端/中端/后端以 Codegen Trait 解耦"
+  note: "—"
+
+- id: XLF-01-002
+  title: "Lexer/Parser/Semantic→HIR"
+  source: "1.txt"
+  track: core
+  phase: P0
+  done: P1
+  disposition: adopt
+  landing: "Lexer→无损 CST→AST→HIR（名称解析）"
+  note: "—"
+
+- id: XLF-01-003
+  title: "HIR 平台无关优化→MIR/LIR"
+  source: "1.txt"
+  track: core
+  phase: P1
+  done: P3
+  disposition: adopt
+  landing: "MIR 平台无关优化 Pass；P1 基础 Pass，P3 增强"
+  note: "原文 LIR 统一命名为 MIR"
+
+- id: XLF-01-004
+  title: "LLVM 原生后端"
+  source: "1.txt"
+  track: core
+  phase: P0
+  done: P4
+  disposition: adopt
+  landing: "LLVM 后端（ADR-0001），Tier 1 目标"
+  note: "—"
+
+- id: XLF-01-005
+  title: "WASM 与交叉编译"
+  source: "1.txt"
+  track: core
+  phase: P3
+  done: P5
+  disposition: adapt
+  landing: "P3 交叉编译闭环与 wasm32-wasip2 探针；P5 WASM 升 Tier 2"
+  note: "WASM 依赖 std/PAL 成熟，不进 P0–P2"
+
+- id: XLF-01-006
+  title: "所有权、借用、生命周期"
+  source: "1.txt"
+  track: core
+  phase: P1
+  done: P2
+  disposition: adapt
+  landing: "P1 受限借用检查，P2 完整 NLL；1.0 采用隐式区域策略"
+  note: "1.0 无显式生命周期语法，见 specs/language/04"
+
+- id: XLF-01-007
+  title: "无 GC 核心模式"
+  source: "1.txt"
+  track: core
+  phase: P0
+  done: P2
+  disposition: adopt
+  landing: "所有权 + RAII，无隐式 GC"
+  note: "—"
+
+- id: XLF-01-008
+  title: "Comptime 与零成本抽象"
+  source: "1.txt"
+  track: core
+  phase: P2
+  done: P4
+  disposition: adapt
+  landing: "const/static 初始化与 const fn 由 MIR 解释器求值，带资源预算"
+  note: "通用 comptime 进入研究赛道"
+
+- id: XLF-01-009
+  title: "协程、CSP、Channel"
+  source: "1.txt"
+  track: core
+  phase: P2
+  done: P5
+  disposition: adapt
+  landing: "1.0：作用域线程 + 通道（CSP 风格）；P5：async/await Edition + M:N 执行器"
+  note: "async 与所有权/取消/FFI 交织，1.0 前不承诺"
+
+- id: XLF-01-010
+  title: "简洁、显式、OOP+FP 表达力"
+  source: "1.txt"
+  track: core
+  phase: P1
+  done: P2
+  disposition: adopt
+  landing: "struct/enum/impl/trait/闭包/模式匹配；无继承、无重载"
+  note: "—"
+
+- id: XLF-01-011
+  title: "跨平台标准库"
+  source: "1.txt"
+  track: core
+  phase: P1
+  done: P4
+  disposition: adopt
+  landing: "core→alloc→std 分层 + PAL，Tier 矩阵见 platforms"
+  note: "—"
+
+- id: XLF-01-012
+  title: "声明式跨平台 UI"
+  source: "1.txt"
+  track: eco
+  phase: P3
+  done: P5
+  disposition: replace
+  landing: "XUI 库（View/UiIr/Capability）：P3 原型，P4 Web 样例，P5 桌面/移动"
+  note: "UI 不进入核心语法；只承诺语义一致，不承诺像素一致"
+
+- id: XLF-01-013
+  title: "包管理、构建、LSP、格式化一体化"
+  source: "1.txt"
+  track: toolchain
+  phase: P0
+  done: P3
+  disposition: adopt
+  landing: "单一 x 二进制：check/build/run/test/fmt → xpm → LSP"
+  note: "—"
+
+- id: XLF-01-014
+  title: "IDE、增量/并行编译"
+  source: "1.txt"
+  track: toolchain
+  phase: P1
+  done: P3
+  disposition: adopt
+  landing: "P1 查询式 Driver（内存缓存），P3 落盘增量 + LSP"
+  note: "—"
+
+- id: XLF-01-015
+  title: "分阶段路线与最终自举"
+  source: "1.txt"
+  track: core
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "1.0 后启动自举；保留 Rust 实现为 bootstrap 编译器"
+  note: "自举不是 1.0 门禁"
+
+- id: XLF-02-001
+  title: "编译器+LSP+IDE+运行时四层架构"
+  source: "2.txt"
+  track: core
+  phase: P0
+  done: P3
+  disposition: adopt
+  landing: "编译器/工具链/运行时/编辑器四层，见 architecture"
+  note: "—"
+
+- id: XLF-02-002
+  title: "Token/AST/HIR/LIR/LLVM 全流水线"
+  source: "2.txt"
+  track: core
+  phase: P0
+  done: P1
+  disposition: adopt
+  landing: "Token→CST→AST→HIR→MIR→LLVM"
+  note: "原文 LIR 统一为 MIR"
+
+- id: XLF-02-003
+  title: "Rust 初始实现与自举"
+  source: "2.txt"
+  track: core
+  phase: M0
+  done: P5
+  disposition: adopt
+  landing: "Rust 宿主实现（ADR-0001）；自举见 XLF-01-015"
+  note: "—"
+
+- id: XLF-02-004
+  title: "增量、并行编译与彩色诊断"
+  source: "2.txt"
+  track: toolchain
+  phase: P0
+  done: P3
+  disposition: adopt
+  landing: "P0 彩色诊断；P1 查询骨架与并行编译；P3 落盘增量"
+  note: "—"
+
+- id: XLF-02-005
+  title: "LSP 分析、补全、导航、格式化、诊断"
+  source: "2.txt"
+  track: toolchain
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x lsp：诊断/补全/跳转/重命名/格式化"
+  note: "—"
+
+- id: XLF-02-006
+  title: "tree-sitter 增量解析候选"
+  source: "2.txt"
+  track: toolchain
+  phase: P3
+  done: P4
+  disposition: adapt
+  landing: "从规范文法生成 tree-sitter 语法，仅用于高亮/编辑器结构"
+  note: "语义只来自编译器查询，不造第二套解析语义"
+
+- id: XLF-02-007
+  title: "VS Code + TextMate + DAP"
+  source: "2.txt"
+  track: toolchain
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "VS Code 扩展（TextMate/tree-sitter 高亮 + LSP + DAP）"
+  note: "—"
+
+- id: XLF-02-008
+  title: "IntelliJ Grammar-Kit/JFlex/PSI"
+  source: "2.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "IntelliJ 插件经平台 LSP 支持接入 x lsp"
+  note: "不实现 Grammar-Kit/JFlex 第二套 Parser"
+
+- id: XLF-02-009
+  title: "XRT 内存、协程、I/O、标准库"
+  source: "2.txt"
+  track: core
+  phase: P0
+  done: P5
+  disposition: adapt
+  landing: "xrt 最小运行时（启动/panic/分配/线程）；协程运行时 P5"
+  note: "—"
+
+- id: XLF-02-010
+  title: "RAII + 可选 GC"
+  source: "2.txt"
+  track: labs
+  phase: R
+  done: R
+  disposition: replace
+  landing: "共享所有权用 Rc/Arc/Weak；可选 GC 仅研究赛道"
+  note: "GC 与“无隐式 GC”核心目标冲突"
+
+- id: XLF-02-011
+  title: "C ABI FFI"
+  source: "2.txt"
+  track: core
+  phase: P1
+  done: P2
+  disposition: adopt
+  landing: "extern \"C\" 调用与导出、@repr(C)"
+  note: "—"
+
+- id: XLF-02-012
+  title: "正式语法规范与示例"
+  source: "2.txt"
+  track: core
+  phase: P0
+  done: P2
+  disposition: adopt
+  landing: "specs/language 规范 + 机器可读文法"
+  note: "—"
+
+- id: XLF-02-013
+  title: "标准用户项目结构和 `x.toml`"
+  source: "2.txt"
+  track: toolchain
+  phase: P1
+  done: P2
+  disposition: adopt
+  landing: "标准项目结构 + x.toml（specs/packages）"
+  note: "—"
+
+- id: XLF-02-014
+  title: "build/run/test/fmt/check/doc/publish 命令"
+  source: "2.txt"
+  track: toolchain
+  phase: P0
+  done: P4
+  disposition: adopt
+  landing: "P0 check/build/run；P1 test/fmt；P3 doc；P4 publish"
+  note: "—"
+
+- id: XLF-02-015
+  title: "调试与性能分析"
+  source: "2.txt"
+  track: toolchain
+  phase: P2
+  done: P4
+  disposition: adopt
+  landing: "P2 DWARF/PDB 行表；P3 x debug(DAP)；P4 x prof 集成"
+  note: "—"
+
+- id: XLF-03-001
+  title: "`#spec` 显式契约"
+  source: "3.txt"
+  track: core
+  phase: P2
+  done: P5
+  disposition: adapt
+  landing: "1.0 前：assert + doc-test；1.0 后 Edition 候选：可执行契约 @requires/@ensures"
+  note: "ADR-0003：1.0 不扩核心语法"
+
+- id: XLF-03-002
+  title: "`#example` 自然语言/示例测试"
+  source: "3.txt"
+  track: toolchain
+  phase: P2
+  done: P2
+  disposition: replace
+  landing: "doc-test：/// 中代码块编译运行"
+  note: "自然语言示例不进入编译语义"
+
+- id: XLF-03-003
+  title: "`pure` 与确定性标记"
+  source: "3.txt"
+  track: labs
+  phase: P3
+  done: R
+  disposition: adapt
+  landing: "P3 x vet 副作用启发式报告；Effect 系统为研究项"
+  note: "pure 不进入 1.0（ADR-0003）"
+
+- id: XLF-03-004
+  title: "AST/Embedding 语义索引和 `x.meta`"
+  source: "3.txt"
+  track: toolchain
+  phase: P3
+  done: P4
+  disposition: adapt
+  landing: "语义索引来自编译器查询（x query）；向量嵌入为可选插件"
+  note: "编译器不依赖嵌入模型"
+
+- id: XLF-03-005
+  title: "`x agent init/implement/explain/fix`"
+  source: "3.txt"
+  track: eco
+  phase: P3
+  done: P5
+  disposition: adapt
+  landing: "x-ai-tools：P3 explain/fix 只读建议，P5 受控写操作"
+  note: "AI 输出必须经测试与人工审查"
+
+- id: XLF-03-006
+  title: "本地向量检索与上下文构建"
+  source: "3.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "x-ai-tools 可选本地检索组件"
+  note: "不进入编译关键路径"
+
+- id: XLF-03-007
+  title: "内置 MCP Resources/Tools"
+  source: "3.txt"
+  track: toolchain
+  phase: P3
+  done: P4
+  disposition: adapt
+  landing: "x mcp：只读 MCP 服务器，映射编译器查询"
+  note: "写操作走受控流程"
+
+- id: XLF-03-008
+  title: "AI IDE 协驾驶面板"
+  source: "3.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "VS Code 扩展可选 AI 面板：上下文预览、权限、diff"
+  note: "模型供应商经适配器解耦"
+
+- id: XLF-03-009
+  title: "规范实时校验和依赖影响图"
+  source: "3.txt"
+  track: toolchain
+  phase: P3
+  done: P3
+  disposition: adopt
+  landing: "LSP 实时诊断 + x why/x tree 依赖影响图"
+  note: "—"
+
+- id: XLF-03-010
+  title: "标准库机器可读注释"
+  source: "3.txt"
+  track: toolchain
+  phase: P2
+  done: P3
+  disposition: adopt
+  landing: "std 文档注释 + 结构化 JSON 文档元数据"
+  note: "—"
+
+- id: XLF-03-011
+  title: "模板市场"
+  source: "3.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "签名模板仓库：x init --template"
+  note: "模板执行默认沙箱"
+
+- id: XLF-03-012
+  title: "AI 驱动初始化→契约→实现→修复→发布"
+  source: "3.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "x-ai-tools 流水线：提案→测试→审查→发布"
+  note: "人工审批不可绕过"
+
+- id: XLF-04-001
+  title: "Tensor 类型与 Shape 推导"
+  source: "4.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "x-tensor 库：运行时 Shape；静态维度待 const 泛型评估"
+  note: "语言不内建 Tensor；成本为编译器级 ML 系统"
+
+- id: XLF-04-002
+  title: "编译期自动微分"
+  source: "4.txt"
+  track: eco
+  phase: P5
+  done: R
+  disposition: replace
+  landing: "库级 Tape Autograd；编译期 AD 为研究项"
+  note: "编译期 AD 需要宏或编译器插件，1.0 不提供；库级实现已能满足训练原型"
+
+- id: XLF-04-003
+  title: "CUDA/ROCm/Metal Kernel 生成"
+  source: "4.txt"
+  track: eco
+  phase: P5
+  done: R
+  disposition: replace
+  landing: "经 FFI 调用成熟内核库/运行时；自研 Kernel 生成为研究项"
+  note: "三后端 Kernel 生成超出团队规模"
+
+- id: XLF-04-004
+  title: "静态计算图优化与自动并行"
+  source: "4.txt"
+  track: labs
+  phase: R
+  done: R
+  disposition: replace
+  landing: "导出 ONNX 交给成熟图编译器"
+  note: "自动并行属研究"
+
+- id: XLF-04-005
+  title: "LoRA/QLoRA Adapter 注入"
+  source: "4.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "经 Python 互操作调用成熟微调框架"
+  note: "不进入语言语法"
+
+- id: XLF-04-006
+  title: "量化、混合精度和分布式训练"
+  source: "4.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "经互操作使用成熟量化/分布式训练框架"
+  note: "自研分布式训练栈超出团队规模；复用成熟框架的成本最低"
+
+- id: XLF-04-007
+  title: "io_uring/IOCP 网络引擎"
+  source: "4.txt"
+  track: core
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "async 执行器的 io_uring/IOCP/kqueue 适配器；用户态协议栈/DPDK/eBPF 加速改为可选生态适配器（P5 eco）"
+  note: "依赖 async Edition；用户态协议栈不进 std：安全面与维护成本过高，内核协议栈 + 零拷贝 API 已覆盖主流场景"
+
+- id: XLF-04-008
+  title: "HTTP/1-3、QUIC、gRPC、WebSocket"
+  source: "4.txt"
+  track: eco
+  phase: P3
+  done: P5
+  disposition: adopt
+  landing: "x-http：P3 HTTP/1.1+TLS，P4 HTTP/2/gRPC，P5 HTTP/3/QUIC/WebSocket"
+  note: "协议互操作优先于自研协议栈"
+
+- id: XLF-04-009
+  title: "Protocol as Type"
+  source: "4.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: adapt
+  landing: "Typestate 模式 + IDL 代码生成"
+  note: "语言级 Session Type 为研究项"
+
+- id: XLF-04-010
+  title: "训练即服务"
+  source: "4.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "x-ai-tools 编排外部训练服务"
+  note: "复用现有调度基础设施"
+
+- id: XLF-04-011
+  title: "动态批处理"
+  source: "4.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "推理服务库的动态批处理"
+  note: "—"
+
+- id: XLF-04-012
+  title: "`x agent train/finetune/serve`"
+  source: "4.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "x-ai-tools train/serve 子命令编排外部服务"
+  note: "不隐式获取云权限"
+
+- id: XLF-04-013
+  title: "ONNX/GGUF/safetensors 模型导入"
+  source: "4.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "x-ml 读取库：safetensors/GGUF/ONNX 解析"
+  note: "v2 补登：原文“模型格式导入器”"
+
+- id: XLF-05-001
+  title: "`spawn`、作用域线程和 Send 检查"
+  source: "5.txt"
+  track: core
+  phase: P2
+  done: P2
+  disposition: adopt
+  landing: "std::thread::scope/spawn + Send/Sync 检查"
+  note: "—"
+
+- id: XLF-05-002
+  title: "M:N 调度、工作窃取和专用线程池"
+  source: "5.txt"
+  track: core
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "async 执行器：工作窃取 + 专用阻塞线程池"
+  note: "依赖 async Edition"
+
+- id: XLF-05-003
+  title: "fork/exec 安全封装"
+  source: "5.txt"
+  track: core
+  phase: P2
+  done: P3
+  disposition: adapt
+  landing: "std::process::Command；不提供安全 fork"
+  note: "fork 在多线程下不安全"
+
+- id: XLF-05-004
+  title: "共享内存和 IPC"
+  source: "5.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x-ipc：共享内存/管道/本地套接字/句柄传递"
+  note: "—"
+
+- id: XLF-05-005
+  title: "自定义分配器、Arena"
+  source: "5.txt"
+  track: core
+  phase: P3
+  done: P4
+  disposition: adapt
+  landing: "Allocator Trait、全局分配器替换、Arena 类型"
+  note: "—"
+
+- id: XLF-05-006
+  title: "原始指针与 Ghost Memory 调试"
+  source: "5.txt"
+  track: core
+  phase: P2
+  done: P3
+  disposition: adapt
+  landing: "P2 unsafe/原始指针规范；P3 ASan/MIR 解释器 UB 检查"
+  note: "Ghost Memory 改为 Sanitizer 方案"
+
+- id: XLF-05-007
+  title: "CPU/GPU 统一内存"
+  source: "5.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "显式 ManagedBuffer + 同步/迁移 API"
+  note: "不承诺 CPU/GPU 同一指针类型"
+
+- id: XLF-05-008
+  title: "Async File/Direct I/O"
+  source: "5.txt"
+  track: core
+  phase: P3
+  done: P5
+  disposition: adapt
+  landing: "P3 std::os 同步 Direct I/O；P5 async 文件 I/O"
+  note: "—"
+
+- id: XLF-05-009
+  title: "sendfile/splice 零拷贝"
+  source: "5.txt"
+  track: core
+  phase: P3
+  done: P3
+  disposition: adopt
+  landing: "std::os::linux 等平台扩展 API"
+  note: "—"
+
+- id: XLF-05-010
+  title: "mmap 智能预取"
+  source: "5.txt"
+  track: eco
+  phase: P3
+  done: R
+  disposition: replace
+  landing: "x-mmap 显式 madvise hint；自适应预取为研究项"
+  note: "“智能”预取的收益依赖负载，无法给出通用保证；显式 hint 行为可预期"
+
+- id: XLF-05-011
+  title: "AI 系统操作命令"
+  source: "5.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "x-ai-tools：计划→dry-run→审批→执行"
+  note: "拒绝默认提权"
+
+- id: XLF-05-012
+  title: "x inspect memory / x run --prefetch"
+  source: "5.txt"
+  track: toolchain
+  phase: P4
+  done: P5
+  disposition: adapt
+  landing: "x inspect：core dump/堆剖析适配；--prefetch 并入 XLF-05-010"
+  note: "v2 补登：原文 x inspect memory / x run --prefetch"
+
+- id: XLF-06-001
+  title: "分层渲染引擎与声明式 UI"
+  source: "6.txt"
+  track: eco
+  phase: P3
+  done: P5
+  disposition: adopt
+  landing: "XUI 分层：View→UiIr→Renderer→Platform"
+  note: "—"
+
+- id: XLF-06-002
+  title: "Windows/macOS/Linux 桌面"
+  source: "6.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "XUI 桌面宿主：Windows/Linux 先，macOS 后"
+  note: "—"
+
+- id: XLF-06-003
+  title: "Skia、WebView、托盘和快捷键"
+  source: "6.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "Skia/WebView/托盘/快捷键适配器"
+  note: "—"
+
+- id: XLF-06-004
+  title: "Android/iOS 原生库和薄胶水"
+  source: "6.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "Android/iOS 静态/动态库 + JNI/Swift 薄胶水"
+  note: "—"
+
+- id: XLF-06-005
+  title: "Metal/Vulkan、触控与传感器"
+  source: "6.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "平台能力探测：Metal/Vulkan、触控、传感器"
+  note: "—"
+
+- id: XLF-06-006
+  title: "小程序 WASM 逻辑和模板转译"
+  source: "6.txt"
+  track: labs
+  phase: R
+  done: R
+  disposition: research
+  landing: "实验：JS 胶水 + WASM 逻辑包（平台支持时）"
+  note: "平台规则变化快；模板转译不作通用承诺"
+
+- id: XLF-06-007
+  title: "服务端 HTTP3/gRPC/AI 推理"
+  source: "6.txt"
+  track: eco
+  phase: P3
+  done: P5
+  disposition: adopt
+  landing: "x-server：HTTP/gRPC P3–P4；HTTP/3 与推理 P5"
+  note: "—"
+
+- id: XLF-06-008
+  title: "裸机、内核、驱动、嵌入式"
+  source: "6.txt"
+  track: core
+  phase: P4
+  done: P5
+  disposition: adapt
+  landing: "P4 冻结 no_std（core/alloc）子集；P5 QEMU/开发板"
+  note: "内核驱动按目标评估"
+
+- id: XLF-06-009
+  title: "中断、MMIO、RISC-V/x86 裸机目标"
+  source: "6.txt"
+  track: core
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "@interrupt、volatile MMIO、链接脚本；RISC-V/x86 Tier 3"
+  note: "—"
+
+- id: XLF-06-010
+  title: "多目标 Build Matrix/PAL"
+  source: "6.txt"
+  track: toolchain
+  phase: P2
+  done: P4
+  disposition: adopt
+  landing: "PAL + [target] 构建矩阵"
+  note: "—"
+
+- id: XLF-06-011
+  title: "Agent 全场景脚手架"
+  source: "6.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "按场景签名模板（CLI/Web/服务/嵌入式）"
+  note: "禁止万能模板"
+
+- id: XLF-07-001
+  title: "因果回溯、确定性记录重演"
+  source: "7.txt+8.txt"
+  track: toolchain
+  phase: P5
+  done: R
+  disposition: adapt
+  landing: "集成 rr/平台 TTD 记录重放；语言级通用重放为研究项"
+  note: "不承诺 100% 复现"
+
+- id: XLF-07-002
+  title: "增量内存快照"
+  source: "7.txt+8.txt"
+  track: toolchain
+  phase: P4
+  done: R
+  disposition: adapt
+  landing: "core dump/minidump 生成与解析；增量快照为研究项"
+  note: "—"
+
+- id: XLF-07-003
+  title: "能耗/碳感知调度"
+  source: "7.txt+8.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "能耗观测库（RAPL 等）；调度策略归应用"
+  note: "拒绝编译器自动迁移"
+
+- id: XLF-07-004
+  title: "认知复杂度与重构建议"
+  source: "7.txt+8.txt"
+  track: toolchain
+  phase: P3
+  done: P3
+  disposition: adopt
+  landing: "x vet 认知复杂度 Lint"
+  note: "—"
+
+- id: XLF-07-005
+  title: "HLC 因果时间"
+  source: "7.txt+8.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x-time：HLC 实现，显式传播"
+  note: "不给所有变量隐式加字段"
+
+- id: XLF-07-006
+  title: "Data Glacier/PMEM 持久变量"
+  source: "7.txt+8.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "显式持久化事务库（PMEM/对象存储）"
+  note: "普通变量不隐式持久化"
+
+- id: XLF-07-007
+  title: "后量子密码"
+  source: "7.txt+8.txt"
+  track: eco
+  phase: P4
+  done: P4
+  disposition: adapt
+  landing: "x-crypto 绑定成熟 Provider（NIST 标准算法）"
+  note: "不默认替换现有算法"
+
+- id: XLF-07-008
+  title: "ZKP 闭包/电路后端"
+  source: "7.txt+8.txt"
+  track: labs
+  phase: R
+  done: R
+  disposition: research
+  landing: "与外部电路 DSL 互操作研究"
+  note: "通用程序转电路属研究"
+
+- id: XLF-07-009
+  title: "空间锚点和 GPU 光线追踪"
+  source: "7.txt+8.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "图形/XR 绑定库（Vulkan/DXR/Metal/OpenXR）"
+  note: "核心不加空间关键字"
+
+- id: XLF-07-010
+  title: "触觉与脑机接口"
+  source: "7.txt+8.txt"
+  track: eco
+  phase: P5
+  done: R
+  disposition: replace
+  landing: "HID/触觉/传感器适配；脑机接口为研究项"
+  note: "需伦理/法规审批"
+
+- id: XLF-07-011
+  title: "基因编程/策略搜索"
+  source: "7.txt+8.txt"
+  track: toolchain
+  phase: P4
+  done: P4
+  disposition: replace
+  landing: "PGO + x tune 参数搜索（只调参数）"
+  note: "拒绝自动改业务逻辑"
+
+- id: XLF-07-012
+  title: "混沌免疫与自修复"
+  source: "7.txt+8.txt"
+  track: eco
+  phase: P4
+  done: P4
+  disposition: replace
+  landing: "熔断/重试/隔离/故障注入库"
+  note: "拒绝无人审批热补丁"
+
+- id: XLF-07-013
+  title: "法规注解和污点分析"
+  source: "7.txt+8.txt"
+  track: toolchain
+  phase: P4
+  done: P4
+  disposition: adapt
+  landing: "x vet 污点分析规则包"
+  note: "声明不构成法律意见"
+
+- id: XLF-07-014
+  title: "跨栈内存内省"
+  source: "7.txt+8.txt"
+  track: toolchain
+  phase: P4
+  done: P5
+  disposition: adapt
+  landing: "x inspect 统一 core/heap/thread 视图"
+  note: "—"
+
+- id: XLF-07-015
+  title: "Omni-FFI"
+  source: "7.txt+8.txt"
+  track: eco
+  phase: P3
+  done: P5
+  disposition: adapt
+  landing: "C 由核心提供（XLF-02-011）；Python/JVM/Node 绑定生成 P3–P5"
+  note: "拒绝任意 ABI"
+
+- id: XLF-07-016
+  title: "`.xbrain` 联邦项目记忆"
+  source: "7.txt+8.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "x-ai-tools 本地项目记忆（opt-in）"
+  note: "联邦同步默认关闭"
+
+- id: XLF-07-017
+  title: "Living Docs"
+  source: "7.txt+8.txt"
+  track: toolchain
+  phase: P2
+  done: P3
+  disposition: adopt
+  landing: "doc-test + x doc 站点"
+  note: "—"
+
+- id: XLF-07-018
+  title: "Intent/有界符号执行"
+  source: "7.txt+8.txt"
+  track: labs
+  phase: R
+  done: R
+  disposition: research
+  landing: "x verify：有界模型检查实验（外部 SMT）"
+  note: "拒绝通用算法生成"
+
+- id: XLF-07-019
+  title: "eBPF 目标"
+  source: "7.txt+8.txt"
+  track: core
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "bpfel/bpfeb Tier 3 目标（no_std 子集）"
+  note: "—"
+
+- id: XLF-09-001
+  title: "编译期静态反射"
+  source: "9.txt"
+  track: core
+  phase: P2
+  done: P5
+  disposition: adapt
+  landing: "1.0：内置 @derive 闭集；通用反射/用户派生 1.0 后 RFC"
+  note: "无用户宏（ADR-0003）"
+
+- id: XLF-09-002
+  title: "JSON/YAML/TOML/Protobuf/MessagePack"
+  source: "9.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x-json 官方包（P3）；YAML/TOML/Protobuf/MessagePack 生态包"
+  note: "—"
+
+- id: XLF-09-003
+  title: "Schema Evolution"
+  source: "9.txt"
+  track: eco
+  phase: P4
+  done: P4
+  disposition: adopt
+  landing: "序列化库版本化 Schema 与兼容测试"
+  note: "—"
+
+- id: XLF-09-004
+  title: "结构化日志/OTLP"
+  source: "9.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x-log：结构化日志 + OTLP 导出"
+  note: "—"
+
+- id: XLF-09-005
+  title: "Counter/Histogram/Gauge"
+  source: "9.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x-metrics：Counter/Gauge/Histogram"
+  note: "—"
+
+- id: XLF-09-006
+  title: "async Trace 自动上下文"
+  source: "9.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "async Trace Context 传播"
+  note: "依赖 async Edition"
+
+- id: XLF-09-007
+  title: "声明式 CLI 与配置层级"
+  source: "9.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: adapt
+  landing: "x-cli-args 参数/配置分层库（Trait + 代码生成，无宏）"
+  note: "—"
+
+- id: XLF-09-008
+  title: "Fuzz/Property/Benchmark"
+  source: "9.txt"
+  track: toolchain
+  phase: P2
+  done: P4
+  disposition: adopt
+  landing: "x test --bench、x fuzz（libFuzzer）、属性测试库"
+  note: "—"
+
+- id: XLF-09-009
+  title: "Unicode、i18n 提取、复数/性别"
+  source: "9.txt"
+  track: core
+  phase: P2
+  done: P4
+  disposition: adopt
+  landing: "str/char Unicode 基础（P2）；i18n 生态包（P4）"
+  note: "—"
+
+- id: XLF-09-010
+  title: "2D 矢量和音视频编解码"
+  source: "9.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "绑定 Skia/FFmpeg 等成熟库"
+  note: "许可证/漏洞矩阵独立管理"
+
+- id: XLF-09-011
+  title: "编译期 SQL 检查"
+  source: "9.txt"
+  track: eco
+  phase: P4
+  done: P4
+  disposition: adapt
+  landing: "离线 Schema 快照 + 查询检查生成工具"
+  note: "编译期不连数据库"
+
+- id: XLF-09-012
+  title: "异步连接池与迁移"
+  source: "9.txt"
+  track: eco
+  phase: P4
+  done: P5
+  disposition: adopt
+  landing: "同步连接池与迁移 P4；async 版 P5"
+  note: "—"
+
+- id: XLF-09-013
+  title: "Timer/Cron/Leader Election"
+  source: "9.txt"
+  track: eco
+  phase: P4
+  done: P4
+  disposition: adopt
+  landing: "Timer/Cron/Leader Election 库"
+  note: "—"
+
+- id: XLF-09-014
+  title: "JWT/RBAC/Session"
+  source: "9.txt"
+  track: eco
+  phase: P4
+  done: P4
+  disposition: adopt
+  landing: "x-auth：JWT/RBAC/Session 官方安全包"
+  note: "不进入语言"
+
+- id: XLF-09-015
+  title: "分布式构建缓存"
+  source: "9.txt"
+  track: toolchain
+  phase: P4
+  done: P4
+  disposition: adapt
+  landing: "XBuild 远程只读缓存"
+  note: "—"
+
+- id: XLF-09-016
+  title: "二进制 `.xlib` 注册表"
+  source: "9.txt"
+  track: toolchain
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "源码优先；二进制缓存按工具链指纹命中"
+  note: "X ABI 未稳定前不发 binary-only 包"
+
+- id: XLF-09-017
+  title: "PubGrub/SemVer 解析"
+  source: "9.txt"
+  track: toolchain
+  phase: P2
+  done: P3
+  disposition: adopt
+  landing: "PubGrub 解析 + SemVer"
+  note: "—"
+
+- id: XLF-10-001
+  title: "错误回溯和上下文链"
+  source: "10.txt"
+  track: core
+  phase: P2
+  done: P3
+  disposition: adopt
+  landing: "panic 回溯（P2）；错误上下文链库（P3）"
+  note: "—"
+
+- id: XLF-10-002
+  title: "`defer` LIFO 清理"
+  source: "10.txt"
+  track: core
+  phase: P2
+  done: P5
+  disposition: adapt
+  landing: "1.0 用 RAII Guard（std::guard）；defer 1.0 后 RFC"
+  note: "ADR-0003：defer 不进 1.0"
+
+- id: XLF-10-003
+  title: "unwind/abort/no-exceptions"
+  source: "10.txt"
+  track: core
+  phase: P0
+  done: P4
+  disposition: adapt
+  landing: "1.0 只有 panic=abort（ADR-0008 K3）；unwind 1.0 后经 RFC 评估"
+  note: "—"
+
+- id: XLF-10-004
+  title: "decimal32/64/128"
+  source: "10.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x-decimal 库"
+  note: "—"
+
+- id: XLF-10-005
+  title: "编译期正则/DFA"
+  source: "10.txt"
+  track: eco
+  phase: P3
+  done: P5
+  disposition: replace
+  landing: "x-regex 运行时编译 + 缓存；编译期 DFA 待 const 能力"
+  note: "防 ReDoS：线性时间引擎"
+
+- id: XLF-10-006
+  title: "Bitstream/Bitfield"
+  source: "10.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: adapt
+  landing: "位域库（显式字节序/位序）+ @repr"
+  note: "—"
+
+- id: XLF-10-007
+  title: "编译期 DI/Mock"
+  source: "10.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: replace
+  landing: "Trait + 测试替身库"
+  note: "不在 HIR 引入 DI 容器"
+
+- id: XLF-10-008
+  title: "快照测试"
+  source: "10.txt"
+  track: toolchain
+  phase: P2
+  done: P2
+  disposition: adopt
+  landing: "x test 快照断言"
+  note: "—"
+
+- id: XLF-10-009
+  title: "Stream/Generator/背压"
+  source: "10.txt"
+  track: core
+  phase: P1
+  done: P5
+  disposition: adapt
+  landing: "P1 同步 Iterator；P5 Stream/生成器随 async Edition"
+  note: "—"
+
+- id: XLF-10-010
+  title: "Rc/Arc/Weak"
+  source: "10.txt"
+  track: core
+  phase: P1
+  done: P2
+  disposition: adopt
+  landing: "Box/Rc/Weak（P1），Arc（P2）"
+  note: "—"
+
+- id: XLF-10-011
+  title: "Cell/RefCell 内部可变性"
+  source: "10.txt"
+  track: core
+  phase: P2
+  done: P2
+  disposition: adopt
+  landing: "Cell/RefCell"
+  note: "—"
+
+- id: XLF-10-012
+  title: "`build.x`、include、cfg"
+  source: "10.txt"
+  track: core
+  phase: P2
+  done: P5
+  disposition: adapt
+  landing: "@cfg + include_str/include_bytes（P2）；沙箱构建脚本 1.0 后 RFC"
+  note: "1.0 无通用构建脚本"
+
+- id: XLF-10-013
+  title: "信号和 Coredump 元数据"
+  source: "10.txt"
+  track: core
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "std::os 信号；崩溃元数据（P4）"
+  note: "—"
+
+- id: XLF-10-014
+  title: "动态库、插件、符号版本"
+  source: "10.txt"
+  track: core
+  phase: P4
+  done: P5
+  disposition: adapt
+  landing: "C ABI 动态库 + 版本协商"
+  note: "X 原生 ABI 1.0 不稳定"
+
+- id: XLF-10-015
+  title: "C/Python/Node 绑定生成"
+  source: "10.txt"
+  track: eco
+  phase: P3
+  done: P5
+  disposition: adopt
+  landing: "x-bindgen：C 头文件生成（P3），Python/Node（P5）"
+  note: "—"
+
+- id: XLF-10-016
+  title: "SIMD、对齐、cache padding"
+  source: "10.txt"
+  track: core
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "@repr(align)（P3）、std::simd 可移植 SIMD（P4）"
+  note: "—"
+
+- id: XLF-10-017
+  title: "xdoc 站点、依赖图、调用热图"
+  source: "10.txt"
+  track: toolchain
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x doc 站点 + 依赖图"
+  note: "—"
+
+- id: XLF-10-018
+  title: "`x search` 符号/正则/语义搜索"
+  source: "10.txt"
+  track: toolchain
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x search：符号/文本搜索（基于查询索引）"
+  note: "—"
+
+- id: XLF-11-001
+  title: "SemVer API 差异发布门禁"
+  source: "11.txt"
+  track: toolchain
+  phase: P4
+  done: P4
+  disposition: adopt
+  landing: "x publish 前 API diff + SemVer 门禁"
+  note: "—"
+
+- id: XLF-11-002
+  title: "LTS 与发布节奏"
+  source: "11.txt"
+  track: toolchain
+  phase: P4
+  done: P4
+  disposition: adapt
+  landing: "6 周 stable 列车；1.0 起每年 1 个 LTS，提供 12 个月安全修复（ADR-0008 K10，见 release）"
+  note: "只承诺安全与严重缺陷修复，资源有上限"
+
+- id: XLF-11-003
+  title: "`x rfc` 流程"
+  source: "11.txt"
+  track: toolchain
+  phase: M0
+  done: P3
+  disposition: adapt
+  landing: "RFC 模板与流程（M0）；x rfc 命令可选（P3）"
+  note: "—"
+
+- id: XLF-11-004
+  title: "SBOM/CVE/可复现构建"
+  source: "11.txt"
+  track: toolchain
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "SBOM、x audit、可复现构建"
+  note: "—"
+
+- id: XLF-11-005
+  title: "管道、解构、命名/默认参数"
+  source: "11.txt"
+  track: core
+  phase: P1
+  done: P5
+  disposition: adapt
+  landing: "解构（P1）；管道/命名/默认参数 1.0 后逐项 RFC"
+  note: "ADR-0003"
+
+- id: XLF-11-006
+  title: "时间旅行调试"
+  source: "11.txt"
+  track: toolchain
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "x debug 集成 rr/平台 TTD"
+  note: "—"
+
+- id: XLF-11-007
+  title: "Watch 与状态保持热重载"
+  source: "11.txt"
+  track: toolchain
+  phase: P2
+  done: R
+  disposition: adapt
+  landing: "x run --watch 进程重启（P2）；状态保持热重载为研究项"
+  note: "—"
+
+- id: XLF-11-008
+  title: "多调用约定"
+  source: "11.txt"
+  track: core
+  phase: P2
+  done: P5
+  disposition: adopt
+  landing: "extern \"C\"（P2）；stdcall/vectorcall/sysv64 等（P5）"
+  note: "—"
+
+- id: XLF-11-009
+  title: "C++ 名称修饰和模板互操作"
+  source: "11.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "C shim + bindgen 适配常见 C++"
+  note: "不承诺通用 C++ ABI"
+
+- id: XLF-11-010
+  title: "Serverless 快照启动"
+  source: "11.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: replace
+  landing: "启动优化 + 平台快照能力适配"
+  note: "密钥/Socket 不得冻结"
+
+- id: XLF-11-011
+  title: "FaaS 事件注解"
+  source: "11.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "厂商无关事件 Schema + 适配器生成"
+  note: "—"
+
+- id: XLF-11-012
+  title: "SpinLock/Fence/Atomic Ordering"
+  source: "11.txt"
+  track: core
+  phase: P2
+  done: P2
+  disposition: adopt
+  landing: "std::sync::atomic + Ordering + SpinLock"
+  note: "—"
+
+- id: XLF-11-013
+  title: "错误码、`x explain`、Fix-it"
+  source: "11.txt"
+  track: toolchain
+  phase: P0
+  done: P3
+  disposition: adopt
+  landing: "稳定诊断码（P0）、x explain（P1）、Fix-it（P3）"
+  note: "—"
+
+- id: XLF-11-014
+  title: "`.x.tutor` 项目规则"
+  source: "11.txt"
+  track: toolchain
+  phase: P3
+  done: P3
+  disposition: adapt
+  landing: ".x/rules.toml 项目规则 + lint 配置"
+  note: "—"
+
+- id: XLF-11-015
+  title: "x upgrade 升级命令"
+  source: "11.txt"
+  track: toolchain
+  phase: P3
+  done: P4
+  disposition: adapt
+  landing: "x update（依赖）+ 安装器自更新"
+  note: "v2 补登：原文 x upgrade"
+
+- id: XLF-12-001
+  title: "REPL/Readline/高亮/历史/自动导入"
+  source: "12.txt"
+  track: toolchain
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x repl（基于 MIR 解释器）"
+  note: "—"
+
+- id: XLF-12-002
+  title: "彩色诊断和多进度条"
+  source: "12.txt"
+  track: toolchain
+  phase: P0
+  done: P3
+  disposition: adopt
+  landing: "彩色诊断（P0）、进度条（P3）"
+  note: "—"
+
+- id: XLF-12-003
+  title: "Shell 补全生成"
+  source: "12.txt"
+  track: toolchain
+  phase: P3
+  done: P3
+  disposition: adopt
+  landing: "x completions <shell>"
+  note: "—"
+
+- id: XLF-12-004
+  title: "Watch/守护热重启"
+  source: "12.txt"
+  track: toolchain
+  phase: P2
+  done: P2
+  disposition: adopt
+  landing: "x run --watch"
+  note: "—"
+
+- id: XLF-12-005
+  title: "Pub/Sub 消息总线"
+  source: "12.txt"
+  track: eco
+  phase: P4
+  done: P4
+  disposition: adopt
+  landing: "x-bus 进程内/跨进程 Pub/Sub"
+  note: "—"
+
+- id: XLF-12-006
+  title: "共享内存 Ring Buffer 零拷贝"
+  source: "12.txt"
+  track: eco
+  phase: P4
+  done: P4
+  disposition: adopt
+  landing: "x-ipc SPSC/MPSC 共享内存环形缓冲"
+  note: "—"
+
+- id: XLF-12-007
+  title: "持久消息与至少一次重放"
+  source: "12.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "持久消息日志与至少一次重放"
+  note: "不冒充 exactly-once"
+
+- id: XLF-12-008
+  title: "Arrow/Parquet"
+  source: "12.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "Arrow/Parquet 绑定"
+  note: "—"
+
+- id: XLF-12-009
+  title: "DataLoader 双缓冲"
+  source: "12.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adopt
+  landing: "DataLoader 双缓冲"
+  note: "—"
+
+- id: XLF-12-010
+  title: "流式 JSON/CSV 反序列化"
+  source: "12.txt"
+  track: eco
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "x-json 流式解析；CSV 生态包"
+  note: "—"
+
+- id: XLF-12-011
+  title: "likely/unlikely 分支提示"
+  source: "12.txt"
+  track: core
+  phase: P2
+  done: P2
+  disposition: adopt
+  landing: "std::hint::likely/unlikely + @cold"
+  note: "不改变语义"
+
+- id: XLF-12-012
+  title: "尾递归优化保证"
+  source: "12.txt"
+  track: core
+  phase: P2
+  done: P2
+  disposition: adapt
+  landing: "@tailcall：自尾调用保证，否则编译错误"
+  note: "互递归不作保证"
+
+- id: XLF-12-013
+  title: "CPU affinity/NUMA"
+  source: "12.txt"
+  track: core
+  phase: P3
+  done: P4
+  disposition: adopt
+  landing: "std::os 线程亲和/NUMA API"
+  note: "—"
+
+- id: XLF-12-014
+  title: "no-exceptions"
+  source: "12.txt"
+  track: core
+  phase: P0
+  done: P0
+  disposition: adopt
+  landing: "语言无异常；panic=abort 为默认 Profile"
+  note: "—"
+
+- id: XLF-12-015
+  title: "实时调度注解"
+  source: "12.txt"
+  track: eco
+  phase: P4
+  done: R
+  disposition: adapt
+  landing: "OS 实时优先级 API 封装；硬实时认证为研究项"
+  note: "—"
+
+- id: XLF-12-016
+  title: "延迟预算与降级"
+  source: "12.txt"
+  track: eco
+  phase: P4
+  done: P4
+  disposition: adopt
+  landing: "Deadline/Budget/Cancel 库"
+  note: "—"
+
+- id: XLF-12-017
+  title: "Atomic<Option>/无锁热路径"
+  source: "12.txt"
+  track: core
+  phase: P2
+  done: P4
+  disposition: adopt
+  landing: "原子类型（P2）；无锁结构经模型检查后入生态（P4）"
+  note: "—"
+
+- id: XLF-12-018
+  title: "`x env` 本地云环境"
+  source: "12.txt"
+  track: eco
+  phase: P5
+  done: P5
+  disposition: adapt
+  landing: "x-dev 环境模板（容器/模拟器）"
+  note: "凭据不得编译进二进制"
+
+- id: XLF-12-019
+  title: "生产影子环境和远端日志"
+  source: "12.txt"
+  track: labs
+  phase: R
+  done: R
+  disposition: research
+  landing: "脱敏只读流量回放研究"
+  note: "拒绝默认复制生产数据"
+
+- id: XLF-12-020
+  title: "性能基准承诺"
+  source: "12.txt"
+  track: toolchain
+  phase: P1
+  done: P4
+  disposition: replace
+  landing: "docs/performance.md 可测目标 + 版本化基准"
+  note: "原文数值无环境与对照，不作承诺"
+
+- id: XLF-12-021
+  title: "x proxy 内网镜像与 replace 依赖替换"
+  source: "12.txt"
+  track: toolchain
+  phase: P3
+  done: P3
+  disposition: adapt
+  landing: "XPM mirror/replace 源替换配置"
+  note: "v2 补登：原文 x proxy 与 replace 语法"
