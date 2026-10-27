@@ -19,7 +19,7 @@ docs/
 ├─ release.md                # 发布、兼容、签名与回滚
 ├─ risks.md                  # 风险及缓解措施
 ├─ ecosystem.md              # UI、AI、服务端等生态边界
-├─ migration.md              # 历史文档映射与归档说明
+├─ migration.md              # 历史文档映射与分支说明
 ├─ changelog.md              # 文档与发布变更记录
 ├─ decisions/                # ADR-0001～0008
 ├─ design/
@@ -44,7 +44,7 @@ docs/
 | 开发协作与环境 | [governance](governance.md)、[toolchain](toolchain.md) | 流程、职责和工具链约束 |
 | 质量与交付 | [testing](testing.md)、[performance](performance.md)、[platforms](platforms.md)、[release](release.md)、[risks](risks.md) | 质量标准、验证证据和交付约束 |
 | 生态扩展 | [ecosystem](ecosystem.md) | 生态包职责和进入核心的边界 |
-| 历史追溯 | [migration](migration.md)、[changelog](changelog.md)、[原始需求](../archive/original/) | 原始输入永久保留；归档正文保持原样 |
+| 历史追溯 | [migration](migration.md)、[changelog](changelog.md)、[历史分支](https://github.com/linfen123456/x-lang/tree/v1.0.0) | 旧文档和原始输入只保留在历史分支 |
 
 ## 3. 文档间的关系
 
@@ -60,7 +60,7 @@ docs/
 
 ```shell
 python tools/doccheck.py
-python tools/doccheck.py --check --old-matrix archive/v1/docs/X-Lang原始功能全量追溯矩阵.md
+python tools/doccheck.py --check
 ```
 
-普通文档修改只需运行 `python tools/doccheck.py --check`。正文以一级标题开头，不添加版本、状态页头；归档横幅仅用于指向当前内容，历史正文不改写。
+普通文档修改只需运行 `python tools/doccheck.py --check`。正文以一级标题开头，不添加版本、状态页头；旧文档和原始需求不复制到主分支。对照历史需求时，可从 `v1.0.0` 导出旧追溯矩阵，再通过 `--old-matrix <导出文件路径>` 额外核对覆盖。

@@ -25,7 +25,6 @@ x-lang/
 ├─ specs/                     # 语言、标准库、包格式与诊断规范
 ├─ rfcs/                      # 规范变更提案
 ├─ tools/                     # doccheck 等仓库工具
-├─ archive/                   # 历史文档与原始需求
 ├─ compiler/                  # crate x-compiler（lib）
 │  └─ src/
 │     ├─ lib.rs               # 唯一门面：driver API

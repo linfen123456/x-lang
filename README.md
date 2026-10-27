@@ -27,7 +27,7 @@ X-Lang 是一门**无 GC、所有权安全、编译到原生代码**的系统/�
 | [docs/governance.md](docs/governance.md) | Governance | 角色、RFC/ADR 流程、分支/提交/评审、AI 协作规则 |
 | [docs/toolchain.md](docs/toolchain.md) | Governance | 宿主工具链版本锁定 |
 | [docs/changelog.md](docs/changelog.md) | Log | 文档体系与发布变更记录 |
-| [docs/migration.md](docs/migration.md) | Log | 旧文档 → v2 映射与归档清单 |
+| [docs/migration.md](docs/migration.md) | Log | 旧文档与当前文档映射、历史分支说明 |
 | [docs/vision.md](docs/vision.md) | Vision | 设计理念、目标/非目标、范围分层（core/toolchain/eco/labs） |
 | [docs/roadmap.md](docs/roadmap.md) | Plan | **阶段定义**（M0、P0–P5、R）、交付物、验收标准、退出门禁 |
 | [docs/architecture.md](docs/architecture.md) | Architecture | 系统分层、编译器管线、运行时、工具链、LSP/MCP、XUI |
@@ -50,7 +50,7 @@ X-Lang 是一门**无 GC、所有权安全、编译到原生代码**的系统/�
 | [rfcs/0000-template.md](rfcs/0000-template.md) | Template | RFC 模板；以后的 RFC 都放在 `rfcs/` |
 | [tools/doccheck.py](tools/doccheck.py) | Tool | 生成登记册 md，并检查链接、头部、术语、ID 覆盖 |
 
-原始需求 `1.txt～12.txt` 是只读历史输入，永久保存在 [archive/original/](archive/original)。旧文档保存在 [archive/v1/](archive/v1)，v2 导入压缩包保存在 [archive/imports/x-docs-v2.zip](archive/imports/x-docs-v2.zip)，归档映射见 [MIGRATION](docs/migration.md)。
+原始需求 `1.txt～12.txt` 和旧文档仅保留在 [v1.0.0 历史分支](https://github.com/linfen123456/x-lang/tree/v1.0.0)，不放入 `main`。当前需求去向由登记册维护；历史文件与当前文档的对应关系见 [迁移说明](docs/migration.md)。
 
 ## 4. 当前目录
 
@@ -68,11 +68,7 @@ x-lang/
 │  ├─ packages/              # 清单、锁文件与构建契约
 │  └─ diagnostics/           # 诊断登记册与生成视图
 ├─ rfcs/                     # 后续规范变更提案与模板
-├─ tools/doccheck.py         # 文档校验与登记册生成
-└─ archive/                  # 历史输入与导入包
-   ├─ v1/                   # 旧文档，保留追溯
-   ├─ original/             # 12 份原始需求
-   └─ imports/              # 原始导入压缩包
+└─ tools/doccheck.py         # 文档校验与登记册生成
 ```
 
 完整文档目录和内容归属见 [文档索引](docs/README.md)。后续编译器源码、Cargo workspace 与测试目录按 [仓库实施架构](docs/repository.md) 创建；当前仓库尚未包含可构建的编译器实现。
@@ -122,7 +118,7 @@ python tools/doccheck.py --check
 
 ```shell
 python tools/doccheck.py
-python tools/doccheck.py --check --old-matrix archive/v1/docs/X-Lang原始功能全量追溯矩阵.md
+python tools/doccheck.py --check
 ```
 
-检查覆盖内部链接、章节引用、术语、需求去向、诊断登记和规则引用。生成的登记册 Markdown 不手工维护；历史归档不参与当前文档校验。
+检查覆盖内部链接、章节引用、术语、需求去向、诊断登记和规则引用。生成的登记册 Markdown 不手工维护；历史分支中的原始文件不参与当前文档校验。

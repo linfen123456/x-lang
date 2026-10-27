@@ -1,12 +1,13 @@
 # 迁移说明：旧文档 → v2
 
-> 类型：Log｜唯一负责：旧文件 → v2 的映射、旧编号与旧阶段的对照、归档清单。
+> 类型：Log｜唯一负责：旧文件 → v2 的映射、旧编号与旧阶段的对照、历史分支清单。
 
 ## 1. 结论
 
-1. v2 生效后，旧仓库的 `docs/` 与 `rfcs/` 全部移到 `archive/v1/`（保持原路径），设为只读，并在每个文件开头加一行横幅：`> 已归档：见 v2 <新路径>`。
-2. 原始需求 `docs/原始文档/1.txt～12.txt` 移到 `archive/original/`，**永久保留**，作为需求登记册中 `source` 字段的出处。
-3. 以后所有修改只发生在 v2 中；归档文件不再修改（错别字也不改）。
+1. `main` 只维护当前文档，不包含旧文档、原始需求正文或导入压缩包。
+2. 旧仓库的 README、`docs/` 与 `rfcs/` 完整保存在 [v1.0.0 分支](https://github.com/linfen123456/x-lang/tree/v1.0.0)，保留原目录和正文。
+3. 原始需求 `docs/原始文档/1.txt～12.txt` 只从历史分支查阅；当前需求登记册的 `source` 字段仍以这些文件名标识出处。
+4. 后续设计和维护在 `main` 进行，不把历史文档复制回主分支。
 
 ## 2. 文件映射
 
@@ -95,25 +96,19 @@
 | `static` 用作标识符 | 改名（`static` 现在是关键字） | 可以 |
 | `async`、`await`、`defer`、`dyn`、`macro`、`throw`、`try`、`yield` 用作标识符 | 改名（它们现在是保留字） | 可以 |
 
-## 7. 归档清单（全部移到 `archive/`）
+## 7. 历史分支清单
 
-- `archive/v1/README.md`
-- `archive/v1/docs/` 下的全部 `.md` 文件：8 份大纲/矩阵 + `README.md`，`decisions/` 下 5 个文件，`design/` 下 8 个文件
-- `archive/v1/rfcs/` 下的 12 个文件（0001–0011 + README）
-- `archive/original/1.txt … 12.txt`（永久保留）
+`v1.0.0` 指向迁移前的完整文档基线，包含：
 
-以上共 47 个文件，与审查时的输入一致。
+- 根目录 `README.md`。
+- `docs/` 下的 8 份大纲和矩阵、文档索引、架构决策与实现设计。
+- `rfcs/` 下的 11 份规范提案与索引。
+- `docs/原始文档/1.txt～12.txt`，保留原始内容。
 
-## 8. main 分支迁移记录 — 2026-10-27
+以上共 47 个文件，包括迁移前工作区中尚未提交的设计更新。
 
-- v2.1.0 已提升到仓库根目录，作为 main 分支的当前文档体系。
-- 迁移前的工作区文档先提交保存；上述 47 个文件全部归档，旧 Markdown 仅添加归档横幅，12 份原始需求保持字节不变。
-- 原始导入包保存在 [archive/imports/x-docs-v2.zip](../archive/imports/x-docs-v2.zip)，不参与当前文档检查。
-- `doccheck` 只检查当前文档，跳过 `.git/` 与只读 `archive/`；生成链接统一使用 `/`，保证 Windows 与 Linux 上的生成物一致。
-- 验证命令：`python tools/doccheck.py --check --old-matrix archive/v1/docs/X-Lang原始功能全量追溯矩阵.md`。
+## 8. 当前目录与校验
 
-## 9. 文档目录整合 — 2026-10-27
+治理、工具链、变更日志和迁移说明分别位于 `docs/governance.md`、`docs/toolchain.md`、`docs/changelog.md` 和 `docs/migration.md`。根 README 提供项目介绍和阅读导航，完整文档架构见 [docs/README](README.md)。
 
-治理、工具链、变更日志和迁移说明分别移入 `docs/governance.md`、`docs/toolchain.md`、`docs/changelog.md` 和 `docs/migration.md`。根 README 保留项目介绍、阅读导航和维护入口，完整文档架构见 [docs/README](README.md)。
-
-旧内容同时保存在 `v1.0.0` 分支；当前文档在 `main` 维护。归档正文不变，归档横幅链接随当前文档位置更新。
+日常校验运行 `python tools/doccheck.py --check`。需要核对历史需求时，从 `v1.0.0` 分支导出 `docs/X-Lang原始功能全量追溯矩阵.md`，再通过 `--old-matrix <导出文件路径>` 校验；不需要把旧矩阵加入主分支。
