@@ -17,12 +17,13 @@
 
 | 决策 | 当前状态 | 实施约束 |
 |---|---|---|
-| 初始编译器使用 Rust | `待决策` | 作为首个实现探针；自举安排在 1.0 后，不能阻塞早期版本。 |
-| 首个原生后端使用 LLVM | `待决策` | 作为首个后端探针；通过后端接口隔离 LLVM，不让其类型泄漏到前端。 |
+| 初始编译器使用 Rust | `Proposed`（[ADR-0004](./decisions/ADR-0004-rust-llvm-host-baseline.md)） | P0–P2 宿主实现；自举安排在 1.0 后，不能阻塞早期版本。 |
+| 首个原生后端使用 LLVM | `Proposed`（ADR-0004） | 作为首个后端探针；通过后端接口隔离 LLVM，不让其类型泄漏到前端。 |
 | 使用自定义 AST/HIR/MIR | `待决策` | 原型验证每层契约、验证器和文本打印格式后再由 ADR 冻结。 |
-| 所有权 + 借用 + RAII | `待决策` | 仅是语言安全候选方向，具体可观察语义必须由 RFC 批准。 |
+| 所有权 + 借用 + RAII | `Proposed`（RFC-0007；实现见 [semantic-pipeline](./design/semantic-pipeline.md)） | 仅是语言安全候选方向，具体可观察语义必须由 RFC 批准。 |
 | 首批目标集合 | `待决策` | Windows/Linux/macOS × x86_64/ARM64 作为候选集合；Stable 支持级别按 CI、真机和发布证据逐目标晋级。 |
 | WASM 及其他后端 | `待决策` | P3 只做 WASI/交叉编译探针，P5 才稳定平台；GPU/eBPF/裸机/移动端均需独立 RFC。 |
+| P0–P4 语言剖面与 Labs 隔离 | `Proposed`（[ADR-0003](./decisions/ADR-0003-p0-language-profile-and-labs-freeze.md)） | `defer`/async/宏/UI/ML 等不得挤占 P0–P4；回归 `RETURN` 不自动进入 Workspace。 |
 
 重大架构选择必须写入 `docs/decisions/` 的 ADR；未形成 ADR 的方案不得被视为永久约束。
 
@@ -40,7 +41,15 @@
 
 ### 0.6 后续工程专题展开方式
 
-当前只保留本工程大纲，原编译器、运行时、工具链、测试、CI、发布、运维和任务 DAG 专题正文已移除。后续实施时按本大纲的篇章和工作包逐项生成必要专题；每份专题必须回链原始功能矩阵、完整项目目录架构、目标子项目和验收测试，不复制本文件已有目录说明。
+当前保留本工程大纲作为任务与门禁母版。实现级模块边界、Pass 接口、P0 纵向切片与符合性 runner 写入 [docs/design/](./design/README.md)，不在 `docs/` 根目录新增 `X-Lang*.md`。原编译器/运行时/工具链等超长专题正文已移除；新专题必须回链原始功能矩阵、完整项目目录架构、目标子项目、对应 RFC/ADR 和验收测试，不复制本文件已有目录说明。
+
+P0 开工前必读：
+
+1. [缺口分析与设计目标](./design/00-gap-analysis-and-design-targets.md)
+2. [P0 纵向切片实现设计](./design/p0-vertical-slice.md)
+3. [语义管线实现设计](./design/semantic-pipeline.md)
+4. [符合性与门禁实现设计](./design/conformance-and-gates.md)
+5. ADR-0002 / ADR-0003 / ADR-0004
 
 ---
 
@@ -152,7 +161,7 @@
 | 6.2 | 类型与函数生成 | `CORE/草案` | 标量/聚合/引用布局、函数签名、调用、控制流、phi、全局量和常量。 | IR verify 通过；与 C ABI 探针比对布局。 |
 | 6.3 | 调试与对象文件 | `CORE/草案` | DWARF/PDB、源码路径映射、符号、目标文件、静态/动态链接。来源：10、11。 | GDB/LLDB/WinDbg 基本断点和回溯测试。 |
 | 6.4 | 首批原生目标 | `CORE/待决策` | Windows/Linux/macOS × x86_64/ARM64 为候选集合；定义 Tier 1/2/3。 | 只把具有 CI、真机、安装和发布证据的目标晋级 Tier 1。 |
-| 6.5 | WASM/WASI | `EXTENDED/待决策` | P3 仅做 wasm32、WASI 与交叉编译探针；P5 再决策浏览器宿主、JS glue、能力权限和体积优化。来源：1、2、6。 | 探针不得形成稳定承诺；P5 通过 WASM 与宿主集成测试后再晋级。 |
+| 6.5 | WASM/WASI | `EXTENDED/待决策` | P3 做 wasm32/WASI/组件接口和交叉编译探针，隔离的 Web DOM/SSR 宿主桥可做 XUI 原型；P4 以 Web 黄金产品验证；P5 再单独评审浏览器宿主、JS glue、权限与体积的稳定性。来源：1、2、6。 | 探针或产品样例都不自动形成稳定承诺；P5 通过真实宿主集成测试后按目标晋级。 |
 | 6.6 | C FFI 与动态库 | `EXTENDED/待决策` | C ABI、调用约定、导入导出、头文件、符号版本和插件。来源：2、10、11。 | ABI 黄金测试；异常不得越过未声明边界。 |
 | 6.7 | 移动端与交叉编译 | `EXPERIMENTAL/待决策` | 在 P5 决策 Android NDK、Apple SDK、签名、打包和薄胶水层。来源：6。 | 独立样例应用在真机通过；许可证和 SDK 条款确认。 |
 | 6.8 | GPU/eBPF/裸机 | `EXPERIMENTAL/待决策` | 目标子集、设备 ABI、验证器、工具链依赖和安全限制。来源：4、6、8。 | 每个后端独立 RFC；不复用未经证明的统一承诺。 |
@@ -285,20 +294,22 @@
 
 ### 12.1 P0 规范冻结与可行性原型
 
+**D0 前置门禁**：语言/编译器 Owner 联同符合性与安全 Owner 整理词法/语法、类型/求值、所有权/Drop、错误、模块、包图的 RFC 冲突表和正反例；每条拟实现规则落实 Rule ID、诊断码、语料、Owner、失败回退及评审结论。批准 ADR-0004 后锁定精确 Rust/LLVM/链接器版本和单宿主 CI 环境。Proposed RFC/ADR 仅为候选实施假设；未通过评审的冲突不能由设计文档擅自裁决。检查表见[缺口分析与设计目标](./design/00-gap-analysis-and-design-targets.md)。
+
 | 任务 | 依赖 | 交付物 | 验收 |
 |---|---|---|---|
 | P0-T01 冻结最小语法与语料 | 规范 RFC | 关键字、字面量、函数、控制流、结构体的语法草案 | EBNF 与正反语料评审通过。 |
 | P0-T02 冻结基础类型与错误模型 | P0-T01 | 标量、函数、结构体、Result/panic 最小规则 | 规则 ID 可映射到测试。 |
 | P0-T03 冻结所有权最小子集 | P0-T02 | move/borrow/RAII 范围和暂缓项 | compile-pass/fail 设计评审通过。 |
-| P0-T04 建立 Rust/LLVM 探针 | 3.3 | 从固定 IR 生成并运行目标程序 | Tier 1 主机至少两类通过。 |
+| P0-T04 建立 Rust/LLVM 探针 | 3.3、ADR-0004 评审 | 从固定 IR 生成并运行目标程序 | P0 单一候选宿主 CI 通过，记录 triple、工具链和 ABI 结果；不据此宣称 Tier 1。第二类宿主及正式 Tier 等级由后续目标矩阵验收。 |
 | P0-T05 Lexer/Parser/AST 原型 | P0-T01 | 可解析最小语言并打印 AST | fuzz 冒烟无崩溃，错误定位可读。 |
-| P0-T06 最小端到端链路 | P0-T04/T05 | AST→简化 IR→LLVM→Hello World | 可复现命令、调试制品和 CI 证据齐全。 |
+| P0-T06 最小端到端链路 | P0-T04/T05 | 单包 AST→类型/Place→HIR/MIR→验证→LLVM→Hello World，`x check/build/run` 最小命令 | 早期 M1–M3 可复现；不是最终 P0 门禁，末端仍须通过 P0-T07/T10 与阻断性符合性语料。 |
 | P0-T07 最小 ABI/布局探针 | P0-T02/T04 | 一个主机 target 的机器可读布局、黄金对象和 C 双向标量/结构体 Harness；对应 `GAP-COMP-01` | 固定 C/LLVM 版本结果一致；明确不构成 Stable ABI 承诺。 |
 | P0-T08 冻结 1.0 语言剖面 | P0-T01/T02/T03 | 设计宪法、关键字/语法预算、公开类型边界、1.0 非目标和逐项 RFC | 每个候选能力有接受/延期/拒绝结论；无宏、默认参数或高级泛型暗中成为前置。 |
 | P0-T09 冻结跨域语义矩阵 | P0-T02/T03/T07 | return/`?`/panic/abort/Drop/线程失败/取消/FFI 的结果和清理矩阵 | Rule ID、状态机、MIR trace 和正反测试设计一一对应。 |
-| P0-T10 冻结最小包图契约 | P0-T01/T06、RFC-0003/0004 | 三包 Path Workspace、PackageId、Host/Target、类型化边和版本化 ResolvedGraph | `x` 内置 XPM 模块生成稳定图；XBuild 消费同一图完成 Action DAG→LLVM；随机目录顺序下结果字节一致。 |
+| P0-T10 实现最小包图契约 | P0-T01/T06、RFC-0003/0004 评审 | 三包 Path Workspace、PackageId、Host/Target、类型化边和版本化 ResolvedGraph | `x` 内置 XPM 模块生成稳定图；XBuild 消费同一图完成 Action DAG→LLVM 链接运行；随机目录顺序下结果字节一致；循环诊断先经 RFC-0003 登记。 |
 
-**P0 检查点**：架构风险已验证；规范、实现和测试追溯可演示；至少三包 Path Workspace 经版本化 ResolvedGraph 进入 Action DAG 并完成 LLVM 链接；若 LLVM 集成、语法模型或 XPM/XBuild 契约不可行，先调整 ADR，不进入 P1。
+**P0 检查点**：架构风险已验证；规范、实现和测试追溯可演示；至少三包 Path Workspace 经版本化 ResolvedGraph 进入 Action DAG 并完成 LLVM 链接；`x test conformance --stage p0 --gate p0` 在 CI 阻断失败、缺失语料与未授权跳过，ABI 探针及优化级别可观察行为对照通过。若 LLVM 集成、语法模型或 XPM/XBuild 契约不可行，先修订相关 RFC/ADR，不进入 P1。可执行细则与勾选清单以 [P0 纵向切片](./design/p0-vertical-slice.md) 与 [符合性门禁](./design/conformance-and-gates.md) 为准。
 
 ### 12.2 P1 可运行 MVP
 
@@ -309,7 +320,7 @@
 | P1-T03 HIR/MIR 与验证器 | P1-T02 | 分层 IR、printer/verifier | IR 快照和往返/不变量测试通过。 |
 | P1-T04 LLVM 原生后端 | P1-T03 | 函数、控制流、结构体、目标文件和链接 | 三大 OS 至少主架构运行测试。 |
 | P1-T05 基础错误与诊断 | P1-T02/T04 | Result、panic 最小实现、错误码和 JSON 输出 | compile-fail 快照和清理路径测试。 |
-| P1-T06 CI 与符合性框架 | 全部 | compile-pass/fail/run-pass 基础设施 | PR 自动门禁、失败制品可下载。 |
+| P1-T06 扩展 CI 与符合性框架 | P0 已有阻断 runner | 扩展 P1 compile-pass/fail/run-pass/fail、报告和多宿主矩阵 | 保持 P0 PR 阻断，不得重置为仅报告；P1 规则测试和失败制品可下载。 |
 
 **P1 检查点**：可编译多个文件的命令行程序；所有 MVP 规则有测试；没有未解释的崩溃或数据竞争。
 
@@ -336,6 +347,8 @@
 | P3-T04 增量编译 | 稳定 IR/查询 ADR | 查询图、缓存、失效和统计 | 正确性优先，典型改动有可复现收益。 |
 | P3-T05 调试与性能分析 | P2 后端 | 调试信息、DAP/调试器接入、Profiler | 断点、变量、回溯和崩溃定位测试。 |
 | P3-T06 Alpha/Beta 发布流程 | 第十/十一篇 | 签名制品、安装器、通道、回滚 | 演练发布与撤回成功。 |
+| P3-T07 Web/WASI 与 XUI 隔离原型 | P2 核心 + 公开构建/宿主接口；RFC-0011 评审 | WASI/组件接口探针、Web DOM/SSR 桥、版本化 UI IR 与能力验证、业务 UI 静态/交互样例 | 不支持能力有明确诊断或显式降级；无权限越界和核心 Workspace 反向依赖；不称稳定 Web。 |
+| P3-T08 AI 应用 SDK 与可审计开发原型 | 稳定诊断/语义索引、权限接口 | 可替换模型适配、流式/取消/预算/脱敏、补丁→编译→测试→安全审查→批准日志、学习反例 | 注入、越权、秘密泄漏语料失败安全；训练系统仍为独立研究。 |
 
 ### 12.5 P4 X-Lang 1.0
 
@@ -347,14 +360,16 @@
 | P4-T04 供应链与发布审计 | 第十/十一篇 | SBOM、签名、可复现证明和响应手册 | 独立评审无阻断问题。 |
 | P4-T05 正式文档和迁移 | 规范冻结 | 教程、参考、错误索引、升级指南 | 新用户可复现；全部链接和示例通过。 |
 | P4-T06 1.0 Go/No-Go | 全部 | 决策记录、已知问题和回滚计划 | 没有实验能力被误标稳定。 |
+| P4-T07 Web 黄金产品样例（独立晋级） | P3-T07 + 公开服务接口 | 表单/列表/离线状态、导航与无障碍的 Web 应用，复用服务端业务契约 | 跨浏览器、键盘/屏幕阅读器、SSR/水合、失败恢复与包体/延迟报告；失败不阻断已独立达标的核心 1.0，只阻断 Web 晋级。 |
 
 ### 12.6 P5 扩展平台与生态
 
-- WASM/WASI 后端与浏览器宿主。
-- 异步运行时、高级网络、数据库和 Web 官方包。
-- C FFI 稳定子集及 Python/Node.js 绑定原型。
-- 移动端、GUI、云原生和模板生态分别立项，不共享未经验证的发布日期。
-- 每个项目使用独立 RFC、目标平台矩阵、安全模型、互操作和性能测试。
+- WASM/WASI 后端与浏览器宿主在 P3 探针、P4 Web 样例基础上单独评审稳定性；不因核心 1.0 发布自动晋级。
+- 桌面（Windows/macOS/Linux 各自）、移动（Android/iOS 各自）和微信小程序（首个小程序目标）从 RFC-0011 的公开 UI IR/能力契约派生适配器；每目标真机/官方工具、权限、无障碍、生命周期、安装/发布证据独立晋级。其他小程序生态另行验证。
+- 异步运行时、高级网络、数据库、Web 官方包、C FFI 稳定子集及 Python/Node.js 绑定分别立项；云原生和模板生态不共享未经验证的发布日期。
+- 每个项目使用独立 RFC、目标平台矩阵、安全模型、互操作和性能测试；平台失败只阻断该目标，不能倒逼修改稳定核心语义。
+
+以上原型及产品证据的指标、对照项目和停止条件见[阶段证据与平台门禁](./design/evidence-and-platform-gates.md)、[XUI 与平台适配](./design/xui-and-platforms.md)、[AI 应用与学习](./design/ai-development-and-learning.md)。
 
 ### 12.7 P6 实验与研究
 
@@ -423,8 +438,8 @@
 | R0 决策与探针 | P0-P1 | `defer`、语法糖、WASM 探针、tree-sitter 对照、Comptime 预算、契约/Effect RFC | Parser→HIR/MIR→LLVM/WASM 探针；语义、失败和缓存键均有规则 ID。 |
 | R1 核心开发体验 | P2 | `#spec/#example`、Pure、静态反射、decimal/bitfield、Regex/DFA、Process、unsafe 诊断、Watch、branch hint/TCO | `x build/check/test/doc` 可演示；compile-pass/fail、doc-test、Sanitizer 与迁移测试通过。 |
 | R2 企业和生产工具 | P3 | IntelliJ、AI IDE、模板市场、SQL 检查、认证、插件、Ring Buffer、消息日志、HLC、污点、Trace、`x env` | CLI/IDE/服务端纵向样板；安全、协议、崩溃恢复、离线和供应链门禁。 |
-| R3 领域框架 | P3-P4 | UI 契约、Tensor/Shape、图 IR、Autograd Tape、HTTP/gRPC、媒体、能耗、PQC、软实时 | Web/桌面最小 UI、CPU Tensor 训练、服务 API 和观测报告；框架不得修改核心语义。 |
-| R4 平台扩展 | P4-P5 | GPU、桌面/移动、WASM Web、嵌入式/eBPF、Serverless、PMEM、Replay/Snapshot、Profiler | 每项至少一个真实目标通过；有 CPU/软件回退、能力探测、签名和平台测试。 |
+| R3 领域框架 | P3-P4 原型回归 | Web XUI 契约、Tensor/Shape、图 IR、Autograd Tape、HTTP/gRPC、媒体、能耗、PQC、软实时 | Web 最小 UI、CPU Tensor 训练实验、服务 API 和观测报告；桌面真实适配由 P5+ 单独晋级，框架不得修改核心语义。 |
+| R4 平台扩展 | P4 原型至 P5+ 目标晋级 | GPU、桌面/移动/微信、WASM Web、嵌入式/eBPF、Serverless、PMEM、Replay/Snapshot、Profiler | 每个宣称支持的目标独立通过真实宿主、能力探测、签名和平台测试；P4 Web 样例不代表其他平台通过。 |
 | R5 高风险条件能力 | P5-P6 | 可选 GC、Protocol Type、统一内存、热状态迁移、ZKP、空间/触觉、有界符号执行、生产影子 | 每项独立 Go/No-Go；不满足正确性、安全、成本和维护门槛则保持实验，不影响 1.0/LTS。 |
 
 ### 14.1 回归任务卡附加字段

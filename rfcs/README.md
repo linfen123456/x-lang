@@ -32,6 +32,7 @@ Accepted/Implemented/Stable → Superseded
 | [RFC-0008](0008-result-panic-termination-and-cleanup.md) | Proposed | Result、panic、终止类别与清理 | `specs/language/errors-and-termination.md` |
 | [RFC-0009](0009-owned-text-bytes-and-collections.md) | Proposed | 拥有型文本/字节与 HashMap/BTreeMap/OrderedMap | `specs/library/text-bytes-and-collections.md` |
 | [RFC-0010](0010-json-data-model-codec-and-canonical-output.md) | Proposed | JSON 模型、三类 Codec、资源上限与 Canonical Output | `specs/library/json.md` |
+| [RFC-0011](0011-xui-typed-declarative-and-platform-capabilities.md) | Proposed | P3+ XUI 类型化声明、UI IR 与宿主能力契约；不扩核心语法 | 独立 x-ui 生态接口规范（接受后） |
 
 ## 接受门禁
 

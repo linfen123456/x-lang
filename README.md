@@ -19,8 +19,9 @@ X-Lang 是一个处于语言设计和工程规划阶段的现代原生编程语�
 3. [编译器工程实施文档大纲](docs/X-Lang编译器工程实施文档大纲.md)：编译器、运行时、工具链、测试和发布路线。
 4. [完整项目目录架构与模块说明](docs/X-Lang完整项目目录架构与模块说明.md)：D0、P0/P1、P2-P4、P5+ 的阶段化物理架构、依赖与拆分门禁。
 5. [RFC 索引](rfcs/README.md)：核心语法/语义、模块、数据、JSON、包管理和构建的待评审规范提案。
-6. [架构决策索引](docs/decisions/README.md)：XPM/XBuild 等工程决策及其状态。
-7. [文档索引](docs/README.md)：全部保留文档的职责和阅读入口。
+6. [架构决策索引](docs/decisions/README.md)：XPM/XBuild、模块化单体、P0 剖面冻结、Rust/LLVM 基线等工程决策。
+7. [实现设计索引](docs/design/README.md)：P0 切片、语义门禁、[XUI/平台](docs/design/xui-and-platforms.md)、[AI/学习](docs/design/ai-development-and-learning.md)与[证据矩阵](docs/design/evidence-and-platform-gates.md)等 Proposed 编码设计。
+8. [文档索引](docs/README.md)：全部保留文档的职责和阅读入口。
 
 ## 当前仓库
 
@@ -32,6 +33,7 @@ x/
    ├─ README.md               # 文档索引与最小维护规则
    ├─ X-Lang*.md              # 8 份保留大纲、矩阵与路线文档
    ├─ decisions/              # Proposed/Accepted 架构决策
+   ├─ design/                 # 实现级设计（非第二语言规范）
    └─ 原始文档/               # 12 份历史原始需求，只读保留
 ```
 
@@ -46,8 +48,9 @@ x/
 | X-Lang 1.0 语言剖面 | 已形成设计宪法、最小语法和语义边界候选；尚待 RFC 批准 |
 | 语言语法与正式语义 | 已有 31 个候选关键字及词法→求值→所有权/Drop→错误清理的 `Proposed` RFC 链；尚待批准、实现和符合性验证 |
 | 模块、模式、包与构建规则 | 已建立 `Proposed` RFC 和 ADR；数量及状态以各自索引为准，尚未批准或实现 |
-| 项目架构 | 已形成 D0→P5+ 阶段化候选；P0/P1 采用 4～6 成员模块化单体 |
-| 编译器、运行时、标准库 | 尚未实现 |
+| 项目架构 | 已形成 D0→P5+ 阶段化候选；P0/P1 采用 4～6 成员模块化单体；P0 实现设计与 Rust/LLVM 基线 ADR 已 Proposed |
+| 编译器、运行时、标准库 | 尚未实现；实现设计见 `docs/design/` |
+| XUI、Web/WASI、桌面/移动/微信与 AI SDK | 仅有 [RFC-0011](rfcs/0011-xui-typed-declarative-and-platform-capabilities.md) 等 Proposed 提案和设计；尚无适配器或应用实现 |
 | 性能、安全、生态成熟度 | 尚无实现证据 |
 | 许可证 | 待确定 |
 

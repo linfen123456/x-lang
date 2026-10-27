@@ -1,8 +1,9 @@
 # X-Lang 未纳入与偏离内容再审核及回归路线
 
 > 总纲：[X-Lang 企业级完整文档体系总纲](./X-Lang企业级完整文档体系总纲.md)  
-> 大纲版本：1.0-outline｜状态：复审路线已冻结｜复审基线：2026-08-15  
+> 大纲版本：1.0-outline｜状态：复审路线已冻结｜复审基线：2026-08-15｜局部修订：2026-09-29（`XLF-10-002`→`CONDITIONAL`，ADR-0003 待审）
 > 目的：对 164 个原始功能中 87 个“重设计、暂缓、研究或研究后接受”条目重新评估；凡有现实技术路径和明确用户价值者，默认回归实施。  
+> 约束：[ADR-0003](./decisions/ADR-0003-p0-language-profile-and-labs-freeze.md) 仍为 Proposed，其新增剖面限制是待评审实施假设，不得声称已由 ADR 冻结；现有总纲与语言大纲的排除项仍有效；`RETURN` 不自动进入核心 Workspace，也不能阻塞 [P0 纵向切片](./design/p0-vertical-slice.md)。
 
 ## 1. 复审结论与优先规则
 
@@ -109,7 +110,7 @@
 | XLF-09-011 | 编译期 SQL 检查 | `RETURN` | P3 实施离线 Schema 快照、参数/结果类型检查、迁移兼容和无数据库 CI。 |
 | XLF-09-014 | JWT/RBAC/Session | `RETURN` | P3 作为官方安全包实现，不放入语言内置；默认算法、轮换、撤销和审计齐全。 |
 | XLF-09-016 | 二进制 `.xlib` 注册表 | `CONDITIONAL` | P4 先发布源码包+签名，二进制包仅对明确 Target/ABI/工具链指纹命中，失败回退源码构建。 |
-| XLF-10-002 | `defer` LIFO 清理 | `RETURN` | P1-P2 完成与 RAII/Drop/return/panic 的精确顺序 RFC 和 lowering；不得双重释放。 |
+| XLF-10-002 | `defer` LIFO 清理 | `CONDITIONAL` | **P0–P4 / 1.0 不实现**（总纲 §12 的既有范围约束；[ADR-0003](./decisions/ADR-0003-p0-language-profile-and-labs-freeze.md) 尚待接受）。仅当 Drop/panic 模型 Stable 后，经独立 RFC 证明无双重释放与可测试顺序，方可进入 **1.0 之后 Edition** 候选；此前语法必须拒绝或 `X-E9001`。 |
 | XLF-10-004 | decimal32/64/128 | `RETURN` | P3 先库类型和软件实现，硬件支持通过能力探测；符合 IEEE 754 十进制语义。 |
 | XLF-10-005 | 编译期正则/DFA | `RETURN` | P3 受限常量模式编译、大小预算和运行时回退；防止代码膨胀与 ReDoS。 |
 | XLF-10-006 | Bitstream/Bitfield | `RETURN` | P2-P3 以显式字节序、位序、布局和协议黄金测试实施。 |

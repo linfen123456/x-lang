@@ -38,6 +38,7 @@ x/
 └─ docs/
    ├─ README.md
    ├─ decisions/                     # Proposed/Accepted 架构决策及索引
+   ├─ design/                        # 实现级设计（P0 切片/语义管线/符合性）；非第二规范
    ├─ X-Lang企业级完整文档体系总纲.md
    ├─ X-Lang语言规范与学习研究大纲.md
    ├─ X-Lang编译器工程实施文档大纲.md
@@ -49,7 +50,7 @@ x/
    └─ 原始文档/                       # 12 份只读历史输入
 ```
 
-根 `rfcs/` 和 `docs/decisions/` 已因真实提案创建；`specs/` 仍只接收已批准规则，当前 Proposed 设计继续留在 RFC/ADR，不以目录名伪装成熟度。
+根 `rfcs/`、`docs/decisions/` 与 `docs/design/` 已因真实提案/决策/实现设计创建；`specs/` 仍只接收已批准规则，当前 Proposed 设计继续留在 RFC/ADR/design，不以目录名伪装成熟度。
 
 ### 1.3 P0/P1：推荐模块化单体
 

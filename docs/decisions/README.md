@@ -6,5 +6,9 @@
 |---|---|---|
 | [ADR-0001](ADR-0001-xpm-xbuild-layered-toolchain.md) | Proposed | XPM/XBuild 分层并复用成熟解析、执行和供应链标准 |
 | [ADR-0002](ADR-0002-staged-modular-monolith.md) | Proposed | D0 保持文档最小集，P0/P1 使用 4～6 成员模块化单体，后续按证据拆分 |
+| [ADR-0003](ADR-0003-p0-language-profile-and-labs-freeze.md) | Proposed | P0–P4 语言剖面冻结、`defer` 不进入 1.0、Labs 隔离与 CLI/服务端楔子 |
+| [ADR-0004](ADR-0004-rust-llvm-host-baseline.md) | Proposed | P0–P2 宿主 Rust + LLVM 后端基线；LLVM 类型不泄漏到前端 |
 
 状态采用 `Proposed → Accepted → Superseded/Deprecated`。未接受 ADR 不得被写成已冻结工程事实。
+
+实现级模块/接口/门禁设计见 [docs/design/](../design/README.md)；设计服从已批准 RFC/ADR，不构成第二语言规范。
