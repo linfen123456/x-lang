@@ -1,6 +1,5 @@
 # 诊断码登记册（生成物）
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Compiler Lead｜最后更新：2026-10-22
 > 类型：Register｜**由 `tools/doccheck.py` 从 [registry.yaml](registry.yaml) 生成，请勿手改。** 码段：0xxx 驱动｜1xxx 词法/语法/属性｜2xxx 名称/模块/模式｜3xxx 类型/Trait/求值｜4xxx 所有权/借用｜5xxx 错误/终止｜6xxx unsafe/FFI｜7xxx 并发｜8xxx 包/构建｜9xxx 阶段门禁｜X-W 为 lint。码一经分配永不复用。
 
 共 111 个码。

@@ -1,4 +1,4 @@
-> 已归档：见 v2 [GOVERNANCE.md](../../../GOVERNANCE.md)
+> 已归档：见 v2 [docs/governance.md](../../../docs/governance.md)
 
 # X-Lang 日常开发与 AI 协作风险补全大纲
 

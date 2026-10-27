@@ -1,12 +1,13 @@
 # 变更日志
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Release Lead｜最后更新：2026-10-22
 > 类型：Log｜格式：Keep a Changelog；小节 Added / Changed / Deprecated / Removed / Fixed / Security / Platform。
 
 ## [Unreleased]
 
 ### Changed
-- 将 v2.1.0 文档提升到 main 分支根目录；旧文档与原始需求按 [MIGRATION](MIGRATION.md) 归档，保留迁移前未提交的设计内容。
+- 将治理、工具链、迁移说明和变更日志集中到 `docs/`；新增文档架构索引，补全项目 README 的目录、内容归属和检查命令。
+- 移除当前文档页头的版本、状态标记及 README 中的状态词表；登记册生成器和文档检查同步适配。
+- 将 v2.1.0 文档提升到 main 分支根目录；旧文档与原始需求按 [MIGRATION](migration.md) 归档，保留迁移前未提交的设计内容。
 
 ### Fixed
 - `doccheck` 跳过历史归档及 Git 元数据，统一生成跨平台的 `/` 链接，避免 Windows 检查误报生成物过期。
@@ -14,7 +15,7 @@
 ## [2.1.0] 开工前决策闭环 — 2026-10-22
 
 ### Added
-- [ADR-0008](docs/decisions/ADR-0008-pre-kickoff-decisions.md)：开工前的 12 项决定（K1–K12），v2.0 遗留的待决事项全部关闭。
+- [ADR-0008](decisions/ADR-0008-pre-kickoff-decisions.md)：开工前的 12 项决定（K1–K12），v2.0 遗留的待决事项全部关闭。
 - P0 工作分解新增 §7 仓库初始化清单（Cargo workspace、`rust-toolchain.toml`、`.editorconfig`、`.gitattributes`、`deny.toml`、CI 工作流样例、许可证等）和 §8 Windows 开发环境步骤。
 - 风险 R15（Windows 开发环境配置）、R16（第三方 crate 风险）。
 - doccheck 新增检查：文档中不得残留“待用户决定 / 待指定 / 开放问题”这类未关闭项。
@@ -45,4 +46,4 @@
 - P1 起引用必须经过借用检查（取代旧方案“P2 才有借用检查”）。
 
 ### Removed
-- 旧 `docs/`、`rfcs/` 退为归档，见 [MIGRATION](MIGRATION.md)。
+- 旧 `docs/`、`rfcs/` 退为归档，见 [MIGRATION](migration.md)。

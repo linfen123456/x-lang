@@ -1,6 +1,5 @@
 # 风险登记册
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Project Lead｜最后更新：2026-10-22
 > 类型：Risks｜唯一负责：项目风险、预警指标与应对。每个阶段的退出评审都要复审本表。
 
 ## 1. 结论
@@ -23,7 +22,7 @@
 | R08 | 跨平台差异（Windows 路径、macOS 签名）拖慢进度 | M | M | P1 三主机 CI 长期红 | P1 起三主机 CI；PAL 隔离；平台 Owner 制度 | P1–P4 |
 | R09 | 供应链攻击（依赖投毒、工件篡改） | L | H | 依赖审计告警 | `cargo-deny`/审计；锁定依赖；签名 + SBOM + 可复现构建 | P3–P4 |
 | R10 | 生态冷启动：没有库，用户就无法使用 | H | M | P3 官方包交付延期 | 先做 C FFI 与 `x-bindgen` 以复用 C 库；官方包按楔子排序 | P3–P5 |
-| R11 | AI 生成代码质量不稳或引入许可证问题 | M | M | Review 中频繁发现 AI 代码缺陷 | [GOVERNANCE](../GOVERNANCE.md) §6：强制人工审查、`ai-assisted` 标签、测试先行 | 全程 |
+| R11 | AI 生成代码质量不稳或引入许可证问题 | M | M | Review 中频繁发现 AI 代码缺陷 | [GOVERNANCE](governance.md) §6：强制人工审查、`ai-assisted` 标签、测试先行 | 全程 |
 | R12 | 文档与实现漂移 | M | M | doccheck 或 diag-check 失败；Rule 没有对应语料 | CI 中运行 doccheck；Rule→语料覆盖报告；规范状态与实现绑定 | 全程 |
 | R13 | 1.0 只有 abort，服务端无法做到单请求级别的 panic 隔离 | M | M | 试点团队反馈 | 推荐用进程级隔离（supervisor 加多进程）；`JoinHandle::join` 保留 `Result` 以便将来引入 unwind；1.0 后按 ADR-0008 K3 的条件启动 RFC | P3–P5 |
 | R14 | 研究赛道挤占主线资源 | M | M | Labs 投入 > 总人力的 10% | Labs 独立预算；不得阻塞主线 | P3+ |

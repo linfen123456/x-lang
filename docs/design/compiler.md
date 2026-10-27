@@ -1,6 +1,5 @@
 # 编译器设计（x-compiler）
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Compiler Lead｜最后更新：2026-10-22
 > 类型：Design｜唯一负责：编译器内部数据结构、查询清单、驱动契约、代码生成约定、intrinsic 清单。系统边界见 [architecture](../architecture.md)，语言语义见 [specs](../../specs/language/01-lexical-syntax.md)。
 
 ## 1. 结论

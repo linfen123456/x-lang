@@ -1,12 +1,11 @@
 # P0 工作分解：纵向骨架
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Compiler Lead｜最后更新：2026-10-22
 > 类型：Workplan｜唯一负责：M0 与 P0 的任务、顺序、DoD、样例。阶段目标与退出门禁以 [roadmap](../roadmap.md) 为准。
 
 ## 1. 结论
 
 - 目标：单个 `.x` 文件经完整管线（CST→AST→HIR→类型检查→MIR→移动检查→LLVM→链接）生成可执行文件，在 **Linux x86_64 与 Windows x86_64（MSVC）双主机**上行为一致（[ADR-0008](../decisions/ADR-0008-pre-kickoff-decisions.md) K5）。
-- 开工前的决策已经全部闭环（ADR-0001～0008 Accepted），工具链版本已锁定（[TOOLCHAIN](../../TOOLCHAIN.md)）。M0 第 1 天就可以按 §7 初始化仓库。
+- 开工前的决策已经全部闭环（ADR-0001～0008 Accepted），工具链版本已锁定（[TOOLCHAIN](../toolchain.md)）。M0 第 1 天就可以按 §7 初始化仓库。
 - 关键路径：M0 → T01 Lexer → T02 Parser/CST → T04 HIR/解析 → T05 类型检查 → T06 MIR → T08 代码生成 → T09 链接/xrt（Linux + Windows）→ T11 gate。
 - 规模【推断】：2–3 人，M0 4 周 + P0 12 周（Windows 部分约 +1 周，已计入）。在 P0 结束时按实测速度校准（K12）。
 
@@ -27,7 +26,7 @@
 | ID | 任务 | 依赖 | DoD |
 |---|---|---|---|
 | M0-01 | 按 §7 初始化仓库：5 个成员 + 根目录文件 | — | §7.1 清单的每一项都存在；`cargo build --workspace` 在 Linux 与 Windows 上都通过 |
-| M0-02 | `xtask setup-llvm`、`doctor`、`toolchain-check`（按 [TOOLCHAIN](../../TOOLCHAIN.md) §2 下载 LLVM 23.1.3 并校验 SHA-256） | M0-01 | 在全新的 Windows 机器（只装了 VS Build Tools 与 rustup）上，执行 `cargo xtask setup-llvm` 后 `cargo xtask doctor` 全绿 |
+| M0-02 | `xtask setup-llvm`、`doctor`、`toolchain-check`（按 [TOOLCHAIN](../toolchain.md) §2 下载 LLVM 23.1.3 并校验 SHA-256） | M0-01 | 在全新的 Windows 机器（只装了 VS Build Tools 与 rustup）上，执行 `cargo xtask setup-llvm` 后 `cargo xtask doctor` 全绿 |
 | M0-03 | `xtask check-deps`（源码扫描 `use`，以及 `llvm_sys`、`rowan`、`salsa` 的引用位置） | M0-01 | 故意制造的违规样例使 CI 失败 |
 | M0-04 | `xtask llvm-probe`：用 llvm-sys 生成 `main` 返回 42，并完成链接 | M0-02 | 在 `ubuntu-24.04` 与 `windows-2025` 两个 CI 上运行，退出码都是 42 |
 | M0-05 | CI：fmt、clippy `-D warnings`、test、doccheck、cargo-deny（§7.3） | M0-01 | 5 个检查都阻断合并；LLVM 缓存命中后，单次 PR 运行 ≤ 15 分钟 |
@@ -174,7 +173,7 @@ fn main() {
 | `.github/pull_request_template.md` | 动机、方案、测试证据、影响的 Rule ID、`ai-assisted` 勾选项、DCO 提示 |
 | `README.md`、`CONTRIBUTING.md` | 构建步骤（链接到 §8）、DCO、Conventional Commits |
 | `SECURITY.md` | 漏洞报告渠道（GitHub Private Vulnerability Reporting）、90 天披露期 |
-| `AGENTS.md` | [GOVERNANCE](../../GOVERNANCE.md) §6 的一页摘要，以及“先读后改、跑 `cargo test` 与 doccheck、禁止修改 TOOLCHAIN 锁定版本” |
+| `AGENTS.md` | [GOVERNANCE](../governance.md) §6 的一页摘要，以及“先读后改、跑 `cargo test` 与 doccheck、禁止修改 TOOLCHAIN 锁定版本” |
 | `docs/` | 本文档体系（x-docs-v2 原样拷入）；`python3 docs/tools/doccheck.py --check` 进 CI |
 | `tests/conformance/p0/`、`gates/p0.toml` | 先放 §5 的 5 个样例；开始时 gate 允许失败（`allow_fail = true`），T11 完成后去掉 |
 

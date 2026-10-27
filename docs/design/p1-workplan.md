@@ -1,6 +1,5 @@
 # P1 工作分解：Core-CLI 0.1
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Compiler Lead｜最后更新：2026-10-22
 > 类型：Workplan｜唯一负责：P1 的任务、顺序、DoD、样例。门禁以 [roadmap](../roadmap.md) 为准，特性范围以 roadmap §4 为准。
 
 ## 1. 结论

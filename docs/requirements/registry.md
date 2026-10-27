@@ -1,6 +1,5 @@
 # 原始需求登记册（生成物）
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Project Lead｜最后更新：2026-10-22
 > 类型：Register｜**由 `tools/doccheck.py` 从 [registry.yaml](registry.yaml) 生成，请勿手改。** 字段含义见 [vision](../vision.md) §5–6；阶段定义见 [roadmap](../roadmap.md)。
 
 ## 1. 统计

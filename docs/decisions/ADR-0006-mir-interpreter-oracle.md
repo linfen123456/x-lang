@@ -1,6 +1,5 @@
 # ADR-0006 MIR 解释器作为语义 Oracle
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Compiler Lead｜最后更新：2026-10-22
 > 类型：ADR｜新增（v2）
 
 ## 决策

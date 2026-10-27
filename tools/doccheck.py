@@ -13,18 +13,16 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATUS = {"Draft", "Proposed", "Accepted", "Implemented", "Stable", "Deprecated", "Superseded", "Archived"}
 PHASES = {"M0", "P0", "P1", "P2", "P3", "P4", "P5", "R"}
 PHASE_ORDER = ["M0", "P0", "P1", "P2", "P3", "P4", "P5", "R"]
 TRACKS = {"core", "toolchain", "eco", "labs"}
 DISPOSITIONS = {"adopt", "adapt", "replace", "research"}
-HEADER_RE = re.compile(r"^> 状态：(\S+)｜版本：[0-9A-Za-z.\-]+｜负责人：.+｜最后更新：(\d{4}-\d{2}-\d{2})$")
 REQ_YAML = "docs/requirements/registry.yaml"
 REQ_MD = "docs/requirements/registry.md"
 DIAG_YAML = "specs/diagnostics/registry.yaml"
 DIAG_MD = "specs/diagnostics/registry.md"
 # 允许出现“已废止术语”的文件（迁移说明、变更日志本身就要提及旧名）
-HISTORY_FILES = {"MIGRATION.md", "CHANGELOG.md"}
+HISTORY_FILES = {"docs/migration.md", "docs/changelog.md"}
 
 errors = []
 
@@ -69,21 +67,10 @@ def md_escape(s):
     return s.replace("|", "\\|").replace("\n", " ")
 
 
-def doc_date():
-    with open(os.path.join(ROOT, "README.md"), encoding="utf-8") as f:
-        for line in f:
-            m = HEADER_RE.match(line.strip())
-            if m:
-                return m.group(2)
-    return "1970-01-01"
-
-
 def gen_requirements(recs):
-    date = doc_date()
     out = [
         "# 原始需求登记册（生成物）",
         "",
-        f"> 状态：Accepted｜版本：2.1.0｜负责人：Project Lead｜最后更新：{date}",
         "> 类型：Register｜**由 `tools/doccheck.py` 从 [registry.yaml](registry.yaml) 生成，请勿手改。** 字段含义见 [vision](../vision.md) §5–6；阶段定义见 [roadmap](../roadmap.md)。",
         "",
         "## 1. 统计",
@@ -115,11 +102,9 @@ def gen_requirements(recs):
 
 
 def gen_diagnostics(recs):
-    date = doc_date()
     out = [
         "# 诊断码登记册（生成物）",
         "",
-        f"> 状态：Accepted｜版本：2.1.0｜负责人：Compiler Lead｜最后更新：{date}",
         "> 类型：Register｜**由 `tools/doccheck.py` 从 [registry.yaml](registry.yaml) 生成，请勿手改。** 码段：0xxx 驱动｜1xxx 词法/语法/属性｜2xxx 名称/模块/模式｜3xxx 类型/Trait/求值｜4xxx 所有权/借用｜5xxx 错误/终止｜6xxx unsafe/FFI｜7xxx 并发｜8xxx 包/构建｜9xxx 阶段门禁｜X-W 为 lint。码一经分配永不复用。",
         "",
         f"共 {len(recs)} 个码。",
@@ -253,12 +238,6 @@ def check_markdown(diag_codes):
         # 头部
         if not lines or not lines[0].startswith("# "):
             err(rel, "第一行必须是一级标题")
-        hdr = next((l for l in lines[1:4] if l.strip()), "")
-        m = HEADER_RE.match(hdr.strip())
-        if not m:
-            err(rel, "缺少统一头部（> 状态：…｜版本：…｜负责人：…｜最后更新：YYYY-MM-DD）")
-        elif m.group(1) not in STATUS:
-            err(rel, f"状态词不在词表中：{m.group(1)}")
         in_code = False
         for no, line in enumerate(lines, 1):
             if line.strip().startswith("```"):

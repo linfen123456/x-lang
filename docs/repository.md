@@ -1,6 +1,5 @@
 # 仓库结构、模块职责与依赖规则
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Compiler Lead｜最后更新：2026-10-22
 > 类型：Architecture｜唯一负责：实现仓库目录、Cargo 成员、模块职责、依赖规则、拆分门禁。决策依据见 [ADR-0002](decisions/ADR-0002-repository-modular-monolith.md)。
 
 ## 1. 结论
@@ -11,16 +10,22 @@
 
 ## 2. 目录树（实现仓库 `x-lang/`）
 
+以下是随实施阶段逐步创建的源码目录规划。当前实际文档目录见 [文档架构](README.md)，项目现有内容见 [根目录 README](../README.md) §4。
+
 ```text
 x-lang/
 ├─ Cargo.toml  Cargo.lock     # workspace：5 个成员；Cargo.lock 入库
-├─ rust-toolchain.toml        # Rust 1.99.1，与 TOOLCHAIN.md 一致
-├─ README.md  GOVERNANCE.md  TOOLCHAIN.md  CHANGELOG.md  AGENTS.md  SECURITY.md  CONTRIBUTING.md
+├─ rust-toolchain.toml        # Rust 1.99.1，与 docs/toolchain.md 一致
+├─ README.md  AGENTS.md  SECURITY.md  CONTRIBUTING.md
 ├─ LICENSE-APACHE  LICENSE-MIT  # Apache-2.0 OR MIT（ADR-0008 K7）
 ├─ .editorconfig  .gitattributes  .gitignore  rustfmt.toml  clippy.toml  deny.toml
 ├─ .cargo/config.toml         # xtask 别名；本地 LLVM 路径写在不入库的 config.local.toml
 ├─ .github/                   # workflows/{ci,nightly,release}.yml、dependabot.yml、CODEOWNERS、PR/Issue 模板
-├─ docs/                      # 本文档体系（v2）
+├─ docs/                      # 索引、治理、工具链、架构、设计、需求和维护记录
+├─ specs/                     # 语言、标准库、包格式与诊断规范
+├─ rfcs/                      # 规范变更提案
+├─ tools/                     # doccheck 等仓库工具
+├─ archive/                   # 历史文档与原始需求
 ├─ compiler/                  # crate x-compiler（lib）
 │  └─ src/
 │     ├─ lib.rs               # 唯一门面：driver API
@@ -53,7 +58,6 @@ x-lang/
 ├─ bench/                     # xbench：{compile,runtime}/、results/、MACHINE.md
 ├─ fuzz/                      # cargo-fuzz 目标（独立 workspace，不计入成员）
 ├─ editors/vscode/            # P3 起
-├─ docs/  specs/  rfcs/  tools/   # 本文档体系
 ```
 
 规则：

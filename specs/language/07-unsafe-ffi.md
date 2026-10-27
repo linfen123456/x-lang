@@ -1,6 +1,5 @@
 # 07 unsafe、原始指针、未定义行为与 FFI
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Language Lead｜最后更新：2026-10-22
 > 类型：Spec｜唯一负责：unsafe 上下文与操作、UB 清单、原始指针、布局 `@repr`、C FFI（导入/导出/链接/回调）。
 
 ## 1. 结论

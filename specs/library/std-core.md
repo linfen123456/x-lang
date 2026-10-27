@@ -1,6 +1,5 @@
 # 标准库最小契约（core / alloc / std）
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Std Lead｜最后更新：2026-10-22
 > 类型：Spec｜唯一负责：标准库分层、各模块最小 API 与阶段、集合与文本契约、I/O/进程/时间契约。语言规则见 [specs/language](../language/01-lexical-syntax.md)。
 
 ## 1. 结论

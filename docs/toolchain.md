@@ -1,7 +1,6 @@
 # 宿主工具链锁定
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Release Lead｜最后更新：2026-10-22
-> 类型：Governance｜唯一负责：宿主工具链与关键第三方依赖的版本。决策依据：[ADR-0008](docs/decisions/ADR-0008-pre-kickoff-decisions.md) K4、K6。
+> 类型：Governance｜唯一负责：宿主工具链与关键第三方依赖的版本。决策依据：[ADR-0008](decisions/ADR-0008-pre-kickoff-decisions.md) K4、K6。
 
 ## 1. 版本表（2026-10-22 联网核实）
 
@@ -42,6 +41,6 @@
 ## 4. 升级规则
 
 1. Rust：每季度评估一次，升级到当时最新的 stable 补丁版本；升级走普通 PR，要求全部 CI 通过；`rust-toolchain.toml` 必须与本表一致（由 `cargo xtask toolchain-check` 校验）。
-2. LLVM：同一主版本内的补丁升级走普通 PR，要求差分测试与基准测试全部通过；主版本升级必须走 ADR（[ADR-0001](docs/decisions/ADR-0001-host-and-backend.md)），且只能在新主版本的 `x.1.2` 发布之后进行。
+2. LLVM：同一主版本内的补丁升级走普通 PR，要求差分测试与基准测试全部通过；主版本升级必须走 ADR（[ADR-0001](decisions/ADR-0001-host-and-backend.md)），且只能在新主版本的 `x.1.2` 发布之后进行。
 3. `rowan`、`salsa`、`llvm-sys` 使用 `=` 精确版本，升级必须单独提交 PR；其他依赖由 Cargo.lock 锁定，Dependabot 每周提交更新 PR。
 4. 安全公告（RUSTSEC 或 GHSA）涉及本表中的组件时，必须在 7 天内升级。

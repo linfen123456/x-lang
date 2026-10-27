@@ -1,6 +1,5 @@
 # 路线图：阶段、交付物与门禁
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Project Lead｜最后更新：2026-10-22
 > 类型：Plan｜唯一负责：阶段定义（M0、P0–P5、R）、各阶段交付物、验收标准、退出门禁、语言特性的阶段归属。
 
 ## 1. 结论
@@ -39,7 +38,7 @@ flowchart LR
 | 交付物 | 验收（可执行） |
 |---|---|
 | 开工决策已闭环（ADR-0001～0008 Accepted，见 [ADR-0008](decisions/ADR-0008-pre-kickoff-decisions.md)） | 已完成（2026-10-22）；M0 只核对仓库中各 ADR 的状态 |
-| `rust-toolchain.toml`（Rust 1.99.1）+ `cargo xtask setup-llvm`（LLVM 23.1.3） | 在 Linux 与 Windows 上，`cargo xtask toolchain-check` 输出的版本都等于 [TOOLCHAIN](../TOOLCHAIN.md) 中的值 |
+| `rust-toolchain.toml`（Rust 1.99.1）+ `cargo xtask setup-llvm`（LLVM 23.1.3） | 在 Linux 与 Windows 上，`cargo xtask toolchain-check` 输出的版本都等于 [TOOLCHAIN](toolchain.md) 中的值 |
 | 仓库初始化（[p0-workplan](design/p0-workplan.md) §7 清单）+ Cargo Workspace 骨架（5 成员） | 清单中的每一项都存在；`cargo build --workspace` 通过；`cargo xtask check-deps` 无违规 |
 | LLVM 探针 | `cargo xtask llvm-probe` 生成并运行一个返回 42 的可执行文件，在 Linux 与 Windows（MSVC `link.exe`）上退出码都是 42 |
 | CI（GitHub Actions，`ubuntu-24.04` + `windows-2025`） | PR 上运行 fmt、clippy、单元测试、doccheck、cargo-deny，全部阻断式 |
@@ -167,6 +166,6 @@ flowchart LR
 ## 5. 阶段命名约束
 
 - 文档、Issue、标签只能使用第 2 节的阶段标识。
-- 旧体系中的 G0–G6、R0–R5、GAP 波次 A–D、D0 已废止，映射关系见 [MIGRATION](../MIGRATION.md)。
+- 旧体系中的 G0–G6、R0–R5、GAP 波次 A–D、D0 已废止，映射关系见 [MIGRATION](migration.md)。
 - 缺口优先级改用 `Blocker/High/Medium/Low`，不得写成 `P0/P1/P2`。
 - [RULE-STAGE-UNIMPL] 如果源码使用了第 4 节中属于后续阶段的特性，当前阶段的编译器必须报 `X-E9001`，并在诊断中写明“该特性计划于 <阶段> 提供”。不得报普通语法错误，也不得静默接受。

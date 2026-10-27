@@ -1,4 +1,4 @@
-> 已归档：见 v2 [GOVERNANCE.md](../../../../GOVERNANCE.md)
+> 已归档：见 v2 [docs/governance.md](../../../../docs/governance.md)
 
 # AI 应用、协作与学习实现设计
 

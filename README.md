@@ -1,7 +1,6 @@
-# X-Lang 文档体系 v2（总入口）
+# X-Lang
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Project Lead｜最后更新：2026-10-22
-> 类型：Index｜本文件是**阅读顺序、文档地图、状态词表、权威顺序、规范用语**的唯一定义处。
+> 类型：Index｜本文件是**阅读顺序、文档地图、权威顺序、规范用语**的唯一定义处。
 
 ## 1. 一句话
 
@@ -17,17 +16,18 @@ X-Lang 是一门**无 GC、所有权安全、编译到原生代码**的系统/�
 | 工具链/包管理 | [ADR-0004](docs/decisions/ADR-0004-xpm-xbuild-layering.md) → [包与构建规范](specs/packages/manifest-lock-build.md) → [release](docs/release.md) |
 | 测试/发布 | [testing](docs/testing.md) → [release](docs/release.md) → [performance](docs/performance.md) |
 | 生态（UI/AI/服务端/ML） | [ecosystem](docs/ecosystem.md) → [需求登记册](docs/requirements/registry.md) |
-| 贡献者/AI Agent | [GOVERNANCE](GOVERNANCE.md)（流程、分支、评审、AI 规则） |
+| 贡献者/AI Agent | [GOVERNANCE](docs/governance.md)（流程、分支、评审、AI 规则） |
 
 ## 3. 文档地图
 
 | 路径 | 类型 | 唯一负责的事实 |
 |---|---|---|
-| [README.md](README.md) | Index | 阅读顺序、地图、状态词表、权威顺序、规范用语 |
-| [GOVERNANCE.md](GOVERNANCE.md) | Governance | 角色、RFC/ADR 流程、分支/提交/评审、AI 协作规则 |
-| [TOOLCHAIN.md](TOOLCHAIN.md) | Governance | 宿主工具链版本锁定 |
-| [CHANGELOG.md](CHANGELOG.md) | Log | 文档体系与发布变更记录 |
-| [MIGRATION.md](MIGRATION.md) | Log | 旧文档 → v2 映射与归档清单 |
+| [README.md](README.md) | Index | 项目介绍、阅读顺序、地图、权威顺序、规范用语 |
+| [docs/README.md](docs/README.md) | Index | 文档目录架构、内容归属、维护入口 |
+| [docs/governance.md](docs/governance.md) | Governance | 角色、RFC/ADR 流程、分支/提交/评审、AI 协作规则 |
+| [docs/toolchain.md](docs/toolchain.md) | Governance | 宿主工具链版本锁定 |
+| [docs/changelog.md](docs/changelog.md) | Log | 文档体系与发布变更记录 |
+| [docs/migration.md](docs/migration.md) | Log | 旧文档 → v2 映射与归档清单 |
 | [docs/vision.md](docs/vision.md) | Vision | 设计理念、目标/非目标、范围分层（core/toolchain/eco/labs） |
 | [docs/roadmap.md](docs/roadmap.md) | Plan | **阶段定义**（M0、P0–P5、R）、交付物、验收标准、退出门禁 |
 | [docs/architecture.md](docs/architecture.md) | Architecture | 系统分层、编译器管线、运行时、工具链、LSP/MCP、XUI |
@@ -50,25 +50,32 @@ X-Lang 是一门**无 GC、所有权安全、编译到原生代码**的系统/�
 | [rfcs/0000-template.md](rfcs/0000-template.md) | Template | RFC 模板；以后的 RFC 都放在 `rfcs/` |
 | [tools/doccheck.py](tools/doccheck.py) | Tool | 生成登记册 md，并检查链接、头部、术语、ID 覆盖 |
 
-原始需求 `1.txt～12.txt` 是只读历史输入，永久保存在 [archive/original/](archive/original/)。旧文档保存在 [archive/v1/](archive/v1/)，v2 导入压缩包保存在 [archive/imports/x-docs-v2.zip](archive/imports/x-docs-v2.zip)，归档映射见 [MIGRATION](MIGRATION.md)。
+原始需求 `1.txt～12.txt` 是只读历史输入，永久保存在 [archive/original/](archive/original)。旧文档保存在 [archive/v1/](archive/v1)，v2 导入压缩包保存在 [archive/imports/x-docs-v2.zip](archive/imports/x-docs-v2.zip)，归档映射见 [MIGRATION](docs/migration.md)。
 
-## 4. 状态词表（全体系唯一）
+## 4. 当前目录
 
-| 状态 | 含义 | 可否据此实现 |
-|---|---|---|
-| Draft | 起草中，可随时改 | 否 |
-| Proposed | 已提交评审，内容完整 | 可以做探针和原型；不得据此宣称稳定 |
-| Accepted | 评审通过，成为实现依据 | 是 |
-| Implemented | 已实现，并有符合性语料覆盖 | 是 |
-| Stable | 进入兼容承诺（Edition 内不破坏） | 是 |
-| Deprecated | 仍可用，计划移除 | 仅维护 |
-| Superseded | 已被新文档取代（必须链接取代者） | 否 |
-| Archived | 只读历史 | 否 |
+```text
+x-lang/
+├─ README.md                 # 项目介绍与阅读导航
+├─ docs/                     # 设计、规划、治理和维护文档
+│  ├─ README.md              # 文档架构与内容归属
+│  ├─ decisions/             # 架构决策
+│  ├─ design/                # 编译器设计与实施工作分解
+│  └─ requirements/          # 需求登记册与生成视图
+├─ specs/                    # 语言、标准库、包与诊断规范
+│  ├─ language/              # 语言规范 01–08
+│  ├─ library/               # core / alloc / std 契约
+│  ├─ packages/              # 清单、锁文件与构建契约
+│  └─ diagnostics/           # 诊断登记册与生成视图
+├─ rfcs/                     # 后续规范变更提案与模板
+├─ tools/doccheck.py         # 文档校验与登记册生成
+└─ archive/                  # 历史输入与导入包
+   ├─ v1/                   # 旧文档，保留追溯
+   ├─ original/             # 12 份原始需求
+   └─ imports/              # 原始导入压缩包
+```
 
-规则：
-- 文档头部的“状态”只能取上表的值。
-- v2 全部文档的初始状态为 Proposed。
-- 规范条目要从 Accepted 升到 Implemented，必须有对应的 `RULE-*` 语料（见 [testing](docs/testing.md)）。
+完整文档目录和内容归属见 [文档索引](docs/README.md)。后续编译器源码、Cargo workspace 与测试目录按 [仓库实施架构](docs/repository.md) 创建；当前仓库尚未包含可构建的编译器实现。
 
 ## 5. 权威顺序（冲突时按此裁决）
 
@@ -80,7 +87,7 @@ X-Lang 是一门**无 GC、所有权安全、编译到原生代码**的系统/�
 6. 其余 Policy/Register 文档。
 7. 原始需求 txt（历史输入，只说明意图，不构成规则）。
 
-发现冲突时：不得自行挑选一方继续实现。必须开 Issue 并标记 `conflict`，按 [GOVERNANCE](GOVERNANCE.md) §3 处理；修正后由 `tools/doccheck.py` 复检。
+发现冲突时：不得自行挑选一方继续实现。必须开 Issue 并标记 `conflict`，按 [GOVERNANCE](docs/governance.md) §3 处理；修正后由 `tools/doccheck.py` 复检。
 
 ## 6. 规范用语
 
@@ -92,15 +99,9 @@ X-Lang 是一门**无 GC、所有权安全、编译到原生代码**的系统/�
 | 【推断】 | 基于经验的判断，未经测量；首个基线数据出来后必须替换 |
 | 【待核实】 | 外部事实（如版本号）尚未核实；M0 前必须核实 |
 
-## 7. 统一头部格式
+## 7. 文档格式
 
-每个 Markdown 文件的标题下一行必须是：
-
-```text
-> 状态：<状态词>｜版本：<semver>｜负责人：<角色或姓名>｜最后更新：YYYY-MM-DD
-```
-
-`python3 tools/doccheck.py` 会检查这一格式。
+文档以一级标题开头，正文说明职责、设计依据和具体内容，不添加版本、状态页头。章节使用稳定编号，引用规则时链接到对应规范，避免复制定义。
 
 ## 8. 维护规则
 
@@ -108,3 +109,20 @@ X-Lang 是一门**无 GC、所有权安全、编译到原生代码**的系统/�
 - 阶段名只使用 roadmap 中定义的 `M0`、`P0`～`P5`、`R`。
 - 诊断码只能在诊断登记册中分配；需求去向只能在需求登记册中修改。
 - 每个 PR 必须通过 `python3 tools/doccheck.py --check`。
+
+## 9. 本地检查
+
+只需要 Python 3.10 或更高版本，无第三方依赖。在仓库根目录执行：
+
+```shell
+python tools/doccheck.py --check
+```
+
+修改需求或诊断 YAML 后，先重新生成视图，再校验：
+
+```shell
+python tools/doccheck.py
+python tools/doccheck.py --check --old-matrix archive/v1/docs/X-Lang原始功能全量追溯矩阵.md
+```
+
+检查覆盖内部链接、章节引用、术语、需求去向、诊断登记和规则引用。生成的登记册 Markdown 不手工维护；历史归档不参与当前文档校验。

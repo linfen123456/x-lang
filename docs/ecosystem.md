@@ -1,6 +1,5 @@
 # 生态与研究赛道
 
-> 状态：Proposed｜版本：2.1.0｜负责人：Ecosystem Lead｜最后更新：2026-10-22
 > 类型：Ecosystem｜唯一负责：eco/labs 包的边界、清单、准入与晋级规则，以及 XUI 和 x-json 的契约。各条目的阶段以[登记册](requirements/registry.md)为准。取代旧 RFC-0010、RFC-0011 与旧 xui-and-platforms 设计。
 
 ## 1. 结论
@@ -121,7 +120,7 @@ pub fn encode_canonical<T: ToJson>(value: &T) -> Result<Vec<u8>, JsonError>;
 |---|---|---|
 | P3 | `x mcp`：只读工具（诊断、符号、文档、测试列表） | 不执行写操作；所有调用写入审计日志 |
 | P3 | `x explain X-Exxxx`、`x fix --suggest` | 只输出建议补丁，不自动应用 |
-| P5 | 受控写操作：计划 → dry-run → 人工审批 → 执行 → 测试 | 权限白名单；不读取秘密；遵守 [GOVERNANCE](../GOVERNANCE.md) §6 |
+| P5 | 受控写操作：计划 → dry-run → 人工审批 → 执行 → 测试 | 权限白名单；不读取秘密；遵守 [GOVERNANCE](governance.md) §6 |
 | P5 | 本地检索与项目记忆（opt-in）、模板市场（签名模板） | 默认关闭；数据保留在本地 |
 
 AI 工具不进入编译关键路径。构建结果不得依赖模型输出。

@@ -1,6 +1,5 @@
 # 02 类型系统、泛型与 Trait
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Language Lead｜最后更新：2026-10-22
 > 类型：Spec｜唯一负责：原始类型命名、复合与名义类型、类型推断边界、泛型、Trait 最小集、内建 Trait、`@derive`、`const`/`static`、布局默认规则。
 
 ## 1. 结论

@@ -1,6 +1,5 @@
 # ADR-0001 宿主语言 Rust 与 LLVM 后端
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Compiler Lead｜最后更新：2026-10-22
 > 类型：ADR｜取代：旧 ADR-0004（内容保留并修订）
 
 ## 背景
@@ -9,7 +8,7 @@
 
 ## 决策
 
-1. 编译器、运行时 xrt、CLI 都用 **Rust stable** 实现。版本通过 `rust-toolchain.toml` 锁定，并在 [TOOLCHAIN](../../TOOLCHAIN.md) 中登记。
+1. 编译器、运行时 xrt、CLI 都用 **Rust stable** 实现。版本通过 `rust-toolchain.toml` 锁定，并在 [TOOLCHAIN](../toolchain.md) 中登记。
 2. 后端使用 **LLVM**，通过 `llvm-sys` 绑定，外加一层薄的安全封装。LLVM 类型只能出现在 `x-compiler::codegen::llvm` 中。
 3. 前端与后端之间的契约是 `trait Backend { fn compile(&self, mir: &MonoProgram, target: &TargetSpec) -> Result<ObjectFile, CodegenError>; }`。
 4. P0 同时支持两个主机与目标：`x86_64-unknown-linux-gnu` 与 `x86_64-pc-windows-msvc`，两者都是 CI 阻断项（[ADR-0008](ADR-0008-pre-kickoff-decisions.md) K5）。P1 增加 `aarch64-apple-darwin`。
@@ -29,5 +28,5 @@
 
 - 构建依赖 LLVM 开发库。CI 必须缓存 LLVM，或使用预编译版本。
 - LLVM 升级主版本必须走 ADR，并通过全部差分测试与基准测试。
-- 版本已经联网核实并锁定为 Rust 1.99.1、LLVM 23.1.3、`llvm-sys` 231.0.1，见 [TOOLCHAIN](../../TOOLCHAIN.md)。旧文档中的“Rust 1.97.1、LLVM 22.1.8”作废：两者都是真实存在的版本，但已经不是最新的稳定版本。
+- 版本已经联网核实并锁定为 Rust 1.99.1、LLVM 23.1.3、`llvm-sys` 231.0.1，见 [TOOLCHAIN](../toolchain.md)。旧文档中的“Rust 1.97.1、LLVM 22.1.8”作废：两者都是真实存在的版本，但已经不是最新的稳定版本。
 - Windows 开发者必须使用 `clang+llvm-*-x86_64-pc-windows-msvc` 归档包，因为 `.msi` 安装器里没有 `llvm-config` 和开发库；`cargo xtask setup-llvm` 会自动完成下载与校验。

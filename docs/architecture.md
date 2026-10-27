@@ -1,6 +1,5 @@
 # 总体技术架构
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Compiler Lead｜最后更新：2026-10-22
 > 类型：Architecture｜唯一负责：系统分层、组件边界、数据契约。编译器内部细节见 [compiler](design/compiler.md)，目录与 crate 见 [repository](repository.md)。
 
 ## 1. 结论（7 条架构决策）
@@ -121,7 +120,7 @@ flowchart LR
 | `x lsp` | P3 | LSP 协议适配：诊断、补全、跳转、重命名、格式化、语义高亮 | 只调用 driver 查询，不复制语义 |
 | `x mcp` | P3 | MCP 只读工具：`diagnostics`、`type_of`、`definition`、`references`、`explain`、`deps_tree` | 默认只读；写操作只能以补丁提案形式返回 |
 | `x query --json` | P1 | 命令行查询（CI、脚本、Agent 共用） | 输出 JSON schema 版本化 |
-| `x-ai-tools`（eco） | P3/P5 | 上下文打包、策略、评测、溯源 | 不进入编译关键路径；遵守 [GOVERNANCE](../GOVERNANCE.md) §6 |
+| `x-ai-tools`（eco） | P3/P5 | 上下文打包、策略、评测、溯源 | 不进入编译关键路径；遵守 [GOVERNANCE](governance.md) §6 |
 
 “AI 原生”的含义是：稳定诊断码、确定的名称解析、规范格式化、机器可读查询。AI 生成的内容**不得**影响编译语义。
 

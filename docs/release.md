@@ -1,6 +1,5 @@
 # CI/CD 与发布
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Release Lead｜最后更新：2026-10-22
 > 类型：Release｜唯一负责：CI 流水线、版本与 Edition、渠道、工件、签名、CHANGELOG、回滚。
 
 ## 1. 结论
@@ -86,7 +85,7 @@ CI 平台：**GitHub Actions**（ADR-0008 K8）。Runner 标签锁定为 `ubuntu
 
 ## 7. CHANGELOG
 
-- 根目录 `CHANGELOG.md`，格式参考 Keep a Changelog，小节为 `Added / Changed / Deprecated / Removed / Fixed / Security / Platform`。
+- 根目录 `docs/changelog.md`，格式参考 Keep a Changelog，小节为 `Added / Changed / Deprecated / Removed / Fixed / Security / Platform`。
 - 通过 PR 标签与 Conventional Commits 自动生成草稿，由人工编辑定稿。
 - 破坏性变更必须带 `BREAKING:` 前缀与迁移指引的链接。
 

@@ -1,6 +1,5 @@
 # 测试策略
 
-> 状态：Accepted｜版本：2.1.0｜负责人：QA Lead｜最后更新：2026-10-22
 > 类型：Testing｜唯一负责：测试层次、语料格式、差分与 fuzz、gate manifest、易学实验方法。性能阈值见 [performance](performance.md)。
 
 ## 1. 结论

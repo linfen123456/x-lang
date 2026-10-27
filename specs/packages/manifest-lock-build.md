@@ -1,6 +1,5 @@
 # 包、Manifest、Lockfile 与构建契约（XPM / XBuild）
 
-> 状态：Accepted｜版本：2.1.0｜负责人：Tooling Lead｜最后更新：2026-10-22
 > 类型：Spec｜唯一负责：包名规则、`x.toml` Schema、`x.lock` 格式、依赖解析规则、Action DAG 与构建键、缓存、命令契约、供应链要求。分层决策见 [ADR-0004](../../docs/decisions/ADR-0004-xpm-xbuild-layering.md)。
 
 ## 1. 结论

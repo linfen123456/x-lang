@@ -1,4 +1,4 @@
-> 已归档：见 v2 [CHANGELOG.md](../../../../CHANGELOG.md)
+> 已归档：见 v2 [docs/changelog.md](../../../../docs/changelog.md)
 
 # 缺口分析与设计目标
 
